@@ -354,7 +354,7 @@ public class State {
         return !this.walls[row][col] && this.boxes[row][col] == 0 && this.agentAt(row, col) == 0;
     }
 
-    private char agentAt(int row, int col) {
+    public char agentAt(int row, int col) {
         for (int i = 0; i < this.agentRows.length; i++) {
             if (this.agentRows[i] == row && this.agentCols[i] == col) {
                 return (char) ('0' + i);

@@ -2,7 +2,9 @@ package searchclient;
 
 import java.nio.file.attribute.UserDefinedFileAttributeView;
 import java.util.ArrayDeque;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 
 public interface Frontier {
     void add(State state);
@@ -98,35 +100,45 @@ class FrontierDFS
 
 class FrontierBestFirst
         implements Frontier {
+
     private Heuristic heuristic;
+    private PriorityQueue<State> queue;
+    private HashSet<State> visited;
 
     public FrontierBestFirst(Heuristic h) {
         this.heuristic = h;
+        this.queue = new PriorityQueue<>(Comparator.comparingDouble(h::h));
+        this.visited = new HashSet<>();
     }
 
     @Override
     public void add(State state) {
-        throw new NotImplementedException();
+        if (!visited.contains(state)) { // 仅添加未访问状态
+            queue.add(state);
+            visited.add(state);
+        }
     }
 
     @Override
     public State pop() {
-        throw new NotImplementedException();
+        State s = queue.poll();
+        this.visited.remove(s);
+        return s;
     }
 
     @Override
     public boolean isEmpty() {
-        throw new NotImplementedException();
+        return queue.isEmpty();
     }
 
     @Override
     public int size() {
-        throw new NotImplementedException();
+        return queue.size();
     }
 
     @Override
     public boolean contains(State state) {
-        throw new NotImplementedException();
+        return visited.contains(state);
     }
 
     @Override
