@@ -73,8 +73,10 @@ public class GraphSearch {
     private static long startTime = System.nanoTime();
 
     private static void printSearchStatus(HashSet<State> expanded, Frontier frontier) {
+        long current = System.nanoTime();
+        double elapsedTime = (current - startTime) / 1_000_000_000d;
+//        System.out.printf("#now nano:%,d ; second string:%s; second float:%3.3f s\n", current - startTime, elapsedTime, elapsedTime);
         String statusTemplate = "#Expanded: %,8d, #Frontier: %,8d, #Generated: %,8d, Time: %3.3f s\n%s\n";
-        double elapsedTime = (System.nanoTime() - startTime) / 1_000_000_000d;
         System.err.format(statusTemplate, expanded.size(), frontier.size(), expanded.size() + frontier.size(), elapsedTime, Memory.stringRep());
     }
 }

@@ -80,7 +80,7 @@ class HeuristicGreedy
     @Override
     public int f(State s)
     {
-        return this.h(s);
+        return h(s);
     }
 
     @Override

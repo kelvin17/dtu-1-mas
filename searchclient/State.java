@@ -101,10 +101,12 @@ public class State {
                     break;
 
                 case Push:
-                    //1. find box
+                    //1. update agent row and col num
                     this.agentRows[agent] += action.agentRowDelta;
                     this.agentCols[agent] += action.agentColDelta;
 
+                    //2. update boxes
+                    //2.1 find old box
                     box = this.boxes[this.agentRows[agent]][this.agentCols[agent]];
 
                     destinationBoxRow = this.agentRows[agent] + action.boxRowDelta;
@@ -121,23 +123,27 @@ public class State {
                     int originAgentRow = this.agentRows[agent];
                     int originAgentCol = this.agentCols[agent];
 
-                    destinationBoxRow = this.agentRows[agent];
-                    destinationBoxCol = this.agentCols[agent];
+                    destinationBoxRow = originAgentRow;
+                    destinationBoxCol = originAgentCol;
 
+                    //2. update agent row and col num
                     this.agentRows[agent] += action.agentRowDelta;
                     this.agentCols[agent] += action.agentColDelta;
 
+                    //3. find old box
                     int originBoxRow = originAgentRow;
                     int originBoxCol = originAgentCol;
-
                     if (action.boxRowDelta == 0) {
                         originBoxCol = originAgentCol - action.boxColDelta;
                     } else {
                         originBoxRow = originAgentRow - action.boxRowDelta;
                     }
 
+                    //4. set box new position
                     box = this.boxes[originBoxRow][originBoxCol];
                     this.boxes[destinationBoxRow][destinationBoxCol] = box;
+                    //5. clear old box position to empty
+                    this.boxes[originBoxRow][originBoxCol] = '\0';
                     break;
             }
         }
@@ -225,8 +231,6 @@ public class State {
         int destinationRow;
         int destinationCol;
 
-        int destinationRowOfAgent;
-        int destinationColOfAgent;
         int destinationRowOfBox;
         int destinationColOfBox;
         switch (action.type) {
@@ -239,18 +243,17 @@ public class State {
                 return this.cellIsFree(destinationRow, destinationCol);
 
             case Push:
-                destinationRowOfAgent = agentRow + action.agentRowDelta;
-                destinationColOfAgent = agentCol + action.agentColDelta;
-                //1. condition1 - 相同颜色的box
-                boxRow = destinationRowOfAgent;
-                boxCol = destinationColOfAgent;
+                destinationRow = agentRow + action.agentRowDelta;
+                destinationCol = agentCol + action.agentColDelta;
+                //1. condition1 - check  - 相同颜色的box
+                boxRow = destinationRow;
+                boxCol = destinationCol;
                 box = this.boxes[boxRow][boxCol];
                 if (box == '\0') {
                     //1. default -> no box
                     return false;
                 }
 
-                //todo box color check
                 boxColor = boxColors[box - 'A'];
                 if (boxColor != agentColor) {
                     return false;
@@ -258,14 +261,14 @@ public class State {
 
                 //2. condition2
                 destinationRowOfBox = boxRow + action.boxRowDelta;
-                destinationColOfBox = boxCol + action.boxRowDelta;
+                destinationColOfBox = boxCol + action.boxColDelta;
                 return this.cellIsFree(destinationRowOfBox, destinationColOfBox);
 
             case Pull:
-                destinationRowOfAgent = agentRow + action.agentRowDelta;
-                destinationColOfAgent = agentCol + action.agentColDelta;
+                destinationRow = agentRow + action.agentRowDelta;
+                destinationCol = agentCol + action.agentColDelta;
                 //1. cond1
-                if (!this.cellIsFree(destinationRowOfAgent, destinationColOfAgent)) {
+                if (!this.cellIsFree(destinationRow, destinationCol)) {
                     return false;
                 }
 
@@ -273,10 +276,10 @@ public class State {
                 //2.1 find the box
                 if (action.boxRowDelta == 0) {
                     //Row delta is 0.means box on the col of the agent
-                    boxCol = agentCol - action.agentColDelta;
+                    boxCol = agentCol - action.boxColDelta;
                     boxRow = agentRow;
                 } else {
-                    boxRow = agentRow - action.agentRowDelta;
+                    boxRow = agentRow - action.boxRowDelta;
                     boxCol = agentCol;
                 }
                 box = this.boxes[boxRow][boxCol];
@@ -290,6 +293,8 @@ public class State {
                 if (boxColor != agentColor) {
                     return false;
                 }
+
+                return true;
         }
 
         // Unreachable:
