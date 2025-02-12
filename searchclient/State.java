@@ -327,6 +327,28 @@ public class State {
                     boxRows[agent] = agentRow; // Distinct dummy value
                     boxCols[agent] = agentCol; // Distinct dummy value
                     break;
+
+                case Push:
+                    destinationRows[agent] = agentRow + action.agentRowDelta;
+                    destinationCols[agent] = agentCol + action.agentColDelta;
+
+                    boxRow = destinationRows[agent] + action.boxRowDelta;
+                    boxCol = destinationCols[agent] + action.boxColDelta;
+                    boxRows[agent] = boxRow;
+                    boxCols[agent] = boxCol;
+
+                    break;
+
+                case Pull:
+                    destinationRows[agent] = agentRow + action.agentRowDelta;
+                    destinationCols[agent] = agentCol + action.agentColDelta;
+
+                    boxRow = agentRow;
+                    boxCol = agentCol;
+                    boxRows[agent] = boxRow;
+                    boxCols[agent] = boxCol;
+
+                    break;
             }
         }
 
@@ -341,7 +363,10 @@ public class State {
                 }
 
                 // Moving into same cell?
-                if (destinationRows[a1] == destinationRows[a2] && destinationCols[a1] == destinationCols[a2]) {
+                if ((destinationRows[a1] == destinationRows[a2] && destinationCols[a1] == destinationCols[a2])
+                        || (boxRows[a1] == boxRows[a2] && boxRows[a1] == boxCols[a2])
+                        || (destinationRows[a1] == boxRows[a2] && destinationCols[a1] == boxCols[a2])
+                        || (destinationRows[a2] == boxRows[a1] && destinationCols[a2] == boxCols[a1])) {
                     return true;
                 }
             }
