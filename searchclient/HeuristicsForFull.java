@@ -20,47 +20,8 @@ public class HeuristicsForFull {
          *      组3：box21->goal21
          *      cost = max(组1，组2，组3)
          */
-        //1. group by the color
-        Map<Color, AgentAndBoxesGroup> color2AgentAndBoxesGroup = new HashMap<>();
-        for (int row = 0; row < State.goals.length; row++) {
-            for (int col = 0; col < State.goals[row].length; col++) {
-                char goal = State.goals[row][col];
-                //skip non-goal
-                if (!((goal <= '9' && goal >= '0') || (goal <= 'Z' && goal >= 'A'))) {
-                    continue;
-                }
 
-                if ((goal <= '9' && goal >= '0')) {
-                    //如果是agent
-                    int agent = (int) goal;
-                    Color color = State.agentColors[agent];
-                    AgentAndBoxesGroup group = color2AgentAndBoxesGroup.get(color);
-                    if (null == group) {
-                        group = new AgentAndBoxesGroup(color);
-                        color2AgentAndBoxesGroup.put(color, group);
-                    }
-
-                    group.setAgent(agent);
-                    group.setAgentHasGoal(true);
-                    group.setAgentGoalLoc(new ObjAndGoalLoc(s.agentRows[agent], s.agentCols[agent], row, col));
-
-                } else {
-                    //如果是box
-                    char box = (char) goal;
-                    Color color = State.boxColors[box - 'A'];
-                    AgentAndBoxesGroup group = color2AgentAndBoxesGroup.get(color);
-                    if (null == group) {
-                        group = new AgentAndBoxesGroup(color);
-                        color2AgentAndBoxesGroup.put(color, group);
-                    }
-
-                    int boxRow = s.boxLocation.get(box).getRow();
-                    int boxCol = s.boxLocation.get(box).getCol();
-                    group.getBoxesAndLoc().put(box, new ObjAndGoalLoc(boxRow, boxCol, row, col));
-                }
-            }
-        }
-
+        Map<Color, AgentAndBoxesGroup> color2AgentAndBoxesGroup = group(s);
         List<Integer> heuristicValueInGroup = new ArrayList<>();
         //2. calculate the cost
         for (AgentAndBoxesGroup group : color2AgentAndBoxesGroup.values()) {
@@ -111,9 +72,55 @@ public class HeuristicsForFull {
         }
         //2.2 组间取最大值
         for (Integer value : heuristicValueInGroup) {
+            value = Math.min(value, Integer.MAX_VALUE);
             heuristicValue = Math.max(heuristicValue, value);
         }
         return heuristicValue;
+    }
+
+    private static Map<Color, AgentAndBoxesGroup> group(State s) {
+        //1. group by the color
+        Map<Color, AgentAndBoxesGroup> color2AgentAndBoxesGroup = new HashMap<>();
+        for (int row = 0; row < State.goals.length; row++) {
+            for (int col = 0; col < State.goals[row].length; col++) {
+                char goal = State.goals[row][col];
+                //skip non-goal
+                if (!((goal <= '9' && goal >= '0') || (goal <= 'Z' && goal >= 'A'))) {
+                    continue;
+                }
+
+                if ((goal <= '9' && goal >= '0')) {
+                    //如果是agent
+                    int agent = (int) goal;
+                    Color color = State.agentColors[agent];
+                    AgentAndBoxesGroup group = color2AgentAndBoxesGroup.get(color);
+                    if (null == group) {
+                        group = new AgentAndBoxesGroup(color);
+                        color2AgentAndBoxesGroup.put(color, group);
+                    }
+
+                    group.setAgent(agent);
+                    group.setAgentHasGoal(true);
+                    group.setAgentGoalLoc(new ObjAndGoalLoc(s.agentRows[agent], s.agentCols[agent], row, col));
+
+                } else {
+                    //如果是box
+                    char box = (char) goal;
+                    Color color = State.boxColors[box - 'A'];
+                    AgentAndBoxesGroup group = color2AgentAndBoxesGroup.get(color);
+                    if (null == group) {
+                        group = new AgentAndBoxesGroup(color);
+                        color2AgentAndBoxesGroup.put(color, group);
+                    }
+
+                    int boxRow = s.boxLocation.get(box).getRow();
+                    int boxCol = s.boxLocation.get(box).getCol();
+                    group.getBoxesAndLoc().put(box, new ObjAndGoalLoc(boxRow, boxCol, row, col));
+                }
+            }
+        }
+
+        return color2AgentAndBoxesGroup;
     }
 }
 
