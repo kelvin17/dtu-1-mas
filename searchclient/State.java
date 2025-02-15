@@ -1,9 +1,6 @@
 package searchclient;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Random;
+import java.util.*;
 
 public class State {
     private static final Random RNG = new Random(1);
@@ -35,6 +32,7 @@ public class State {
     */
     public static boolean[][] walls;
     public char[][] boxes;
+    public Map<Character, Location> boxLocation = new HashMap<>();
     public static char[][] goals;
 
     /*
@@ -42,7 +40,6 @@ public class State {
         this.boxColor[1] is the color of B boxes, etc.
     */
     public static Color[] boxColors;
-
     public final State parent;
     public final Action[] jointAction;
     private final int g;
@@ -52,7 +49,7 @@ public class State {
 
     // Constructs an initial state.
     // Arguments are not copied, and therefore should not be modified after being passed in.
-    public State(int[] agentRows, int[] agentCols, Color[] agentColors, boolean[][] walls, char[][] boxes, Color[] boxColors, char[][] goals) {
+    public State(int[] agentRows, int[] agentCols, Color[] agentColors, boolean[][] walls, char[][] boxes, Color[] boxColors, char[][] goals, Map<Character, Location> boxLocation) {
         this.agentRows = agentRows;
         this.agentCols = agentCols;
         this.agentColors = agentColors;
@@ -63,6 +60,7 @@ public class State {
         this.parent = null;
         this.jointAction = null;
         this.g = 0;
+        this.boxLocation = boxLocation;
     }
 
 
@@ -72,6 +70,7 @@ public class State {
         // Copy parent
         this.agentRows = Arrays.copyOf(parent.agentRows, parent.agentRows.length);
         this.agentCols = Arrays.copyOf(parent.agentCols, parent.agentCols.length);
+        this.boxLocation = deepCopy(parent.boxLocation);
         this.boxes = new char[parent.boxes.length][];
         for (int i = 0; i < parent.boxes.length; i++) {
             this.boxes[i] = Arrays.copyOf(parent.boxes[i], parent.boxes[i].length);
@@ -116,6 +115,7 @@ public class State {
                     this.boxes[destinationBoxRow][destinationBoxCol] = box;
                     //2. clear the old one
                     this.boxes[this.agentRows[agent]][this.agentCols[agent]] = '\0';
+                    this.boxLocation.get(box).update(destinationBoxRow, destinationBoxCol);
                     break;
 
                 case Pull:
@@ -144,9 +144,18 @@ public class State {
                     this.boxes[destinationBoxRow][destinationBoxCol] = box;
                     //5. clear old box position to empty
                     this.boxes[originBoxRow][originBoxCol] = '\0';
+                    this.boxLocation.get(box).update(destinationBoxRow, destinationBoxCol);
                     break;
             }
         }
+    }
+
+    private Map<Character, Location> deepCopy(Map<Character, Location> boxLocation) {
+        Map<Character, Location> newBoxLocation = new HashMap<>();
+        for (Map.Entry<Character, Location> entry : boxLocation.entrySet()) {
+            newBoxLocation.put(entry.getKey(), new Location(entry.getValue().getRow(), entry.getValue().getCol()));
+        }
+        return newBoxLocation;
     }
 
     public int g() {
@@ -363,10 +372,7 @@ public class State {
                 }
 
                 // Moving into same cell?
-                if ((destinationRows[a1] == destinationRows[a2] && destinationCols[a1] == destinationCols[a2])
-                        || (boxRows[a1] == boxRows[a2] && boxRows[a1] == boxCols[a2])
-                        || (destinationRows[a1] == boxRows[a2] && destinationCols[a1] == boxCols[a2])
-                        || (destinationRows[a2] == boxRows[a1] && destinationCols[a2] == boxCols[a1])) {
+                if ((destinationRows[a1] == destinationRows[a2] && destinationCols[a1] == destinationCols[a2]) || (boxRows[a1] == boxRows[a2] && boxRows[a1] == boxCols[a2]) || (destinationRows[a1] == boxRows[a2] && destinationCols[a1] == boxCols[a2]) || (destinationRows[a2] == boxRows[a1] && destinationCols[a2] == boxCols[a1])) {
                     return true;
                 }
             }
@@ -375,8 +381,23 @@ public class State {
         return false;
     }
 
+    public boolean isDeadlocked(int boxRow, int boxCol) {
+        // 如果箱子当前位置被墙壁或其他箱子完全围住，说明死锁
+        boolean upMayNotOk = !this.cellIsNotWallBoxes(boxRow - 1, boxCol);
+        boolean downMayNotOk = !this.cellIsNotWallBoxes(boxRow + 1, boxCol);
+        boolean leftMayNotOk = !this.cellIsNotWallBoxes(boxRow, boxCol - 1);
+        boolean rightMayNotOk = !this.cellIsNotWallBoxes(boxRow, boxCol + 1);
+
+        // 检查是否被完全围住，若是，则死锁
+        return (upMayNotOk && downMayNotOk && leftMayNotOk && rightMayNotOk);
+    }
+
     private boolean cellIsFree(int row, int col) {
         return !this.walls[row][col] && this.boxes[row][col] == 0 && this.agentAt(row, col) == 0;
+    }
+
+    private boolean cellIsNotWallBoxes(int row, int col) {
+        return !this.walls[row][col] && this.boxes[row][col] == 0;
     }
 
     public char agentAt(int row, int col) {
@@ -455,5 +476,28 @@ public class State {
             s.append("\n");
         }
         return s.toString();
+    }
+}
+
+class Location {
+    private int row;
+    private int col;
+
+    public Location(int row, int col) {
+        this.row = row;
+        this.col = col;
+    }
+
+    public int getCol() {
+        return col;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public void update(int row, int col) {
+        this.row = row;
+        this.col = col;
     }
 }

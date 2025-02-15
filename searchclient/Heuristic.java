@@ -35,9 +35,11 @@ class HeuristicAStar extends Heuristic {
     @Override
     public int h(State s) {
         if ("-distance".equals(hType)) {
-            return GoalAndDistance.hDistance(s);
+            return HeuristicsForSimple.hDistance(s);
+        } else if ("-newdistance".equals(hType)) {
+            return HeuristicsForFull.hDistance(s);
         } else {
-            return GoalAndDistance.hGoal(s);
+            return HeuristicsForSimple.hGoal(s);
         }
     }
 
@@ -82,9 +84,11 @@ class HeuristicGreedy extends Heuristic {
     @Override
     public int h(State s) {
         if ("-distance".equals(hType)) {
-            return GoalAndDistance.hDistance(s);
+            return HeuristicsForSimple.hDistance(s);
+        } else if ("-newdistance".equals(hType)) {
+            return HeuristicsForFull.hDistance(s);
         } else {
-            return GoalAndDistance.hGoal(s);
+            return HeuristicsForSimple.hGoal(s);
         }
     }
 

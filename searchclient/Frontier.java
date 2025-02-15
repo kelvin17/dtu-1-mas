@@ -1,6 +1,5 @@
 package searchclient;
 
-import java.nio.file.attribute.UserDefinedFileAttributeView;
 import java.util.ArrayDeque;
 import java.util.Comparator;
 import java.util.HashSet;

@@ -4,10 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Locale;
+import java.util.*;
 
 public class SearchClient {
     public static State parseLevel(BufferedReader serverMessages) throws IOException {
@@ -57,6 +54,7 @@ public class SearchClient {
         int[] agentCols = new int[10];
         boolean[][] walls = new boolean[numRows][numCols];
         char[][] boxes = new char[numRows][numCols];
+        Map<Character, Location> boxesLoc = new HashMap<>();
         for (int row = 0; row < numRows; ++row) {
             line = levelLines.get(row);
             for (int col = 0; col < line.length(); ++col) {
@@ -68,6 +66,7 @@ public class SearchClient {
                     ++numAgents;
                 } else if ('A' <= c && c <= 'Z') {
                     boxes[row][col] = c;
+                    boxesLoc.put(c, new Location(row, col));
                 } else if (c == '+') {
                     walls[row][col] = true;
                 }
@@ -96,7 +95,7 @@ public class SearchClient {
 
         // End
         // line is currently "#end"
-        return new State(agentRows, agentCols, agentColors, walls, boxes, boxColors, goals);
+        return new State(agentRows, agentCols, agentColors, walls, boxes, boxColors, goals, boxesLoc);
     }
 
     public static Action[][] search(State initialState, Frontier frontier) {
