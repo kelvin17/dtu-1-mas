@@ -106,7 +106,7 @@ class FrontierBestFirst
 
     public FrontierBestFirst(Heuristic h) {
         this.heuristic = h;
-        this.queue = new PriorityQueue<>(Comparator.comparingDouble(h::h));
+        this.queue = new PriorityQueue<>(Comparator.comparingDouble(h::f));
         this.visited = new HashSet<>();
     }
 
