@@ -8,7 +8,7 @@ import java.util.List;
  * Base Model and For CBS
  * For low level of an agent
  */
-public class SingleAgentPlan implements Iterable<Move> {
+public class SingleAgentPath implements Iterable<Move> {
 
     private final int agentId;
 
@@ -18,7 +18,7 @@ public class SingleAgentPlan implements Iterable<Move> {
 
     private final Location goalLocation;
 
-    public SingleAgentPlan(int agentId, Location goalLocation, Location initLocation) {
+    public SingleAgentPath(int agentId, Location goalLocation, Location initLocation) {
         this.agentId = agentId;
         this.goalLocation = goalLocation;
         this.initLocation = initLocation;

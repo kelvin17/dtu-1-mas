@@ -8,20 +8,20 @@ import java.util.Map;
  * Model for CBS
  *  For high level of CT
  */
-public class Solution implements Iterable<SingleAgentPlan> {
+public class Solution implements Iterable<SingleAgentPath> {
 
-    private final Map<Integer, SingleAgentPlan> agentPlans;
+    private final Map<Integer, SingleAgentPath> agentPlans;
 
-    public Solution(Map<Integer, SingleAgentPlan> agentPlans) {
+    public Solution(Map<Integer, SingleAgentPath> agentPlans) {
         this.agentPlans = new HashMap<>(agentPlans);
     }
 
-    public SingleAgentPlan getPlanForAgent(int agentId) {
+    public SingleAgentPath getPlanForAgent(int agentId) {
         return agentPlans.get(agentId);
     }
 
     @Override
-    public Iterator<SingleAgentPlan> iterator() {
+    public Iterator<SingleAgentPath> iterator() {
         return agentPlans.values().iterator();
     }
 }

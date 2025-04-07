@@ -7,23 +7,24 @@ package searchclient.cbs.model;
 public class Node {
 
     /**
-     * If it's the goal Node
-     * the solution is the final solution can be used
-     * else
-     */
-    private final Solution solution;
-
-    //Todo
-    private float solutionCost;
-    /**
-     * Every node is created for solving a selectedConflict except the root one
+     * Every node is created for solving a selectedConflict with a specific constraint except the root one
+     * As the paper analysis in 4.2.4
      */
     private final AbstractConflict selectedConflict;
-
     /**
-     * The constraint that was added in this node (without constraints from {@link #parent}).
+     * The constraint that was added in this node as one way to solve the selectedConflict{@link #selectedConflict}
+     * (without constraints from {@link #parent}).
      */
     private Constraint addedConstraint;
+    /**
+     * A Set of k paths, one path for each agent.
+     * The path for agent a_i is consistent with the constraints of a_i
+     */
+    private final Solution solution;
+    /**
+     * The cost of the current solution(using SIC) , and it is referred to as the f-value of the node
+     */
+    private int solutionCost = 0;
 
     private final Node parent;
 
@@ -46,6 +47,20 @@ public class Node {
         this.selectedConflict = selectedConflict;
         this.addedConstraint = addedConstraint;
         this.parent = parent;
+    }
+
+    /**
+     * the cost of Solution is the sum cost of every agent
+     *
+     * @return
+     */
+    public int getSolutionCost() {
+        int cost = 0;
+        for (SingleAgentPath singleAgentPath : solution) {
+            cost += singleAgentPath.getCost();
+        }
+        solutionCost = cost;
+        return solutionCost;
     }
 
     public void setLeftChild(Node leftChild) {
