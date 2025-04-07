@@ -5,19 +5,24 @@ package searchclient.cbs.model;
  *  Location representation
  */
 public class Location {
-    private final int row;
-    private final int column;
+    private int row;
+    private int col;
 
-    public Location(int row, int column) {
+    public Location(int row, int col) {
         this.row = row;
-        this.column = column;
+        this.col = col;
     }
 
     public int getRow() {
         return row;
     }
 
-    public int getColumn() {
-        return column;
+    public int getCol() {
+        return col;
+    }
+
+    public void update(int row, int col) {
+        this.row = row;
+        this.col = col;
     }
 }

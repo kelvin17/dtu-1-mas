@@ -1,5 +1,7 @@
 package searchclient;
 
+import searchclient.cbs.model.Location;
+
 import java.util.*;
 
 public class State {
@@ -476,28 +478,5 @@ public class State {
             s.append("\n");
         }
         return s.toString();
-    }
-}
-
-class Location {
-    private int row;
-    private int col;
-
-    public Location(int row, int col) {
-        this.row = row;
-        this.col = col;
-    }
-
-    public int getCol() {
-        return col;
-    }
-
-    public int getRow() {
-        return row;
-    }
-
-    public void update(int row, int col) {
-        this.row = row;
-        this.col = col;
     }
 }
