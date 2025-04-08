@@ -54,4 +54,12 @@ public class SingleAgentPath implements Iterable<Move> {
     public Location getGoalLocation() {
         return goalLocation;
     }
+
+    public SingleAgentPath copy() {
+        SingleAgentPath copy = new SingleAgentPath(agentId, goalLocation.copy(), initLocation.copy());
+        for (Move move : moves) {
+            copy.addMove(move.copy());
+        }
+        return copy;
+    }
 }

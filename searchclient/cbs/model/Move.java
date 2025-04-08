@@ -34,4 +34,8 @@ public class Move {
     public Action getAction() {
         return action;
     }
+
+    public Move copy() {
+        return new Move(agentId, timeNow, currentLocation.copy(), action);
+    }
 }

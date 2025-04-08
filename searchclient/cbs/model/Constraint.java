@@ -9,7 +9,7 @@ public class Constraint {
     /**
      * The agent this constraint applied to at the specific time {@link #time}.
      */
-    private final int agentId;
+    private final Agent agent;
 
     private final int time;
 
@@ -21,15 +21,11 @@ public class Constraint {
 
     private final Location toLocation;
 
-    public Constraint(int agentId, int time, Location fromLocation, Location toLocation) {
-        this.agentId = agentId;
+    public Constraint(Agent agent, int time, Location fromLocation, Location toLocation) {
+        this.agent = agent;
         this.time = time;
         this.fromLocation = fromLocation;
         this.toLocation = toLocation;
-    }
-
-    public int getAgentId() {
-        return agentId;
     }
 
     public int getTime() {
@@ -42,5 +38,9 @@ public class Constraint {
 
     public Location getToLocation() {
         return toLocation;
+    }
+
+    public Agent getAgent() {
+        return agent;
     }
 }

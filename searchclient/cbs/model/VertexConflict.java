@@ -6,7 +6,7 @@ package searchclient.cbs.model;
  */
 public class VertexConflict extends AbstractConflict {
 
-    public VertexConflict(int agent1, int agent2, int time, Location locationOfAgent1, Location locationOfAgent2, Location targetLocation) {
+    public VertexConflict(Agent agent1, Agent agent2, int time, Location locationOfAgent1, Location locationOfAgent2, Location targetLocation) {
         super(agent1, agent2, time, locationOfAgent1, locationOfAgent2, targetLocation);
     }
 

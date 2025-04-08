@@ -2,11 +2,11 @@ package searchclient.cbs.model;
 
 /**
  * Model for CBS
- *  Represents for the edge or swap conflict
+ * Represents for the edge or swap conflict
  */
 public class EdgeConflict extends AbstractConflict {
 
-    public EdgeConflict(int agent1, int agent2, int time, Location locationOfAgent1, Location locationOfAgent2) {
+    public EdgeConflict(Agent agent1, Agent agent2, int time, Location locationOfAgent1, Location locationOfAgent2) {
         super(agent1, agent2, time, locationOfAgent1, locationOfAgent2, null);
     }
 

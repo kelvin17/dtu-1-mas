@@ -25,4 +25,8 @@ public class Location {
         this.row = row;
         this.col = col;
     }
+
+    public Location copy() {
+        return new Location(row, col);
+    }
 }

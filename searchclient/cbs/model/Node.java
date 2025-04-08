@@ -10,7 +10,7 @@ public class Node {
      * Every node is created for solving a selectedConflict with a specific constraint except the root one
      * As the paper analysis in 4.2.4
      */
-    private final AbstractConflict selectedConflict;
+    private AbstractConflict selectedConflict;
     /**
      * The constraint that was added in this node as one way to solve the selectedConflict{@link #selectedConflict}
      * (without constraints from {@link #parent}).
@@ -20,7 +20,7 @@ public class Node {
      * A Set of k paths, one path for each agent.
      * The path for agent a_i is consistent with the constraints of a_i
      */
-    private final Solution solution;
+    private Solution solution;
     /**
      * The cost of the current solution(using SIC) , and it is referred to as the f-value of the node
      */
@@ -35,6 +35,16 @@ public class Node {
      */
     private Node leftChild;
     private Node rightChild;
+
+    public Node(Node parent) {
+        this.parent = parent;
+    }
+
+    public Node(Node parent, AbstractConflict selectedConflict, Constraint addedConstraint) {
+        this.parent = parent;
+        this.selectedConflict = selectedConflict;
+        this.addedConstraint = addedConstraint;
+    }
 
     public Node(Solution solution, AbstractConflict selectedConflict, Node parent) {
         this.solution = solution;
@@ -69,6 +79,10 @@ public class Node {
 
     public void setRightChild(Node rightChild) {
         this.rightChild = rightChild;
+    }
+
+    public void setSolution(Solution solution) {
+        this.solution = solution;
     }
 
     public Solution getSolution() {

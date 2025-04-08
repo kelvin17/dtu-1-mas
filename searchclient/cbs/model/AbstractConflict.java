@@ -5,17 +5,21 @@ package searchclient.cbs.model;
  */
 public abstract class AbstractConflict {
 
-    private final int agent1;
-    private final int agent2;
-    private final int time;
+    private Agent agent1;
+    private Agent agent2;
+    private int time;
     //Used for vertex conflict
-    private final Location targetLocation;
+    private Location targetLocation;
     //The origin loc of Agent1
-    private final Location locationOfAgent1;
+    private Location locationOfAgent1;
     //The origin loc of Agent2
-    private final Location locationOfAgent2;
+    private Location locationOfAgent2;
 
-    public AbstractConflict(int agent1, int agent2, int time, Location locationOfAgent1, Location locationOfAgent2, Location targetLocation) {
+    public AbstractConflict() {
+
+    }
+
+    public AbstractConflict(Agent agent1, Agent agent2, int time, Location locationOfAgent1, Location locationOfAgent2, Location targetLocation) {
         this.agent1 = agent1;
         this.agent2 = agent2;
         this.time = time;
@@ -31,11 +35,11 @@ public abstract class AbstractConflict {
      */
     public abstract Constraint[] getPreventingConstraints();
 
-    public int getAgent1() {
+    public Agent getAgent1() {
         return agent1;
     }
 
-    public int getAgent2() {
+    public Agent getAgent2() {
         return agent2;
     }
 
