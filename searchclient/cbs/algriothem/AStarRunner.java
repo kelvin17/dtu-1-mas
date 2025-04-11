@@ -1,23 +1,25 @@
 package searchclient.cbs.algriothem;
 
-import searchclient.cbs.model.Agent;
+import searchclient.cbs.model.Move;
 import searchclient.cbs.model.Node;
-import searchclient.cbs.model.SingleAgentPath;
+import searchclient.cbs.model.SingleAgentPlan;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AStarRunner {
 
     /**
      * Low-level
-     *  find path for single agent
+     * find path for single agent
+     *
      * @param currentNode
-     * @param agent
+     * @param singleAgentPlan
      * @return
      */
-    public SingleAgentPath findPath(Node currentNode, Agent agent) {
-        SingleAgentPath singleAgentPath = null;
+    public List<Move> findPath(Node currentNode, SingleAgentPlan singleAgentPlan) {
+        List<Move> moves = new ArrayList<>();
         //如果无解，返回null
-
-
-        return singleAgentPath;
+        return moves;
     }
 }

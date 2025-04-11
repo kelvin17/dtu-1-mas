@@ -30,6 +30,16 @@ public abstract class AbstractConflict {
 
     public abstract String getConflictType();
 
+    public static AbstractConflict conflictBetween(Move move1, Move move2) {
+        if (move1.getMoveTo() == move2.getMoveTo()) {
+            return new VertexConflict(move1.getAgent(), move2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo());
+        }
+        if (move1.getCurrentLocation() == move2.getMoveTo() && move2.getCurrentLocation() == move1.getMoveTo()) {
+            return new EdgeConflict(move1.getAgent(), move2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation());
+        }
+        return null;
+    }
+
     /**
      * @return an array of constraints, each of which could prevent this conflict
      */

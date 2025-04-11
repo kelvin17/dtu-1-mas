@@ -4,23 +4,24 @@ import searchclient.Action;
 
 /**
  * Base Model
- *  Agent move at timeNow, who is at currentLocation
+ * Agent move at timeNow, who is at currentLocation
  */
 public class Move {
-    private final int agentId;
+    private final Agent agent;
     private final int timeNow;
     private final Location currentLocation;
     private final Action action;
+    private Location moveTo;
 
-    public Move(int agentId, int timeNow, Location currentLocation, Action action) {
-        this.agentId = agentId;
+    public Move(Agent agent, int timeNow, Location currentLocation, Action action) {
+        this.agent = agent;
         this.timeNow = timeNow;
         this.currentLocation = currentLocation;
         this.action = action;
     }
 
-    public int getAgentId() {
-        return agentId;
+    public Agent getAgent() {
+        return agent;
     }
 
     public int getTimeNow() {
@@ -36,6 +37,11 @@ public class Move {
     }
 
     public Move copy() {
-        return new Move(agentId, timeNow, currentLocation.copy(), action);
+        return new Move(agent, timeNow, currentLocation.copy(), action);
+    }
+
+    //todo
+    public Location getMoveTo() {
+        return moveTo;
     }
 }

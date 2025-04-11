@@ -1,10 +1,13 @@
 package searchclient.cbs.model;
 
+import java.util.Comparator;
+import java.util.Objects;
+
 /**
  * Model for CBS
  * Node in the conflict tree
  */
-public class Node {
+public class Node implements Comparable<Node> {
 
     /**
      * Every node is created for solving a selectedConflict with a specific constraint except the root one
@@ -66,8 +69,8 @@ public class Node {
      */
     public int getSolutionCost() {
         int cost = 0;
-        for (SingleAgentPath singleAgentPath : solution) {
-            cost += singleAgentPath.getCost();
+        for (SingleAgentPlan singleAgentPlan : solution) {
+            cost += singleAgentPlan.getCost();
         }
         solutionCost = cost;
         return solutionCost;
@@ -111,5 +114,15 @@ public class Node {
 
     public void setAddedConstraint(Constraint addedConstraint) {
         this.addedConstraint = addedConstraint;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int compareTo(Node o) {
+        return Objects.compare(this, o, Comparator.comparing(Node::getSolutionCost));
     }
 }
