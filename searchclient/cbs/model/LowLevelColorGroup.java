@@ -16,6 +16,14 @@ public class LowLevelColorGroup {
         this.boxes = new ArrayList<>();
     }
 
+    public void addAgent(Agent agent) {
+        this.agents.add(agent);
+    }
+
+    public void addBox(Box box) {
+        this.boxes.add(box);
+    }
+
     public Color getColor() {
         return color;
     }

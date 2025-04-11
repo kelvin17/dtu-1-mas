@@ -8,11 +8,16 @@ public class Agent {
 
     private final Color color;
 
-    private final Location initialLocation;
+    private Location initialLocation;
 
     private Location currentLocation;
 
-    private final Location goalLocation;
+    private Location goalLocation;
+
+    public Agent(int agentId, Color color) {
+        this.agentId = agentId;
+        this.color = color;
+    }
 
     public Agent(int agentId, Color color, Location initialLocation, Location targetLocation) {
         this.agentId = agentId;
@@ -27,6 +32,14 @@ public class Agent {
 
     public int getAgentId() {
         return agentId;
+    }
+
+    public void setInitialLocation(Location initialLocation) {
+        this.initialLocation = initialLocation;
+    }
+
+    public void setGoalLocation(Location goalLocation) {
+        this.goalLocation = goalLocation;
     }
 
     public Location getInitialLocation() {
