@@ -17,14 +17,6 @@ public class MovableObj {
         this.color = color;
     }
 
-    public static MovableObj buildAgent(char uniqueId, Color color) {
-        return new MovableObj(ObjectType.AGENT, uniqueId, color);
-    }
-
-    public static MovableObj buildBox(char uniqueId, Color color) {
-        return new MovableObj(ObjectType.BOX, uniqueId, color);
-    }
-
     public boolean isAgent() {
         return objType == ObjectType.AGENT;
     }
@@ -71,5 +63,68 @@ public class MovableObj {
         copy.setGoalLocation(this.goalLocation.copy());
         copy.setCurrentLocation(this.currentLocation.copy());
         return copy;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+        MovableObj other = (MovableObj) obj;
+        if (this.uniqueId != other.uniqueId) {
+            return false;
+        }
+        if (this.objType != other.objType) {
+            return false;
+        }
+        if (this.color != other.color) {
+            return false;
+        }
+        if (this.initLocation != null) {
+            if (!this.initLocation.equals(other.initLocation)) {
+                return false;
+            }
+        } else {
+            if (other.initLocation != null) {
+                return false;
+            }
+        }
+        if (this.goalLocation != null) {
+            if (!this.goalLocation.equals(other.goalLocation)) {
+                return false;
+            }
+        } else {
+            if (other.goalLocation != null) {
+                return false;
+            }
+        }
+        if (this.currentLocation != null) {
+            if (!this.currentLocation.equals(other.currentLocation)) {
+                return false;
+            }
+        } else {
+            if (other.currentLocation != null) {
+                return false;
+            }
+        }
+        // If all checks passed, return true
+        return true;
+    }
+
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + Character.hashCode(uniqueId);
+        result = 31 * result + objType.hashCode();
+        result = 31 * result + color.hashCode();
+        result = 31 * result + (initLocation != null ? initLocation.hashCode() : 0);
+        result = 31 * result + (goalLocation != null ? goalLocation.hashCode() : 0);
+        result = 31 * result + (currentLocation != null ? currentLocation.hashCode() : 0);
+        return result;
     }
 }

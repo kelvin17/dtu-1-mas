@@ -30,13 +30,13 @@ public class AStarRunner {
 
         List<Move> result = null;
 
-        LowLevelState init = new LowLevelState(singleAgentPlan.getAgent(), singleAgentPlan.getBoxes(), singleAgentPlan.getEnv());
+        LowLevelState initState = new LowLevelState(singleAgentPlan.getAgent(), singleAgentPlan.getBoxes(), singleAgentPlan.getEnv()).init();
         AStarFrontier frontier = new AStarFrontier();
-        frontier.add(init);
+        frontier.add(initState);
 
         while (!frontier.isEmpty() && !checkTimeout()) {
             LowLevelState currentState = frontier.pop();
-            if (currentState.isGoal() && checkConstraints(currentState, currentNode)) {
+            if (currentState.isGoal()) {
                 System.out.println("#Finish-Lower-level");
                 result = currentState.extractMoves();
                 break;
@@ -50,11 +50,6 @@ public class AStarRunner {
         }
 
         return result;
-    }
-
-    private boolean checkConstraints(LowLevelState currentState, Node currentNode) {
-        //todo 限制写在expand可能就够了。这里可能不需要
-        return true;
     }
 
     private boolean checkTimeout() {

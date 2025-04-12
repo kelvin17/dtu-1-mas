@@ -9,7 +9,12 @@ public class Box extends MovableObj {
     }
 
     public Box copy() {
-        return (Box) super.copy();
+        Box newBox = new Box(this.getUniqueId(), this.getColor());
+        newBox.setInitLocation(this.getInitLocation().copy());
+        newBox.setGoalLocation(this.getGoalLocation() == null ? null : this.getGoalLocation().copy());
+        newBox.setCurrentLocation(this.getCurrentLocation() == null ? null : this.getCurrentLocation().copy());
+
+        return newBox;
     }
 
 }

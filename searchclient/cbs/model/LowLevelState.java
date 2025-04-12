@@ -2,10 +2,7 @@ package searchclient.cbs.model;
 
 import searchclient.Action;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class LowLevelState implements Comparable<LowLevelState> {
     private Agent agent;
@@ -34,13 +31,20 @@ public class LowLevelState implements Comparable<LowLevelState> {
         this.boxes = boxes;
         this.env = env;
         this.loc2Box = new Box[env.getGridNumRows()][env.getGridNumCol()];
-        for (Box box : boxes) {
-            loc2Box[box.getCurrentLocation().getRow()][box.getCurrentLocation().getCol()] = box;
+    }
+
+    public LowLevelState init() {
+        this.agent.setCurrentLocation(agent.getInitLocation());
+        if (!this.boxes.isEmpty()) {
+            for (Box box : this.boxes) {
+                box.setCurrentLocation(box.getInitLocation());
+                this.loc2Box[box.getCurrentLocation().getRow()][box.getCurrentLocation().getCol()] = box;
+            }
         }
+        return this;
     }
 
     public List<LowLevelState> expand(Node currentNode) {
-//        this.agent
         List<LowLevelState> newState = new ArrayList<>();
         List<Constraint> constraints = new ArrayList<>();
         Node node = currentNode;
@@ -112,17 +116,25 @@ public class LowLevelState implements Comparable<LowLevelState> {
         for (Box box : this.boxes) {
             newBoxes.add(box.copy());
         }
-        LowLevelState child = new LowLevelState(this.agent.copy(), newBoxes, this.env);
+        LowLevelState child = new LowLevelState(this.agent.copy(), newBoxes, this.env).init();
         child.parent = this;
         child.timeNow = this.timeNow + 1;
         child.move = move;
 
         switch (move.getAction().type) {
             case NoOp:
+                break;
             case Move:
+                Location newAgentLoc = new Location(child.agent.getCurrentLocation().getRow() + move.getAction().agentRowDelta,
+                        child.agent.getCurrentLocation().getCol() + move.getAction().agentColDelta);
+                child.agent.setCurrentLocation(newAgentLoc);
                 break;
             case Pull:
             case Push:
+                Location newAgentLoc2 = new Location(child.agent.getCurrentLocation().getRow() + move.getAction().agentRowDelta,
+                        child.agent.getCurrentLocation().getCol() + move.getAction().agentColDelta);
+                child.agent.setCurrentLocation(newAgentLoc2);
+
                 Box box = move.getBox();
                 Location newBoxLoc = new Location(box.getCurrentLocation().getRow() + move.getAction().boxRowDelta,
                         box.getCurrentLocation().getCol() + move.getAction().boxColDelta);
@@ -144,8 +156,8 @@ public class LowLevelState implements Comparable<LowLevelState> {
         Box box = this.loc2Box[origin.getRow()][origin.getCol()];
         if (box != null) {
             box.setCurrentLocation(newLocation);
-            loc2Box[newLocation.getRow()][newLocation.getCol()] = box;
-            loc2Box[origin.getRow()][origin.getCol()] = null;
+            this.loc2Box[newLocation.getRow()][newLocation.getCol()] = box;
+            this.loc2Box[origin.getRow()][origin.getCol()] = null;
         } else {
             throw new IllegalArgumentException("No box found for location " + newLocation);
         }
@@ -201,5 +213,57 @@ public class LowLevelState implements Comparable<LowLevelState> {
     @Override
     public int compareTo(LowLevelState o) {
         return Objects.compare(this, o, Comparator.comparing(LowLevelState::getAStar));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+        LowLevelState other = (LowLevelState) obj;
+        boolean equal = true;
+
+        if (this.agent != null) {
+            if (!this.agent.equals(other.agent)) {
+                return false;
+            }
+        } else {
+            if (other.agent != null) {
+                return false;
+            }
+        }
+
+        if (!this.boxes.isEmpty()) {
+            if (this.boxes.size() != other.boxes.size()) {
+                return false;
+            }
+
+            for (Box box : this.boxes) {
+                Box otherBox = other.boxAt(box.getCurrentLocation());
+                if (otherBox == null || !otherBox.equals(box)) {
+                    return false;
+                }
+            }
+        } else {
+            if (!other.boxes.isEmpty()) {
+                return false;
+            }
+        }
+
+        return equal;
+    }
+
+    private Box boxAt(Location location) {
+        return this.loc2Box[location.getRow()][location.getCol()];
+    }
+
+    public int hashCode() {
+        return Objects.hash(agent, boxes);
     }
 }

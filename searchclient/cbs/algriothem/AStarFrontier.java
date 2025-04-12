@@ -44,7 +44,7 @@ public class AStarFrontier implements Frontier<LowLevelState> {
 
     @Override
     public boolean hasNotVisited(LowLevelState item) {
-        return this.visited.contains(item);
+        return !this.visited.contains(item);
     }
 
     @Override

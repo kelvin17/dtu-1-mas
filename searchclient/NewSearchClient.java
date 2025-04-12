@@ -4,6 +4,7 @@ import searchclient.cbs.algriothem.CBSRunner;
 import searchclient.cbs.model.Environment;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -20,8 +21,10 @@ public class NewSearchClient {
         // We can also print comments to stdout by prefixing with a #.
         System.out.println("#This is a comment.");
 
+        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAD1.lvl";
         // Parse the level.
-        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
+//        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
+        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
 //        State initialState = SearchClient.parseLevel(serverMessages);
         Environment environment = Environment.parseLevel(serverMessages);
 
