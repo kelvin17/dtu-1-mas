@@ -4,6 +4,7 @@ import searchclient.Action;
 import searchclient.State;
 import searchclient.cbs.model.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class CBSRunner {
     private final AStarRunner lowLevelRunner;
     private final MinTimeConflictDetection conflictDetection;
 
-    private Map<Integer, SingleAgentPlan> agentId2Path = new HashMap<>();
+    private Map<Integer, SingleAgentPlan> agentId2LowGroup = new HashMap<>();
 
     public CBSRunner() {
         this.lowLevelRunner = new AStarRunner();
@@ -28,12 +29,12 @@ public class CBSRunner {
     /**
      * High level of CBS
      *
-     * @param initialState
+     * @param initEnv
      * @return
      */
-    public Action[][] findSolution(LowLevelState initialState) {
+    public Action[][] findSolution(Environment initEnv) {
         this.startTime = System.currentTimeMillis();
-        Node rootNode = initRoot(initialState);
+        Node rootNode = initRoot(initEnv);
         if (!rootNode.getSolution().isValid()) {
             return null;
         }
@@ -74,7 +75,7 @@ public class CBSRunner {
         Node child = new Node(parent, firstConflict, constraint);
         Solution childSolution = parent.getSolution().copy();
         Agent agent = constraint.getAgent();
-        SingleAgentPlan singleAgentPlan = agentId2Path.get(agent.getAgentId());
+        SingleAgentPlan singleAgentPlan = agentId2LowGroup.get(agent.getAgentId());
         List<Move> newMoves = lowLevelRunner.findPath(child, singleAgentPlan);
 
         childSolution.setValid((newMoves != null));
@@ -113,23 +114,28 @@ public class CBSRunner {
         return false;
     }
 
-    private Node initRoot(LowLevelState initialState) {
+    private Node initRoot(Environment initialState) {
         //static group boxes to agent todo 还需要考虑一下agent没有goal的特殊情况
         for (LowLevelColorGroup colorGroup : initialState.getColorGroups()) {
             int agentCounts = colorGroup.getAgents().size();
             int boxCounts = colorGroup.getBoxes().size();
             if (agentCounts == 1) {
-                Agent agent = colorGroup.getAgents().get(0);
-                SingleAgentPlan singleAgentPlan = new SingleAgentPlan(agent, colorGroup.getBoxes());
-                agentId2Path.put(agent.getAgentId(), singleAgentPlan);
+                Agent agent = Agent.buildFromMovableObj(colorGroup.getAgents().get(0));
+                List<Box> boxes = new ArrayList<>();
+                colorGroup.getBoxes().forEach(box -> {
+                    boxes.add(Box.buildFromMovableObj(box));
+                });
+                SingleAgentPlan singleAgentPlan = new SingleAgentPlan(agent, boxes);
+                agentId2LowGroup.put(agent.getAgentId(), singleAgentPlan);
             } else {
                 for (int i = 0; i < agentCounts; i++) {
-                    Agent agent = colorGroup.getAgents().get(i);
+                    Agent agent = Agent.buildFromMovableObj(colorGroup.getAgents().get(i));
                     SingleAgentPlan singleAgentPlan = new SingleAgentPlan(agent);
                     for (int j = i; j < boxCounts; j = j + agentCounts) {
-                        singleAgentPlan.addBox(colorGroup.getBoxes().get(j));
+                        Box box = Box.buildFromMovableObj(colorGroup.getBoxes().get(j));
+                        singleAgentPlan.addBox(box);
                     }
-                    agentId2Path.put(agent.getAgentId(), singleAgentPlan);
+                    agentId2LowGroup.put(agent.getAgentId(), singleAgentPlan);
                 }
             }
         }
@@ -137,7 +143,7 @@ public class CBSRunner {
         Node rootNode = new Node(null);
 
         Solution solution = new Solution();
-        for (SingleAgentPlan singleAgentPlan : agentId2Path.values()) {
+        for (SingleAgentPlan singleAgentPlan : agentId2LowGroup.values()) {
             List<Move> newPath = lowLevelRunner.findPath(rootNode, singleAgentPlan);
             if (newPath == null || newPath.isEmpty()) {
                 solution.setValid(false);

@@ -7,8 +7,8 @@ import java.util.List;
 
 public class LowLevelColorGroup {
     private final Color color;
-    private final List<Agent> agents;
-    private final List<Box> boxes;
+    private final List<MovableObj> agents;
+    private final List<MovableObj> boxes;
 
     public LowLevelColorGroup(Color color) {
         this.color = color;
@@ -16,11 +16,11 @@ public class LowLevelColorGroup {
         this.boxes = new ArrayList<>();
     }
 
-    public void addAgent(Agent agent) {
+    public void addAgent(MovableObj agent) {
         this.agents.add(agent);
     }
 
-    public void addBox(Box box) {
+    public void addBox(MovableObj box) {
         this.boxes.add(box);
     }
 
@@ -28,11 +28,11 @@ public class LowLevelColorGroup {
         return color;
     }
 
-    public List<Agent> getAgents() {
+    public List<MovableObj> getAgents() {
         return agents;
     }
 
-    public List<Box> getBoxes() {
+    public List<MovableObj> getBoxes() {
         return boxes;
     }
 }

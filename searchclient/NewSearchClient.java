@@ -1,7 +1,7 @@
 package searchclient;
 
 import searchclient.cbs.algriothem.CBSRunner;
-import searchclient.cbs.model.LowLevelState;
+import searchclient.cbs.model.Environment;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,14 +23,14 @@ public class NewSearchClient {
         // Parse the level.
         BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
 //        State initialState = SearchClient.parseLevel(serverMessages);
-        LowLevelState lowLevelState = LowLevelState.parseLevel(serverMessages);
+        Environment environment = Environment.parseLevel(serverMessages);
 
         // Search for a plan.
         Action[][] plan = null;
         try {
             //        System.err.format("Starting %s.\n");
             CBSRunner cbsRunner = new CBSRunner();
-            plan = cbsRunner.findSolution(lowLevelState);
+            plan = cbsRunner.findSolution(environment);
         } catch (OutOfMemoryError ex) {
             System.err.println("Maximum memory usage exceeded.");
         }

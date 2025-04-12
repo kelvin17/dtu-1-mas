@@ -8,13 +8,11 @@ import java.util.List;
  * Base Model and For CBS
  * For low level of an agent
  */
-public class SingleAgentPlan implements Iterable<Move> {
+public class SingleAgentPlan {
 
     private final Agent agent;
-
-    private List<Move> moves = new ArrayList<>();
-
     private List<Box> boxes = new ArrayList<>();
+    private List<Move> moves = new ArrayList<>();
 
     public SingleAgentPlan(Agent agent, List<Box> boxes) {
         this.agent = agent;
@@ -45,11 +43,6 @@ public class SingleAgentPlan implements Iterable<Move> {
 
     public List<Move> getMoves() {
         return this.moves;
-    }
-
-    @Override
-    public Iterator<Move> iterator() {
-        return this.moves.iterator();
     }
 
     public int getAgentId() {
@@ -88,7 +81,7 @@ public class SingleAgentPlan implements Iterable<Move> {
                 stayLocations.add(earlyEndingPlan.agent.getGoalLocation());
             }
             for (Box box : earlyEndingPlan.boxes) {
-                stayLocations.add(box.getGoallocation());
+                stayLocations.add(box.getGoalLocation());
             }
 
             //如果plan2 先结束 - 则去检测plan1是否会经过2的goal

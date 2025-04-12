@@ -1,53 +1,31 @@
 package searchclient.cbs.model;
 
-import searchclient.Color;
-
 public class Agent {
 
     private final int agentId;
-
-    private final Color color;
-
-    private Location initialLocation;
-
+    private final MovableObj innerObj;
     private Location currentLocation;
 
-    private Location goalLocation;
-
-    public Agent(int agentId, Color color) {
-        this.agentId = agentId;
-        this.color = color;
+    public Agent(MovableObj innerObj, Location currentLocation) {
+        this.agentId = innerObj.getUniqueId();
+        this.innerObj = innerObj;
+        this.currentLocation = currentLocation;
     }
 
-    public Agent(int agentId, Color color, Location initialLocation, Location targetLocation) {
-        this.agentId = agentId;
-        this.color = color;
-        this.initialLocation = initialLocation;
-        this.goalLocation = targetLocation;
+    public static Agent buildFromMovableObj(MovableObj innerObj) {
+        return new Agent(innerObj, innerObj.getInitLocation());
     }
 
     public Agent copy() {
-        return new Agent(agentId, color, initialLocation.copy(), goalLocation.copy());
+        return new Agent(innerObj, this.currentLocation.copy());
     }
 
     public int getAgentId() {
         return agentId;
     }
 
-    public void setInitialLocation(Location initialLocation) {
-        this.initialLocation = initialLocation;
-    }
-
-    public void setGoalLocation(Location goalLocation) {
-        this.goalLocation = goalLocation;
-    }
-
-    public Location getInitialLocation() {
-        return initialLocation;
-    }
-
     public Location getGoalLocation() {
-        return goalLocation;
+        return this.innerObj.getGoalLocation();
     }
 
     public Location getCurrentLocation() {

@@ -9,15 +9,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LowLevelState {
+public class Environment {
+    
+    private final List<LowLevelColorGroup> colorGroups;
+    //    private static List<Location> WALL_LOCATIONS;
+    private final boolean[][] WALLS;
+    private final List<LowLevelGoalLocation> GOAL_LOCATIONS;
 
-    private List<LowLevelColorGroup> colorGroups;
-    private static List<Location> WALL_LOCATIONS;
-    private static List<LowLevelGoalLocation> GOAL_LOCATIONS;
-
-    private LowLevelState parent;
-
-    public static LowLevelState parseLevel(BufferedReader serverMessages) throws IOException {
+    public static Environment parseLevel(BufferedReader serverMessages) throws IOException {
         // We can assume that the level file is conforming to specification, since the server verifies this.
         // Read domain
         serverMessages.readLine(); // #domain
@@ -31,9 +30,9 @@ public class LowLevelState {
         serverMessages.readLine(); // #colors
         String line = serverMessages.readLine();
 
-        Map<Integer, Agent> agents = new HashMap<>();
-        Map<Character, Box> boxes = new HashMap<>();
-        List<Location> wallLocations = new ArrayList<>();
+        Map<Character, MovableObj> agents = new HashMap<>();
+        Map<Character, MovableObj> boxes = new HashMap<>();
+//        List<Location> wallLocations = new ArrayList<>();
         List<LowLevelGoalLocation> goalLocations = new ArrayList<>();
         List<LowLevelColorGroup> colorGroups = new ArrayList<>();
 
@@ -45,11 +44,11 @@ public class LowLevelState {
             for (String entity : entities) {
                 char c = entity.strip().charAt(0);
                 if ('0' <= c && c <= '9') {
-                    Agent agent = new Agent(c, color);
+                    MovableObj agent = MovableObj.buildAgent(c, color);
                     colorGroup.addAgent(agent);
-                    agents.put((int) c, agent);
+                    agents.put(c, agent);
                 } else if ('A' <= c && c <= 'Z') {
-                    Box box = new Box(c, color);
+                    MovableObj box = MovableObj.buildBox(c, color);
                     colorGroup.addBox(box);
                     boxes.put(c, box);
                 }
@@ -70,6 +69,7 @@ public class LowLevelState {
             ++numRows;
             line = serverMessages.readLine();
         }
+        boolean[][] walls = new boolean[numRows][numCols];
         for (int row = 0; row < numRows; ++row) {
             line = levelLines.get(row);
             for (int col = 0; col < line.length(); ++col) {
@@ -77,13 +77,14 @@ public class LowLevelState {
 
                 Location initLoc = new Location(row, col);
                 if ('0' <= c && c <= '9') {
-                    Agent agent = agents.get((int) c);
-                    agent.setInitialLocation(initLoc);
+                    MovableObj agent = agents.get(c);
+                    agent.setInitLocation(initLoc);
                 } else if ('A' <= c && c <= 'Z') {
-                    Box box = boxes.get(c);
+                    MovableObj box = boxes.get(c);
                     box.setInitLocation(initLoc);
                 } else if (c == '+') {
-                    wallLocations.add(initLoc);
+//                    wallLocations.add(initLoc);
+                    walls[row][col] = true;
                 }
             }
         }
@@ -99,10 +100,10 @@ public class LowLevelState {
                 goalLocations.add(new LowLevelGoalLocation(c, goalLoc));
 
                 if ('0' <= c && c <= '9') {
-                    Agent agent = agents.get((int) c);
+                    MovableObj agent = agents.get(c);
                     agent.setGoalLocation(goalLoc);
                 } else if ('A' <= c && c <= 'Z') {
-                    Box box = boxes.get(c);
+                    MovableObj box = boxes.get(c);
                     box.setGoalLocation(goalLoc);
                 }
             }
@@ -110,21 +111,21 @@ public class LowLevelState {
             line = serverMessages.readLine();
         }
 
-        return new LowLevelState(colorGroups, wallLocations, goalLocations);
+        return new Environment(colorGroups, goalLocations, walls);
     }
 
-    public LowLevelState(List<LowLevelColorGroup> colorGroups, List<Location> wallLocations, List<LowLevelGoalLocation> goalLocations) {
-        WALL_LOCATIONS = wallLocations;
+    public Environment(List<LowLevelColorGroup> colorGroups, List<LowLevelGoalLocation> goalLocations, boolean[][] walls) {
         GOAL_LOCATIONS = goalLocations;
+        WALLS = walls;
         this.colorGroups = colorGroups;
     }
 
-    public LowLevelState getParent() {
-        return parent;
-    }
-
-    public void setParent(LowLevelState parent) {
-        this.parent = parent;
+    /**
+     * @param location
+     * @return return true if the location is a wall
+     */
+    public boolean isWall(Location location) {
+        return WALLS[location.getRow()][location.getCol()];
     }
 
     public List<LowLevelColorGroup> getColorGroups() {
