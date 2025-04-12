@@ -100,7 +100,7 @@ public class SearchClient {
         return new State(agentRows, agentCols, agentColors, walls, boxes, boxColors, goals, boxesLoc);
     }
 
-    public static Action[][] search(State initialState, Frontier frontier) {
+    public static Action[][] search(State initialState, Frontier<State> frontier) {
         System.err.format("Starting %s.\n", frontier.getName());
 
         return GraphSearch.search(initialState, frontier);

@@ -43,6 +43,11 @@ public class AStarFrontier implements Frontier<LowLevelState> {
     }
 
     @Override
+    public boolean hasNotVisited(LowLevelState item) {
+        return this.visited.contains(item);
+    }
+
+    @Override
     public String getName() {
         return "A Star Frontier for CBS Low Level";
     }

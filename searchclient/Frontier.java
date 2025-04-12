@@ -16,6 +16,8 @@ public interface Frontier<E> {
 
     boolean contains(E item);
 
+    boolean hasNotVisited(E item);
+
     String getName();
 }
 
@@ -50,6 +52,11 @@ class FrontierBFS
     @Override
     public boolean contains(State state) {
         return this.set.contains(state);
+    }
+
+    @Override
+    public boolean hasNotVisited(State item) {
+        return !this.set.contains(item);
     }
 
     @Override
@@ -89,6 +96,11 @@ class FrontierDFS
     @Override
     public boolean contains(State state) {
         return this.set.contains(state);
+    }
+
+    @Override
+    public boolean hasNotVisited(State item) {
+        return !this.set.contains(item);
     }
 
     @Override
@@ -134,6 +146,11 @@ class FrontierBestFirst
     @Override
     public boolean contains(State state) {
         return this.visited.contains(state);
+    }
+
+    @Override
+    public boolean hasNotVisited(State item) {
+        return !this.visited.contains(item);
     }
 
     @Override

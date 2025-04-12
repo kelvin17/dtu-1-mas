@@ -4,7 +4,6 @@ import searchclient.Action;
 import searchclient.State;
 import searchclient.cbs.model.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,8 @@ public class CBSRunner {
     private Map<Character, SingleAgentPlan> agentId2LowGroup = new HashMap<>();
 
     public CBSRunner() {
-        this.lowLevelRunner = new AStarRunner();
+        this.startTime = System.currentTimeMillis();
+        this.lowLevelRunner = new AStarRunner(startTime, DEFAULT_TIMEOUT);
         this.conflictDetection = new MinTimeConflictDetection();
     }
 
@@ -33,7 +33,6 @@ public class CBSRunner {
      * @return
      */
     public Action[][] findSolution(Environment initEnv) {
-        this.startTime = System.currentTimeMillis();
         Node rootNode = initRoot(initEnv);
         if (!rootNode.getSolution().isValid()) {
             return null;

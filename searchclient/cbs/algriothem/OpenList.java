@@ -41,6 +41,11 @@ public class OpenList implements Frontier<Node> {
     }
 
     @Override
+    public boolean hasNotVisited(Node item) {
+        return !this.visited.contains(item);
+    }
+
+    @Override
     public String getName() {
         return "OpenList for CBS Conflict Tree";
     }

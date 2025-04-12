@@ -13,12 +13,16 @@ public class SingleAgentPlan {
     private Agent agent;
     private List<Box> boxes = new ArrayList<>();
     private List<Move> moves = new ArrayList<>();
-    private Environment env;
+    private final Environment env;
 
     public SingleAgentPlan(Agent agent, List<Box> boxes, Environment env) {
         this.agent = agent;
         this.boxes = boxes;
         this.env = env;
+    }
+
+    public Environment getEnv() {
+        return env;
     }
 
     public SingleAgentPlan(Agent agent, Environment env) {
