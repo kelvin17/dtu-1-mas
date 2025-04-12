@@ -30,6 +30,12 @@ The searchclient uses the BFS strategy by default. Use arguments -dfs, -astar, -
     ## run group agent method
     $ java -jar /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/server.jar -l /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAD1.lvl -c "java searchclient.SearchClient -astar -newdistance" -g -s 150 -t 180
 
+    ## run cbs -1
+    $ java -jar /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/server.jar -l /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAsoko1_04.lvl -c "java searchclient.NewSearchClient" -g -s 150 -t 180
+
+    ## 直接调试client代码
+    ## NewSearchClient 的 main函数中直接读取level文件即可调试
+
 Memory settings:
     * Unless your hardware is unable to support this, you should let the JVM allocate at least 4GB of memory for the searchclient *
     Your JVM determines how much memory a program is allowed to allocate. These settings can be manipulated by certain VM options.
