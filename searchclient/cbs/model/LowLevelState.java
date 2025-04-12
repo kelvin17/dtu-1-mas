@@ -81,7 +81,7 @@ public class LowLevelState {
                     agent.setInitialLocation(initLoc);
                 } else if ('A' <= c && c <= 'Z') {
                     Box box = boxes.get(c);
-                    box.setInitlocation(initLoc);
+                    box.setInitLocation(initLoc);
                 } else if (c == '+') {
                     wallLocations.add(initLoc);
                 }
@@ -103,7 +103,7 @@ public class LowLevelState {
                     agent.setGoalLocation(goalLoc);
                 } else if ('A' <= c && c <= 'Z') {
                     Box box = boxes.get(c);
-                    box.setGoallocation(goalLoc);
+                    box.setGoalLocation(goalLoc);
                 }
             }
             ++row;
