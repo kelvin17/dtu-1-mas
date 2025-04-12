@@ -14,7 +14,7 @@ public class LowLevelState implements Comparable<LowLevelState> {
     private int timenow = 0;
 
     //todo 返回steps
-    public List<Move> extractMoves(){
+    public List<Move> extractMoves() {
         return new ArrayList<>();
     }
 
@@ -28,7 +28,7 @@ public class LowLevelState implements Comparable<LowLevelState> {
         }
     }
 
-    public List<LowLevelState> expand(Node currentNode){
+    public List<LowLevelState> expand(Node currentNode) {
         return new ArrayList<>();
     }
 
@@ -76,14 +76,33 @@ public class LowLevelState implements Comparable<LowLevelState> {
         return true;
     }
 
-    //todo 这个heuristic的计算
-    public int getHeuristic() {
-        int cost = 0;
-        return cost;
+    //manhattan distance heuristic
+    public long getHeuristic() {
+        int heuristicValue = 0;
+        for (Box box : this.boxes) {
+            if (box.getGoalLocation() != null) {
+                int mhtDis = Math.abs(box.getCurrentLocation().getRow() - box.getGoalLocation().getRow())
+                        + Math.abs(box.getCurrentLocation().getCol() - box.getGoalLocation().getCol());
+                heuristicValue += mhtDis;
+            }
+        }
+
+        if (this.agent.getGoalLocation() != null) {
+            int mhtDis = Math.abs(this.agent.getCurrentLocation().getRow() - this.agent.getGoalLocation().getRow())
+                    + Math.abs(this.agent.getCurrentLocation().getCol() - this.agent.getGoalLocation().getCol());
+            heuristicValue = Math.max(heuristicValue, mhtDis);
+        }
+
+        return heuristicValue;
+    }
+
+    // A* heuristic function
+    public long getAStar() {
+        return this.getHeuristic() + this.timenow;
     }
 
     @Override
     public int compareTo(LowLevelState o) {
-        return Objects.compare(this, o, Comparator.comparing(LowLevelState::getHeuristic));
+        return Objects.compare(this, o, Comparator.comparing(LowLevelState::getAStar));
     }
 }

@@ -9,8 +9,8 @@ import java.util.Set;
 
 public class OpenList implements Frontier<Node> {
 
-    private PriorityQueue<Node> queue;
-    private Set<Node> visited = new HashSet<Node>();
+    private final PriorityQueue<Node> queue;
+    private final Set<Node> visited = new HashSet<Node>();
 
     public OpenList() {
         this.queue = new PriorityQueue<>(Node::compareTo);
