@@ -21,7 +21,7 @@ public class NewSearchClient {
         // We can also print comments to stdout by prefixing with a #.
         System.out.println("#This is a comment.");
 
-        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAD1.lvl";
+        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAsoko1_04.lvl";
         // Parse the level.
 //        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
         BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
@@ -42,21 +42,16 @@ public class NewSearchClient {
         if (plan == null) {
             System.err.println("Unable to solve level.");
             System.exit(0);
-        } else {//err 会打印在控制台里
+        } else {
             System.err.format("Found solution of length %,d.\n", plan.length);
 
             for (Action[] jointAction : plan) {
-                System.err.print(jointAction[0].name + "@" + jointAction[0].name);
                 System.out.print(jointAction[0].name + "@" + jointAction[0].name);
                 for (int action = 1; action < jointAction.length; ++action) {
                     System.out.print("|");
                     System.out.print(jointAction[action].name);
-
-                    System.err.print("|");
-                    System.err.println(jointAction[action].name);
                 }
                 System.out.println();
-                System.err.println();
                 // We must read the server's response to not fill up the stdin buffer and block the server.
                 serverMessages.readLine();
             }

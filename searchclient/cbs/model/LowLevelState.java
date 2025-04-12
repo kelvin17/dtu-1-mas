@@ -13,7 +13,7 @@ public class LowLevelState implements Comparable<LowLevelState> {
     private int timeNow = 0;
     private Move move;
 
-    //todo 返回steps - 从自己到根节点的路径
+    //Extract the moves from the root to this state
     public List<Move> extractMoves() {
         List<Move> moves = new ArrayList<>();
         LowLevelState current = this;
@@ -23,6 +23,8 @@ public class LowLevelState implements Comparable<LowLevelState> {
             }
             current = current.parent;
         }
+
+        Collections.reverse(moves);
         return moves;
     }
 
@@ -31,6 +33,15 @@ public class LowLevelState implements Comparable<LowLevelState> {
         this.boxes = boxes;
         this.env = env;
         this.loc2Box = new Box[env.getGridNumRows()][env.getGridNumCol()];
+    }
+
+    public LowLevelState initForChild() {
+        if (!this.boxes.isEmpty()) {
+            for (Box box : this.boxes) {
+                this.loc2Box[box.getCurrentLocation().getRow()][box.getCurrentLocation().getCol()] = box;
+            }
+        }
+        return this;
     }
 
     public LowLevelState init() {
@@ -116,7 +127,7 @@ public class LowLevelState implements Comparable<LowLevelState> {
         for (Box box : this.boxes) {
             newBoxes.add(box.copy());
         }
-        LowLevelState child = new LowLevelState(this.agent.copy(), newBoxes, this.env).init();
+        LowLevelState child = new LowLevelState(this.agent.copy(), newBoxes, this.env).initForChild();
         child.parent = this;
         child.timeNow = this.timeNow + 1;
         child.move = move;

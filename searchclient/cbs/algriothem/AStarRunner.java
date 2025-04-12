@@ -49,6 +49,7 @@ public class AStarRunner {
             }
         }
 
+        singleAgentPlan.setMoves(result);
         return result;
     }
 

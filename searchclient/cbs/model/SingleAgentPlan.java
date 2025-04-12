@@ -34,6 +34,10 @@ public class SingleAgentPlan {
         this.moves.add(move);
     }
 
+    public void setMoves(List<Move> moves) {
+        this.moves = moves;
+    }
+
     public int getMoveSize() {
         return this.moves.size();
     }
