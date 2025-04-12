@@ -9,7 +9,7 @@ import java.util.List;
 
 public class AStarRunner {
 
-    private long startTime;
+    private final long startTime;
     private final long timeoutLimit;
     private boolean abortedForTimeout = false;
 
