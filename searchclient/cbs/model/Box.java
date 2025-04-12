@@ -5,29 +5,48 @@ import searchclient.Color;
 public class Box {
     private final char boxLetter;
     private final Color color;
-    private Location initlocation;
-    private Location goallocation;
+    private Location initLocation;
+    private Location goalLocation;
+    private Location currentLocation;
 
     public Box(char boxLetter, Color color) {
         this.boxLetter = boxLetter;
         this.color = color;
     }
 
-    public Box(char boxLetter, Color color, Location initlocation) {
+    public Box(char boxLetter, Color color, Location initLocation, Location goalLocation, Location currentLocation) {
         this.boxLetter = boxLetter;
         this.color = color;
-        this.initlocation = initlocation;
+        this.initLocation = initLocation;
+        this.goalLocation = goalLocation;
+        this.currentLocation = currentLocation;
     }
 
-    public Location getGoallocation() {
-        return goallocation;
+    public Box copy() {
+        return new Box(this.boxLetter, this.color, this.initLocation.copy(), this.goalLocation.copy(), this.currentLocation.copy());
     }
 
-    public void setInitlocation(Location initlocation) {
-        this.initlocation = initlocation;
+    public Location getInitLocation() {
+        return initLocation;
     }
 
-    public void setGoallocation(Location goallocation) {
-        this.goallocation = goallocation;
+    public void setInitLocation(Location initLocation) {
+        this.initLocation = initLocation;
+    }
+
+    public Location getGoalLocation() {
+        return goalLocation;
+    }
+
+    public void setGoalLocation(Location goalLocation) {
+        this.goalLocation = goalLocation;
+    }
+
+    public Location getCurrentLocation() {
+        return currentLocation;
+    }
+
+    public void setCurrentLocation(Location currentLocation) {
+        this.currentLocation = currentLocation;
     }
 }

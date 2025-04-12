@@ -1,5 +1,7 @@
 package searchclient.cbs.model;
 
+import searchclient.ActionType;
+
 /**
  * Model for CBS
  */
@@ -31,6 +33,10 @@ public abstract class AbstractConflict {
     public abstract String getConflictType();
 
     public static AbstractConflict conflictBetween(Move move1, Move move2) {
+        if (move1.getAction().type == ActionType.NoOp || move2.getAction().type == ActionType.NoOp) {
+            // NoOp action, no conflict
+            return null;
+        }
         if (move1.getMoveTo() == move2.getMoveTo()) {
             return new VertexConflict(move1.getAgent(), move2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo());
         }

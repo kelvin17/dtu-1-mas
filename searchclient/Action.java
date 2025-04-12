@@ -1,12 +1,5 @@
 package searchclient;
 
-enum ActionType {
-    NoOp,
-    Move,
-    Push,
-    Pull,
-}
-
 public enum Action {
     /*
         List of possible actions. Each action has the following parameters,
