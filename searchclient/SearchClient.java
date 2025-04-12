@@ -121,7 +121,7 @@ public class SearchClient {
         State initialState = SearchClient.parseLevel(serverMessages);
 
         // Select search strategy.
-        Frontier frontier;
+        Frontier<State> frontier;
         if (args.length > 0) {
             switch (args[0].toLowerCase(Locale.ROOT)) {
                 case "-bfs":

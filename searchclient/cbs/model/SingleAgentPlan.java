@@ -1,26 +1,48 @@
 package searchclient.cbs.model;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Base Model and For CBS
  * For low level of an agent
  */
-public class SingleAgentPlan {
+public class SingleAgentPlan implements Comparable<SingleAgentPlan> {
 
     private final Agent agent;
     private List<Box> boxes = new ArrayList<>();
     private List<Move> moves = new ArrayList<>();
+    private Box[][] loc2Box;
+    private Environment env;
 
-    public SingleAgentPlan(Agent agent, List<Box> boxes) {
-        this.agent = agent;
-        this.boxes = boxes;
+    public void updateBoxLocation(Location origin, Location newLocation) {
+        Box box = this.loc2Box[origin.getRow()][origin.getCol()];
+        if (box != null) {
+            box.setCurrentLocation(newLocation);
+            loc2Box[newLocation.getRow()][newLocation.getCol()] = box;
+            loc2Box[origin.getRow()][origin.getCol()] = null;
+        } else {
+            throw new IllegalArgumentException("No box found for location " + newLocation);
+        }
     }
 
-    public SingleAgentPlan(Agent agent) {
+    public SingleAgentPlan(Agent agent, List<Box> boxes, Environment env) {
         this.agent = agent;
+        this.boxes = boxes;
+        this.env = env;
+        this.loc2Box = new Box[env.getGridNumRows()][env.getGridNumCol()];
+        for (Box box : boxes) {
+            Location location = box.getCurrentLocation();
+            loc2Box[location.getRow()][location.getCol()] = box;
+        }
+    }
+
+    public SingleAgentPlan(Agent agent, Environment env) {
+        this.agent = agent;
+        this.env = env;
+        this.loc2Box = new Box[env.getGridNumRows()][env.getGridNumCol()];
     }
 
     public void addMove(Move move) {
@@ -50,13 +72,12 @@ public class SingleAgentPlan {
     }
 
     public SingleAgentPlan copy() {
-        SingleAgentPlan copy = new SingleAgentPlan(this.agent.copy());
+        SingleAgentPlan copy = new SingleAgentPlan(this.agent.copy(), env);
         for (Move move : moves) {
             copy.addMove(move.copy());
         }
         return copy;
     }
-
 
     public AbstractConflict firstConflict(SingleAgentPlan otherPlan) {
         //1. check every step, either vertex or edge conflict may happen
@@ -104,5 +125,18 @@ public class SingleAgentPlan {
 
     public void addBox(Box box) {
         this.boxes.add(box);
+        Location location = box.getCurrentLocation();
+        this.loc2Box[location.getRow()][location.getCol()] = box;
+    }
+
+    //todo 这个heuristic的计算
+    public int getHeuristic() {
+        int cost = 0;
+        return cost;
+    }
+
+    @Override
+    public int compareTo(SingleAgentPlan o) {
+        return Objects.compare(this, o, Comparator.comparing(SingleAgentPlan::getHeuristic));
     }
 }

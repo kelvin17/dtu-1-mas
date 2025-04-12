@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 public class Environment {
-    
+
+    private final int gridNumRows;
+    private final int gridNumCol;
     private final List<LowLevelColorGroup> colorGroups;
     //    private static List<Location> WALL_LOCATIONS;
     private final boolean[][] WALLS;
@@ -111,13 +113,16 @@ public class Environment {
             line = serverMessages.readLine();
         }
 
-        return new Environment(colorGroups, goalLocations, walls);
+        return new Environment(colorGroups, goalLocations, walls, numRows, numCols);
     }
 
-    public Environment(List<LowLevelColorGroup> colorGroups, List<LowLevelGoalLocation> goalLocations, boolean[][] walls) {
+    public Environment(List<LowLevelColorGroup> colorGroups, List<LowLevelGoalLocation> goalLocations, boolean[][] walls,
+                       int gridNumRows, int gridNumCol) {
         GOAL_LOCATIONS = goalLocations;
         WALLS = walls;
         this.colorGroups = colorGroups;
+        this.gridNumRows = gridNumRows;
+        this.gridNumCol = gridNumCol;
     }
 
     /**
@@ -130,5 +135,13 @@ public class Environment {
 
     public List<LowLevelColorGroup> getColorGroups() {
         return colorGroups;
+    }
+
+    public int getGridNumRows() {
+        return gridNumRows;
+    }
+
+    public int getGridNumCol() {
+        return gridNumCol;
     }
 }

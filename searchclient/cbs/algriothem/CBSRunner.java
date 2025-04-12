@@ -114,9 +114,9 @@ public class CBSRunner {
         return false;
     }
 
-    private Node initRoot(Environment initialState) {
+    private Node initRoot(Environment environment) {
         //static group boxes to agent todo 还需要考虑一下agent没有goal的特殊情况
-        for (LowLevelColorGroup colorGroup : initialState.getColorGroups()) {
+        for (LowLevelColorGroup colorGroup : environment.getColorGroups()) {
             int agentCounts = colorGroup.getAgents().size();
             int boxCounts = colorGroup.getBoxes().size();
             if (agentCounts == 1) {
@@ -125,12 +125,12 @@ public class CBSRunner {
                 colorGroup.getBoxes().forEach(box -> {
                     boxes.add(Box.buildFromMovableObj(box));
                 });
-                SingleAgentPlan singleAgentPlan = new SingleAgentPlan(agent, boxes);
+                SingleAgentPlan singleAgentPlan = new SingleAgentPlan(agent, boxes, environment);
                 agentId2LowGroup.put(agent.getAgentId(), singleAgentPlan);
             } else {
                 for (int i = 0; i < agentCounts; i++) {
                     Agent agent = Agent.buildFromMovableObj(colorGroup.getAgents().get(i));
-                    SingleAgentPlan singleAgentPlan = new SingleAgentPlan(agent);
+                    SingleAgentPlan singleAgentPlan = new SingleAgentPlan(agent, environment);
                     for (int j = i; j < boxCounts; j = j + agentCounts) {
                         Box box = Box.buildFromMovableObj(colorGroup.getBoxes().get(j));
                         singleAgentPlan.addBox(box);
