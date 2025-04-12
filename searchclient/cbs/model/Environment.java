@@ -32,8 +32,8 @@ public class Environment {
         serverMessages.readLine(); // #colors
         String line = serverMessages.readLine();
 
-        Map<Character, MovableObj> agents = new HashMap<>();
-        Map<Character, MovableObj> boxes = new HashMap<>();
+        Map<Character, Agent> agents = new HashMap<>();
+        Map<Character, Box> boxes = new HashMap<>();
 //        List<Location> wallLocations = new ArrayList<>();
         List<LowLevelGoalLocation> goalLocations = new ArrayList<>();
         List<LowLevelColorGroup> colorGroups = new ArrayList<>();
@@ -46,11 +46,11 @@ public class Environment {
             for (String entity : entities) {
                 char c = entity.strip().charAt(0);
                 if ('0' <= c && c <= '9') {
-                    MovableObj agent = MovableObj.buildAgent(c, color);
+                    Agent agent = new Agent(c, color);
                     colorGroup.addAgent(agent);
                     agents.put(c, agent);
                 } else if ('A' <= c && c <= 'Z') {
-                    MovableObj box = MovableObj.buildBox(c, color);
+                    Box box = new Box(c, color);
                     colorGroup.addBox(box);
                     boxes.put(c, box);
                 }

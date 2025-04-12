@@ -1,37 +1,15 @@
 package searchclient.cbs.model;
 
+import searchclient.Color;
 
-public class Box {
+public class Box extends MovableObj {
 
-    private final MovableObj innerObj;
-    private Location currentLocation;
-
-    public Box(MovableObj innerObj, Location currentLocation) {
-        this.innerObj = innerObj;
-        this.currentLocation = currentLocation;
-    }
-
-    public static Box buildFromMovableObj(MovableObj box) {
-        return new Box(box, box.getInitLocation());
+    public Box(char uniqueId, Color color) {
+        super(ObjectType.BOX, uniqueId, color);
     }
 
     public Box copy() {
-        return new Box(this.innerObj, this.currentLocation.copy());
+        return (Box) super.copy();
     }
 
-    public Location getInitLocation() {
-        return this.innerObj.getInitLocation();
-    }
-
-    public Location getGoalLocation() {
-        return this.innerObj.getGoalLocation();
-    }
-
-    public Location getCurrentLocation() {
-        return currentLocation;
-    }
-
-    public void setCurrentLocation(Location currentLocation) {
-        this.currentLocation = currentLocation;
-    }
 }

@@ -9,6 +9,7 @@ public class MovableObj {
     private final Color color;
     private Location initLocation;
     private Location goalLocation;
+    private Location currentLocation;
 
     public MovableObj(ObjectType objType, char uniqueId, Color color) {
         this.objType = objType;
@@ -54,5 +55,21 @@ public class MovableObj {
 
     public char getUniqueId() {
         return uniqueId;
+    }
+
+    public Location getCurrentLocation() {
+        return currentLocation;
+    }
+
+    public void setCurrentLocation(Location currentLocation) {
+        this.currentLocation = currentLocation;
+    }
+
+    public MovableObj copy() {
+        MovableObj copy = new MovableObj(this.objType, this.uniqueId, this.color);
+        copy.setInitLocation(this.initLocation.copy());
+        copy.setGoalLocation(this.goalLocation.copy());
+        copy.setCurrentLocation(this.currentLocation.copy());
+        return copy;
     }
 }

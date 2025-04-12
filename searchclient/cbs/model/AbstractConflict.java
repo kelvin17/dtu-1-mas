@@ -7,41 +7,45 @@ import searchclient.ActionType;
  */
 public abstract class AbstractConflict {
 
-    private Agent agent1;
-    private Agent agent2;
+    protected SingleAgentPlan plan1;
+    protected SingleAgentPlan plan2;
+    private MovableObj movableObj1;
+    private MovableObj movableObj2;
     private int time;
     //Used for vertex conflict
     private Location targetLocation;
     //The origin loc of Agent1
-    private Location locationOfAgent1;
+    private Location locationOfObj1;
     //The origin loc of Agent2
-    private Location locationOfAgent2;
+    private Location locationOfObj2;
 
     public AbstractConflict() {
 
     }
 
-    public AbstractConflict(Agent agent1, Agent agent2, int time, Location locationOfAgent1, Location locationOfAgent2, Location targetLocation) {
-        this.agent1 = agent1;
-        this.agent2 = agent2;
+    public AbstractConflict(SingleAgentPlan plan1, SingleAgentPlan plan2, MovableObj movableObj1, MovableObj movableObj2,
+                            int time, Location locationOfObj1, Location locationOfObj2, Location targetLocation) {
+        this.movableObj1 = movableObj1;
+        this.movableObj2 = movableObj2;
         this.time = time;
-        this.locationOfAgent1 = locationOfAgent1;
-        this.locationOfAgent2 = locationOfAgent2;
+        this.locationOfObj1 = locationOfObj1;
+        this.locationOfObj2 = locationOfObj2;
         this.targetLocation = targetLocation;
     }
 
     public abstract String getConflictType();
 
-    public static AbstractConflict conflictBetween(Move move1, Move move2) {
+    //todo 还需要再考虑一下有box的情况，这个是否可行
+    public static AbstractConflict conflictBetween(SingleAgentPlan plan1, SingleAgentPlan plan2, Move move1, Move move2) {
         if (move1.getAction().type == ActionType.NoOp || move2.getAction().type == ActionType.NoOp) {
             // NoOp action, no conflict
             return null;
         }
         if (move1.getMoveTo() == move2.getMoveTo()) {
-            return new VertexConflict(move1.getAgent(), move2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo());
+            return new VertexConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo());
         }
         if (move1.getCurrentLocation() == move2.getMoveTo() && move2.getCurrentLocation() == move1.getMoveTo()) {
-            return new EdgeConflict(move1.getAgent(), move2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation());
+            return new EdgeConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation());
         }
         return null;
     }
@@ -51,24 +55,24 @@ public abstract class AbstractConflict {
      */
     public abstract Constraint[] getPreventingConstraints();
 
-    public Agent getAgent1() {
-        return agent1;
+    public MovableObj getMovableObj1() {
+        return movableObj1;
     }
 
-    public Agent getAgent2() {
-        return agent2;
+    public MovableObj getMovableObj2() {
+        return movableObj2;
     }
 
     public int getTime() {
         return time;
     }
 
-    public Location getLocationOfAgent1() {
-        return locationOfAgent1;
+    public Location getLocationOfObj1() {
+        return locationOfObj1;
     }
 
-    public Location getLocationOfAgent2() {
-        return locationOfAgent2;
+    public Location getLocationOfObj2() {
+        return locationOfObj2;
     }
 
     public Location getTargetLocation() {

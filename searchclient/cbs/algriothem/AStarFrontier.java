@@ -1,29 +1,29 @@
 package searchclient.cbs.algriothem;
 
 import searchclient.Frontier;
-import searchclient.cbs.model.SingleAgentPlan;
+import searchclient.cbs.model.LowLevelState;
 
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-public class AStarFrontier implements Frontier<SingleAgentPlan> {
+public class AStarFrontier implements Frontier<LowLevelState> {
 
-    private PriorityQueue<SingleAgentPlan> queue;
-    private Set<SingleAgentPlan> visited = new HashSet<SingleAgentPlan>();
+    private PriorityQueue<LowLevelState> queue;
+    private Set<LowLevelState> visited = new HashSet<LowLevelState>();
 
     public AStarFrontier() {
-        this.queue = new PriorityQueue<>(SingleAgentPlan::compareTo);
+        this.queue = new PriorityQueue<>(LowLevelState::compareTo);
     }
 
     @Override
-    public void add(SingleAgentPlan item) {
+    public void add(LowLevelState item) {
         this.queue.add(item);
         this.visited.add(item);
     }
 
     @Override
-    public SingleAgentPlan pop() {
+    public LowLevelState pop() {
         return this.queue.poll();
     }
 
@@ -38,8 +38,8 @@ public class AStarFrontier implements Frontier<SingleAgentPlan> {
     }
 
     @Override
-    public boolean contains(SingleAgentPlan plan) {
-        return this.visited.contains(plan);
+    public boolean contains(LowLevelState item) {
+        return this.visited.contains(item);
     }
 
     @Override

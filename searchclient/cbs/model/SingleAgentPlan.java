@@ -6,43 +6,24 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Base Model and For CBS
- * For low level of an agent
+ * Model for Single Agent Plan
  */
-public class SingleAgentPlan implements Comparable<SingleAgentPlan> {
+public class SingleAgentPlan {
 
-    private final Agent agent;
+    private Agent agent;
     private List<Box> boxes = new ArrayList<>();
     private List<Move> moves = new ArrayList<>();
-    private Box[][] loc2Box;
     private Environment env;
-
-    public void updateBoxLocation(Location origin, Location newLocation) {
-        Box box = this.loc2Box[origin.getRow()][origin.getCol()];
-        if (box != null) {
-            box.setCurrentLocation(newLocation);
-            loc2Box[newLocation.getRow()][newLocation.getCol()] = box;
-            loc2Box[origin.getRow()][origin.getCol()] = null;
-        } else {
-            throw new IllegalArgumentException("No box found for location " + newLocation);
-        }
-    }
 
     public SingleAgentPlan(Agent agent, List<Box> boxes, Environment env) {
         this.agent = agent;
         this.boxes = boxes;
         this.env = env;
-        this.loc2Box = new Box[env.getGridNumRows()][env.getGridNumCol()];
-        for (Box box : boxes) {
-            Location location = box.getCurrentLocation();
-            loc2Box[location.getRow()][location.getCol()] = box;
-        }
     }
 
     public SingleAgentPlan(Agent agent, Environment env) {
         this.agent = agent;
         this.env = env;
-        this.loc2Box = new Box[env.getGridNumRows()][env.getGridNumCol()];
     }
 
     public void addMove(Move move) {
@@ -71,12 +52,8 @@ public class SingleAgentPlan implements Comparable<SingleAgentPlan> {
         return this.agent.getAgentId();
     }
 
-    public SingleAgentPlan copy() {
-        SingleAgentPlan copy = new SingleAgentPlan(this.agent.copy(), env);
-        for (Move move : moves) {
-            copy.addMove(move.copy());
-        }
-        return copy;
+    public Agent getAgent() {
+        return this.agent;
     }
 
     public AbstractConflict firstConflict(SingleAgentPlan otherPlan) {
@@ -88,7 +65,7 @@ public class SingleAgentPlan implements Comparable<SingleAgentPlan> {
         for (int i = 0; i < minEndTime; i++) {
             Move move1 = moves.get(i);
             Move move2 = otherPlan.moves.get(i);
-            AbstractConflict conflict = AbstractConflict.conflictBetween(move1, move2);
+            AbstractConflict conflict = AbstractConflict.conflictBetween(this, otherPlan, move1, move2);
             if (conflict != null) return conflict;
         }
 
@@ -101,16 +78,17 @@ public class SingleAgentPlan implements Comparable<SingleAgentPlan> {
             if (earlyEndingPlan.agent.getGoalLocation() != null) {
                 stayLocations.add(earlyEndingPlan.agent.getGoalLocation());
             }
-            for (Box box : earlyEndingPlan.boxes) {
+            for (MovableObj box : earlyEndingPlan.boxes) {
                 stayLocations.add(box.getGoalLocation());
             }
 
             //如果plan2 先结束 - 则去检测plan1是否会经过2的goal
+            //todo 这里需要考虑所有的plan下所有的对象 agent+boxes
             for (int time = minEndTime; time < maxEndTime; time++) {
                 Move move2 = laterEndingPlan.getMoves().get(time);
                 Location moveTo = move2.getMoveTo();
                 if (stayLocations.contains(moveTo)) {
-                    return new VertexConflict(earlyEndingPlan.agent, laterEndingPlan.agent, time,
+                    return new VertexConflict(earlyEndingPlan, laterEndingPlan, earlyEndingPlan.agent, laterEndingPlan.agent, time,
                             moveTo, move2.getCurrentLocation(), moveTo);
                 }
             }
@@ -125,18 +103,17 @@ public class SingleAgentPlan implements Comparable<SingleAgentPlan> {
 
     public void addBox(Box box) {
         this.boxes.add(box);
-        Location location = box.getCurrentLocation();
-        this.loc2Box[location.getRow()][location.getCol()] = box;
     }
 
-    //todo 这个heuristic的计算
-    public int getHeuristic() {
-        int cost = 0;
-        return cost;
+    public SingleAgentPlan copy() {
+        SingleAgentPlan newPlan = new SingleAgentPlan(this.agent.copy(), this.env);
+        for (Box box : this.boxes) {
+            newPlan.addBox(box.copy());
+        }
+        for (Move move : this.moves) {
+            newPlan.addMove(move.copy());
+        }
+        return newPlan;
     }
 
-    @Override
-    public int compareTo(SingleAgentPlan o) {
-        return Objects.compare(this, o, Comparator.comparing(SingleAgentPlan::getHeuristic));
-    }
 }

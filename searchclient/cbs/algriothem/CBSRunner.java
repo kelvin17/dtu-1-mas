@@ -19,7 +19,7 @@ public class CBSRunner {
     private final AStarRunner lowLevelRunner;
     private final MinTimeConflictDetection conflictDetection;
 
-    private Map<Integer, SingleAgentPlan> agentId2LowGroup = new HashMap<>();
+    private Map<Character, SingleAgentPlan> agentId2LowGroup = new HashMap<>();
 
     public CBSRunner() {
         this.lowLevelRunner = new AStarRunner();
@@ -120,22 +120,17 @@ public class CBSRunner {
             int agentCounts = colorGroup.getAgents().size();
             int boxCounts = colorGroup.getBoxes().size();
             if (agentCounts == 1) {
-                Agent agent = Agent.buildFromMovableObj(colorGroup.getAgents().get(0));
-                List<Box> boxes = new ArrayList<>();
-                colorGroup.getBoxes().forEach(box -> {
-                    boxes.add(Box.buildFromMovableObj(box));
-                });
-                SingleAgentPlan singleAgentPlan = new SingleAgentPlan(agent, boxes, environment);
-                agentId2LowGroup.put(agent.getAgentId(), singleAgentPlan);
+                Agent agent = colorGroup.getAgents().get(0);
+                SingleAgentPlan singleAgentPlan = new SingleAgentPlan(colorGroup.getAgents().get(0), colorGroup.getBoxes(), environment);
+                agentId2LowGroup.put(agent.getUniqueId(), singleAgentPlan);
             } else {
                 for (int i = 0; i < agentCounts; i++) {
-                    Agent agent = Agent.buildFromMovableObj(colorGroup.getAgents().get(i));
+                    Agent agent = colorGroup.getAgents().get(i);
                     SingleAgentPlan singleAgentPlan = new SingleAgentPlan(agent, environment);
                     for (int j = i; j < boxCounts; j = j + agentCounts) {
-                        Box box = Box.buildFromMovableObj(colorGroup.getBoxes().get(j));
-                        singleAgentPlan.addBox(box);
+                        singleAgentPlan.addBox(colorGroup.getBoxes().get(j));
                     }
-                    agentId2LowGroup.put(agent.getAgentId(), singleAgentPlan);
+                    agentId2LowGroup.put(agent.getUniqueId(), singleAgentPlan);
                 }
             }
         }

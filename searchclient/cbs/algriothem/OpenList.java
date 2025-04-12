@@ -22,7 +22,6 @@ public class OpenList implements Frontier<Node> {
         this.visited.add(n);
     }
 
-
     public Node pop() {
         return this.queue.remove();
     }
