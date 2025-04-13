@@ -2,13 +2,20 @@ package searchclient.cbs.model;
 
 import searchclient.Color;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LowLevelColorGroup implements AbstractDeepCopy<LowLevelColorGroup> {
+public class LowLevelColorGroup implements AbstractDeepCopy<LowLevelColorGroup>, Serializable {
     private final Color color;
     private final List<Agent> agents;
     private final List<Box> boxes;
+
+    public LowLevelColorGroup() {
+        this.color = null;
+        this.agents = new ArrayList<>();
+        this.boxes = new ArrayList<>();
+    }
 
     public LowLevelColorGroup(Color color) {
         this.color = color;

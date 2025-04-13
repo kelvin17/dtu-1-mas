@@ -2,11 +2,13 @@ package searchclient.cbs.model;
 
 import searchclient.Color;
 
-public class MovableObj {
+import java.io.Serializable;
 
-    protected final ObjectType objType;
-    protected final char uniqueId;
-    protected final Color color;
+public class MovableObj implements Serializable {
+
+    protected ObjectType objType;
+    protected char uniqueId;
+    protected Color color;
     protected Location initLocation;
     protected Location goalLocation;
     protected Location currentLocation;
@@ -15,6 +17,9 @@ public class MovableObj {
         this.objType = objType;
         this.uniqueId = uniqueId;
         this.color = color;
+    }
+
+    public MovableObj() {
     }
 
     public boolean isAgent() {

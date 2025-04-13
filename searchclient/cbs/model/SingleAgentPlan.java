@@ -1,5 +1,6 @@
 package searchclient.cbs.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,12 +11,12 @@ import java.util.TreeMap;
  * Represents the plan of a single agent, including the env, agent, boxes and a effective move list for this plan.
  * 代表一个单独的代理的计划，包括环境、代理、箱子和使得该计划可解的一个有效移动列表。
  */
-public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan> {
+public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Serializable {
 
     private Agent agent;
     private List<Box> boxes = new ArrayList<>();
     private Map<Integer, Move> moves = new TreeMap<>();
-    private final Environment env;
+    private Environment env;
 
     public SingleAgentPlan(Agent agent, List<Box> boxes, Environment env) {
         this.agent = agent;
@@ -23,11 +24,7 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan> {
         this.env = env;
     }
 
-    public SingleAgentPlan(Agent agent, List<Box> boxes, Map<Integer, Move> moves, Environment env) {
-        this.agent = agent;
-        this.boxes = boxes;
-        this.env = env;
-        this.moves = moves;
+    public SingleAgentPlan() {
     }
 
     public Environment getEnv() {

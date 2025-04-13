@@ -1,12 +1,13 @@
 package searchclient.cbs.model;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Model for CBS
  * For high level of CT
  */
-public class Solution implements AbstractDeepCopy<Solution> {
+public class Solution implements AbstractDeepCopy<Solution>, Serializable {
 
     private final Map<Integer, SingleAgentPlan> agentPlans = new TreeMap<>();
     private boolean valid = true;

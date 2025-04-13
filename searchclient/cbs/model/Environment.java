@@ -4,12 +4,13 @@ import searchclient.Color;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Environment implements AbstractDeepCopy<Environment> {
+public class Environment implements AbstractDeepCopy<Environment>, Serializable {
 
     private final int gridNumRows;
     private final int gridNumCol;
@@ -116,6 +117,13 @@ public class Environment implements AbstractDeepCopy<Environment> {
         this.colorGroups = colorGroups;
         this.gridNumRows = gridNumRows;
         this.gridNumCol = gridNumCol;
+    }
+
+    public Environment() {
+        gridNumRows = 0;
+        gridNumCol = 0;
+        colorGroups = new ArrayList<>();
+        WALLS = new boolean[0][0];
     }
 
 

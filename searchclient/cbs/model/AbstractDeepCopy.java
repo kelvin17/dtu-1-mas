@@ -12,7 +12,8 @@ public interface AbstractDeepCopy<T> extends Serializable {
             oos.flush();
             ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
             ObjectInputStream ois = new ObjectInputStream(bis);
-            return (T) ois.readObject();
+            T newObj = (T) ois.readObject();
+            return newObj;
         } catch (IOException | ClassNotFoundException e) {
             System.err.printf("Deep copy failed + Obj[%s]\n", this.toString());
             throw new RuntimeException(e);
