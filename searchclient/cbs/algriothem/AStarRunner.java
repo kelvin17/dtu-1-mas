@@ -38,8 +38,8 @@ public class AStarRunner {
         while (!frontier.isEmpty() && !checkTimeout()) {
             LowLevelState currentState = frontier.pop();
             if (currentState.isGoal()) {
-                System.out.println("#Finish-Lower-level");
                 result = currentState.extractMoves();
+                System.out.printf("#Finish-Lower-level, agent=%s ,size=%d\n", singleAgentPlan.getAgent().getAgentId(), result.size());
                 findPath = true;
                 break;
             }

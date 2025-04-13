@@ -9,15 +9,15 @@ public abstract class AbstractConflict {
 
     protected SingleAgentPlan plan1;
     protected SingleAgentPlan plan2;
-    private MovableObj movableObj1;
-    private MovableObj movableObj2;
-    private int timeNow;
+    protected MovableObj movableObj1;
+    protected MovableObj movableObj2;
+    protected int timeNow;
     //Used for vertex conflict
-    private Location targetLocation;
+    protected Location targetLocation;
     //The origin loc of Agent1
-    private Location locationOfObj1;
+    protected Location locationOfObj1;
     //The origin loc of Agent2
-    private Location locationOfObj2;
+    protected Location locationOfObj2;
 
     public AbstractConflict(SingleAgentPlan plan1, SingleAgentPlan plan2, MovableObj movableObj1, MovableObj movableObj2,
                             int timeNow, Location locationOfObj1, Location locationOfObj2, Location targetLocation) {
@@ -39,10 +39,10 @@ public abstract class AbstractConflict {
             // NoOp action, no conflict
             return null;
         }
-        if (move1.getMoveTo() == move2.getMoveTo()) {
+        if (move1.getMoveTo().equals(move2.getMoveTo())) {
             return new VertexConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo());
         }
-        if (move1.getCurrentLocation() == move2.getMoveTo() && move2.getCurrentLocation() == move1.getMoveTo()) {
+        if (move1.getCurrentLocation().equals(move2.getMoveTo()) && move2.getCurrentLocation().equals(move1.getMoveTo())) {
             return new EdgeConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation());
         }
         return null;

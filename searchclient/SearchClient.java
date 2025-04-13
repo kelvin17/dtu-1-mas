@@ -186,11 +186,15 @@ public class SearchClient {
 
             for (Action[] jointAction : plan) {
                 System.out.print(jointAction[0].name + "@" + jointAction[0].name);
+                System.err.print(jointAction[0].name + "@" + jointAction[0].name);
                 for (int action = 1; action < jointAction.length; ++action) {
                     System.out.print("|");
+                    System.err.print("|");
                     System.out.print(jointAction[action].name);
+                    System.err.print(jointAction[action].name);
                 }
                 System.out.println();
+                System.err.println();
                 // We must read the server's response to not fill up the stdin buffer and block the server.
                 serverMessages.readLine();
             }

@@ -1,10 +1,12 @@
 package searchclient.cbs.model;
 
+import java.io.Serializable;
+
 /**
  * Model for CBS
  * Represents for the edge or swap conflict
  */
-public class EdgeConflict extends AbstractConflict {
+public class EdgeConflict extends AbstractConflict implements Serializable {
 
     public EdgeConflict(SingleAgentPlan plan1, SingleAgentPlan plan2, MovableObj obj1, MovableObj obj2, int timeNow, Location locationOfObj1, Location locationOfObj2) {
         super(plan1, plan2, obj1, obj2, timeNow, locationOfObj1, locationOfObj2, null);
@@ -23,5 +25,17 @@ public class EdgeConflict extends AbstractConflict {
                 //Solution2, add Constraint to Agent2 from own location to location of Agent1
                 new Constraint(plan2.getAgent(), getTimeNow(), getLocationOfObj2(), getLocationOfObj1())
         };
+    }
+
+    @Override
+    public String toString() {
+        return "EdgeConflict{" +
+                "movableObj1.uniqueId=" + this.movableObj1.getUniqueId() +
+                ", movableObj2.uniqueId=" + this.movableObj2.getUniqueId() +
+                ", timeNow=" + this.timeNow +
+                ", targetLocation=" + this.targetLocation +
+                ", locationOfObj1=" + this.locationOfObj1 +
+                ", locationOfObj2=" + this.locationOfObj2 +
+                '}';
     }
 }

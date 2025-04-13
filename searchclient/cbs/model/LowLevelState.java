@@ -2,9 +2,10 @@ package searchclient.cbs.model;
 
 import searchclient.Action;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCopy<LowLevelState> {
+public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCopy<LowLevelState>, Serializable {
     private Move move;
     private final Agent agent;
     private List<Box> boxes = new ArrayList<>();

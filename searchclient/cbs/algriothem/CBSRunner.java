@@ -47,8 +47,10 @@ public class CBSRunner {
             AbstractConflict firstConflict = conflictDetection.detect(node);
             //find the final solution, when there isn't any conflict
             if (firstConflict == null) {
+                System.err.println("Conflict detected result - No conflict");
                 return convertPaths2Actions(node.getSolution());
             }
+            System.err.println("Conflict detected result - " + firstConflict.toString());
 
             Constraint[] constraints = firstConflict.getPreventingConstraints();
 

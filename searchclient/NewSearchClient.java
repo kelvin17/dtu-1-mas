@@ -21,7 +21,7 @@ public class NewSearchClient {
         // We can also print comments to stdout by prefixing with a #.
         System.out.println("#This is a comment.");
 
-        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAsoko1_04.lvl";
+        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/cbslevel/MAPF03C.lvl";
         // Parse the level.
 //        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
         BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
@@ -49,11 +49,15 @@ public class NewSearchClient {
 
             for (Action[] jointAction : plan) {
                 System.out.print(jointAction[0].name + "@" + jointAction[0].name);
+                System.err.print(jointAction[0].name + "@" + jointAction[0].name);
                 for (int action = 1; action < jointAction.length; ++action) {
                     System.out.print("|");
+                    System.err.print("|");
                     System.out.print(jointAction[action].name);
+                    System.err.print(jointAction[action].name);
                 }
                 System.out.println();
+                System.err.println();
                 // We must read the server's response to not fill up the stdin buffer and block the server.
                 serverMessages.readLine();
             }
