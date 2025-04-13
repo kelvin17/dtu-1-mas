@@ -36,7 +36,19 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         this.loc2Box = new Box[gridNumRows][gridNumCol];
     }
 
-    //only for deep copy
+    public static LowLevelState initRootStateForPlan(SingleAgentPlan singleAgentPlan) {
+        LowLevelState rootState = new LowLevelState(singleAgentPlan.getAgent(), singleAgentPlan.getBoxes(), singleAgentPlan.getEnv().getGridNumRows(),
+                singleAgentPlan.getEnv().getGridNumCol());
+        rootState.agent.setCurrentLocation(rootState.agent.getInitLocation());
+        if (!rootState.boxes.isEmpty()) {
+            for (Box box : rootState.boxes) {
+                box.setCurrentLocation(box.getInitLocation());
+                rootState.loc2Box[box.getCurrentLocation().getRow()][box.getCurrentLocation().getCol()] = box;
+            }
+        }
+        return rootState;
+    }
+
     public LowLevelState() {
         this.agent = null;
         this.boxes = new ArrayList<>();
@@ -45,24 +57,14 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         this.loc2Box = new Box[0][0];
     }
 
-    public LowLevelState init() {
-        this.agent.setCurrentLocation(agent.getInitLocation());
-        if (!this.boxes.isEmpty()) {
-            for (Box box : this.boxes) {
-                box.setCurrentLocation(box.getInitLocation());
-                this.loc2Box[box.getCurrentLocation().getRow()][box.getCurrentLocation().getCol()] = box;
-            }
-        }
-        return this;
-    }
-
     public List<LowLevelState> expand(Node currentNode, Environment env) {
-        List<LowLevelState> newState = new ArrayList<>();
+        List<LowLevelState> newStates = new ArrayList<>();
         List<Constraint> constraints = new ArrayList<>();
         Node node = currentNode;
         while (node != null) {
             if (node.getAddedConstraint() != null && node.getAddedConstraint().getAgent() == this.agent) {
-                if (this.timeNow == node.getAddedConstraint().getTime()) {
+                //todo this 是当前state。现在是要往下走一步。所以应该是考虑下一个时间点。
+                if (this.timeNow + 1 == node.getAddedConstraint().getTime()) {
                     constraints.add(node.getAddedConstraint());
                 }
             }
@@ -70,14 +72,14 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         }
 
         for (Action action : Action.values()) {
-            Move move = this.getMove(this.agent, action, constraints, env);
+            Move move = this.getNextMove(this.agent, action, constraints, env);
             if (move != null) {
                 LowLevelState child = this.generateChildState(move);
-                newState.add(child);
+                newStates.add(child);
             }
         }
 
-        return newState;
+        return newStates;
     }
 
     /**
@@ -85,7 +87,7 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
      * @param action
      * @return
      */
-    private Move getMove(Agent agent, Action action, List<Constraint> constraints, Environment env) {
+    private Move getNextMove(Agent agent, Action action, List<Constraint> constraints, Environment env) {
         switch (action.type) {
             case NoOp:
                 return new Move(agent, this.timeNow + 1, action, null);
@@ -93,13 +95,16 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
                 Location currentLocation = agent.getCurrentLocation();
                 Location newLocation = new Location(currentLocation.getRow() + action.agentRowDelta,
                         currentLocation.getCol() + action.agentColDelta);
+                //1. check是不是墙
                 if (env.isWall(newLocation)) {
                     return null;
                 }
-                //todo 考虑一下这里要不要考虑其他的agent和box
+                //2. check会不会有当前组内的box
                 if (this.loc2Box[newLocation.getRow()][newLocation.getCol()] != null) {
                     return null;
                 }
+                //3. 不需要检查考虑一下这里要不要考虑其他的agent和box - 应该可以不考虑。等同于ignore处理 todo
+                //4. 检查新加入的指定时点的约束
                 for (Constraint constraint : constraints) {
                     if (constraint.getFromLocation() == null) {
                         //vertex conflict
@@ -107,8 +112,8 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
                             return null;
                         }
                     } else {
-                        //edge conflict
-                        if (constraint.getFromLocation().equals(newLocation) && constraint.getToLocation().equals(agent.getCurrentLocation())) {
+                        //edge conflict - todo check
+                        if (constraint.getFromLocation().equals(currentLocation) && constraint.getToLocation().equals(newLocation)) {
                             return null;
                         }
                     }
@@ -139,9 +144,9 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
                 break;
             case Pull:
             case Push:
-                Location newAgentLoc2 = new Location(child.agent.getCurrentLocation().getRow() + move.getAction().agentRowDelta,
+                Location newAgentLocForBox = new Location(child.agent.getCurrentLocation().getRow() + move.getAction().agentRowDelta,
                         child.agent.getCurrentLocation().getCol() + move.getAction().agentColDelta);
-                child.agent.setCurrentLocation(newAgentLoc2);
+                child.agent.setCurrentLocation(newAgentLocForBox);
 
                 Box box = move.getBox();
                 Location newBoxLoc = new Location(box.getCurrentLocation().getRow() + move.getAction().boxRowDelta,
@@ -264,6 +269,20 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
             }
         }
 
+        if (this.timeNow != other.timeNow) {
+            return false;
+        }
+
+        if (this.move != null) {
+            if (!this.move.equals(other.move)) {
+                return false;
+            }
+        } else {
+            if (other.move != null) {
+                return false;
+            }
+        }
+
         return equal;
     }
 
@@ -272,7 +291,7 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
     }
 
     public int hashCode() {
-        return Objects.hash(agent, boxes);
+        return Objects.hash(agent, boxes, move, timeNow);
     }
 
     @Override

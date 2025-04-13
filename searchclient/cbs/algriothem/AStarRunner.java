@@ -6,6 +6,7 @@ import searchclient.cbs.model.Node;
 import searchclient.cbs.model.SingleAgentPlan;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 public class AStarRunner {
 
@@ -26,20 +27,20 @@ public class AStarRunner {
      * @param singleAgentPlan
      * @return
      */
-    public Map<Integer, Move> findPath(Node currentNode, SingleAgentPlan singleAgentPlan) {
+    public boolean findPath(Node currentNode, SingleAgentPlan singleAgentPlan) {
 
-        Map<Integer, Move> result = null;
-
-        LowLevelState initState = new LowLevelState(singleAgentPlan.getAgent(), singleAgentPlan.getBoxes(), singleAgentPlan.getEnv().getGridNumRows(),
-                singleAgentPlan.getEnv().getGridNumCol()).init();
+        boolean findPath = false;
+        LowLevelState initState = LowLevelState.initRootStateForPlan(singleAgentPlan);
         AStarFrontier frontier = new AStarFrontier();
         frontier.add(initState);
 
+        Map<Integer, Move> result = new TreeMap<>();
         while (!frontier.isEmpty() && !checkTimeout()) {
             LowLevelState currentState = frontier.pop();
             if (currentState.isGoal()) {
                 System.out.println("#Finish-Lower-level");
                 result = currentState.extractMoves();
+                findPath = true;
                 break;
             }
 
@@ -51,7 +52,7 @@ public class AStarRunner {
         }
 
         singleAgentPlan.setMoves(result);
-        return result;
+        return findPath;
     }
 
     private boolean checkTimeout() {

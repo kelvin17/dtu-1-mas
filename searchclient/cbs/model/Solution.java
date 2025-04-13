@@ -9,32 +9,36 @@ import java.util.*;
  */
 public class Solution implements AbstractDeepCopy<Solution>, Serializable {
 
-    private final Map<Integer, SingleAgentPlan> agentPlans = new TreeMap<>();
+    private final Map<Character, SingleAgentPlan> agentPlans = new TreeMap<>();
     private boolean valid = true;
     private int maxSinglePath = 0;
 
-    public SingleAgentPlan getPlanForAgent(int agentId) {
+    public SingleAgentPlan getPlanForAgent(Character agentId) {
         return this.agentPlans.get(agentId);
     }
 
     public Solution() {
     }
 
-    public Solution(Map<Integer, SingleAgentPlan> agentPlans, boolean valid, int maxSinglePath) {
-        this.agentPlans.putAll(agentPlans);
-        this.valid = valid;
-        this.maxSinglePath = maxSinglePath;
-    }
-
     public int getMaxSinglePath() {
         return maxSinglePath;
     }
 
-    public void addOrUpdateAgentPlan(int agentId, SingleAgentPlan agentPlan) {
+    public void addAgentPlan(Character agentId, SingleAgentPlan agentPlan) {
         if (agentPlan.getMoveSize() > this.maxSinglePath) {
             this.maxSinglePath = agentPlan.getMoveSize();
         }
         this.agentPlans.put(agentId, agentPlan);
+    }
+
+    public void updateMaxSinglePath() {
+        int newMaxSinglePath = 0;
+        for (SingleAgentPlan singleAgentPlan : this.agentPlans.values()) {
+            if (singleAgentPlan.getMoveSize() > newMaxSinglePath) {
+                newMaxSinglePath = singleAgentPlan.getMoveSize();
+            }
+        }
+        this.maxSinglePath = newMaxSinglePath;
     }
 
     public List<SingleAgentPlan> getAgentPlansInOrder() {

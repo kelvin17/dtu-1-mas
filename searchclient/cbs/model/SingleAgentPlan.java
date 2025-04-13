@@ -36,10 +36,6 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
         this.env = env;
     }
 
-    public void addMove(Move move) {
-        this.moves.put(move.getTimeNow(), move);
-    }
-
     public void setMoves(Map<Integer, Move> moves) {
         this.moves = moves;
     }
@@ -62,7 +58,7 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
         return this.moves;
     }
 
-    public int getAgentId() {
+    public Character getAgentId() {
         return this.agent.getAgentId();
     }
 
@@ -76,8 +72,9 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
         int plan2EndTime = otherPlan.moves.size();
         int minEndTime = Math.min(plan1EndTime, plan2EndTime);
         int maxEndTime = Math.max(plan1EndTime, plan2EndTime);
-        for (int i = 0; i < minEndTime; i++) {
-            Move move1 = moves.get(i);
+        //move 的 time是从1开始的。表示它是走到了 time 时刻的位置
+        for (int i = 1; i <= minEndTime; i++) {
+            Move move1 = this.moves.get(i);
             Move move2 = otherPlan.moves.get(i);
             AbstractConflict conflict = AbstractConflict.conflictBetween(this, otherPlan, move1, move2);
             if (conflict != null) return conflict;
@@ -92,13 +89,15 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
             if (earlyEndingPlan.agent.getGoalLocation() != null) {
                 stayLocations.add(earlyEndingPlan.agent.getGoalLocation());
             }
-            for (MovableObj box : earlyEndingPlan.boxes) {
-                stayLocations.add(box.getGoalLocation());
+            for (Box box : earlyEndingPlan.boxes) {
+                if (box.getGoalLocation() != null) {
+                    stayLocations.add(box.getGoalLocation());
+                }
             }
 
-            //如果plan2 先结束 - 则去检测plan1是否会经过2的goal
-            //todo 这里需要考虑所有的plan下所有的对象 agent+boxes
-            for (int time = minEndTime; time < maxEndTime; time++) {
+            //如果plan2 先结束 - 则去检测plan1是否会经过2的goal - 只检测vertex Conflict即可
+            //这里需要考虑所有的plan下所有的对象 agent+boxes - by stayLocations
+            for (int time = minEndTime + 1; time <= maxEndTime; time++) {
                 Move move2 = laterEndingPlan.getMoves().get(time);
                 Location moveTo = move2.getMoveTo();
                 if (stayLocations.contains(moveTo)) {

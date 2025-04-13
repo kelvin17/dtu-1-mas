@@ -19,7 +19,7 @@ public class CBSRunner {
     private final AStarRunner lowLevelRunner;
     private final MinTimeConflictDetection conflictDetection;
 
-    private Map<Character, SingleAgentPlan> agentId2LowGroup = new HashMap<>();
+    private List<SingleAgentPlan> singleAgentPlanList = new ArrayList<>();
 
     public CBSRunner() {
         this.startTime = System.currentTimeMillis();
@@ -71,17 +71,21 @@ public class CBSRunner {
         return null;
     }
 
-    private Node buildChild(Node parent, AbstractConflict firstConflict, Constraint constraint) {
-        Node child = new Node(parent, firstConflict, constraint);
-        Solution childSolution = parent.getSolution().deepCopy();
-        Agent agent = constraint.getAgent();
-        SingleAgentPlan singleAgentPlan = agentId2LowGroup.get(agent.getAgentId());
-        Map<Integer, Move> newMoves = lowLevelRunner.findPath(child, singleAgentPlan);
+    private Node buildChild(Node parentCTNode, AbstractConflict firstConflict, Constraint constraint) {
+        Node childCTNode = new Node(parentCTNode, firstConflict, constraint);
 
-        childSolution.setValid((newMoves != null && !newMoves.isEmpty()));
-        childSolution.addOrUpdateAgentPlan(agent.getAgentId(), singleAgentPlan);
-        child.setSolution(childSolution);
-        return child;
+        Solution childSolution = parentCTNode.getSolution().deepCopy();
+        Agent agent = constraint.getAgent();
+        SingleAgentPlan currentAgentPlan = childSolution.getPlanForAgent(agent.getAgentId());
+        boolean findNewPath = lowLevelRunner.findPath(childCTNode, currentAgentPlan);
+
+        childSolution.setValid(findNewPath);
+        if (findNewPath) {
+            childSolution.updateMaxSinglePath();
+        }
+
+        childCTNode.setSolution(childSolution);
+        return childCTNode;
     }
 
 
@@ -120,17 +124,15 @@ public class CBSRunner {
             int agentCounts = colorGroup.getAgents().size();
             int boxCounts = colorGroup.getBoxes().size();
             if (agentCounts == 1) {
-                Agent agent = colorGroup.getAgents().get(0);
                 SingleAgentPlan singleAgentPlan = new SingleAgentPlan(colorGroup.getAgents().get(0), colorGroup.getBoxes(), environment);
-                agentId2LowGroup.put(agent.getUniqueId(), singleAgentPlan);
+                singleAgentPlanList.add(singleAgentPlan);
             } else {
                 for (int i = 0; i < agentCounts; i++) {
-                    Agent agent = colorGroup.getAgents().get(i);
-                    SingleAgentPlan singleAgentPlan = new SingleAgentPlan(agent, environment);
+                    SingleAgentPlan singleAgentPlan = new SingleAgentPlan(colorGroup.getAgents().get(i), environment);
                     for (int j = i; j < boxCounts; j = j + agentCounts) {
                         singleAgentPlan.addBox(colorGroup.getBoxes().get(j));
                     }
-                    agentId2LowGroup.put(agent.getUniqueId(), singleAgentPlan);
+                    singleAgentPlanList.add(singleAgentPlan);
                 }
             }
         }
@@ -138,13 +140,14 @@ public class CBSRunner {
         Node rootNode = new Node(null);
 
         Solution solution = new Solution();
-        for (SingleAgentPlan singleAgentPlan : agentId2LowGroup.values()) {
-            Map<Integer, Move> newPath = lowLevelRunner.findPath(rootNode, singleAgentPlan);
-            if (newPath == null || newPath.isEmpty()) {
+        for (SingleAgentPlan singleAgentPlan : singleAgentPlanList) {
+            boolean findPath = lowLevelRunner.findPath(rootNode, singleAgentPlan);
+            if (!findPath) {
+                //it will be invalid if anyone agent cannot find a path
                 solution.setValid(false);
                 break;
             }
-            solution.addOrUpdateAgentPlan(singleAgentPlan.getAgentId(), singleAgentPlan);
+            solution.addAgentPlan(singleAgentPlan.getAgentId(), singleAgentPlan);
         }
         rootNode.setSolution(solution);
 
