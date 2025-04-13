@@ -64,7 +64,7 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         Node node = currentNode;
         while (node != null) {
             if (node.getAddedConstraint() != null && node.getAddedConstraint().getAgent().getAgentId() == this.agent.getAgentId()) {
-                //todo this 是当前state。现在是要往下走一步。所以应该是考虑下一个时间点。
+                //this is the state of parent. Now we need to check if the constraint is added for its child
                 if (this.timeNow + 1 == node.getAddedConstraint().getTime()) {
                     constraints.add(node.getAddedConstraint());
                 }
@@ -77,6 +77,9 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
             if (move != null) {
                 LowLevelState child = this.generateChildState(move);
                 newStates.add(child);
+                if (child.agent.getCurrentLocation().equals(new Location(3, 17))) {
+                    System.err.printf("Adding move %s to state %s\n", action, child.agent.getCurrentLocation());
+                }
             }
         }
 
@@ -121,9 +124,67 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
                 }
                 return new Move(agent, this.timeNow + 1, action, null);
             case Push:
-                return null;
+                Location targetBox = new Location(agent.getCurrentLocation().getRow() + action.agentRowDelta, agent.getCurrentLocation().getCol() + action.agentColDelta);
+                Box box = this.boxAt(targetBox);
+                if (box == null) {
+                    return null;
+                }
+
+                Location newOccupiedLocation = new Location(targetBox.getRow() + action.boxRowDelta, targetBox.getCol() + action.boxColDelta);
+                //1. check是不是墙
+                if (env.isWall(newOccupiedLocation)) {
+                    return null;
+                }
+                //2. check 会不会有当前组内的box
+                if (this.loc2Box[newOccupiedLocation.getRow()][newOccupiedLocation.getCol()] != null) {
+                    return null;
+                }
+                //3. check 是否在约束中
+                for (Constraint constraint : constraints) {
+                    if (constraint.getFromLocation() == null) {
+                        //vertex conflict or follow conflict
+                        if (constraint.getToLocation().equals(newOccupiedLocation)) {
+                            return null;
+                        }
+                    } else {
+                        //edge conflict -- todo 似乎不会走到这里- 需要考虑一下是用box（中间）。还是用agent（最边上）
+                        if (constraint.getFromLocation().equals(targetBox) && constraint.getToLocation().equals(targetBox)) {
+                            return null;
+                        }
+                    }
+                }
+                return new Move(agent, this.timeNow + 1, action, box);
+
             case Pull:
-                return null;
+                Location targetBoxForPull = new Location(agent.getCurrentLocation().getRow() - action.boxRowDelta, agent.getCurrentLocation().getCol() - action.boxColDelta);
+                Box boxForPull = this.boxAt(targetBoxForPull);
+                if (boxForPull == null) {
+                    return null;
+                }
+                Location newOccupiedLocationForPull = new Location(agent.getCurrentLocation().getRow() + action.agentRowDelta, agent.getCurrentLocation().getCol() + action.agentColDelta);
+                //1. check是不是墙
+                if (env.isWall(newOccupiedLocationForPull)) {
+                    return null;
+                }
+                //2. check 会不会有当前组内的box
+                if (this.loc2Box[newOccupiedLocationForPull.getRow()][newOccupiedLocationForPull.getCol()] != null) {
+                    return null;
+                }
+                //3. check 是否在约束中
+                for (Constraint constraint : constraints) {
+                    if (constraint.getFromLocation() == null) {
+                        //vertex conflict or follow conflict
+                        if (constraint.getToLocation().equals(newOccupiedLocationForPull)) {
+                            return null;
+                        }
+                    } else {
+                        //edge conflict -- todo 似乎不会走到这里 - 需要考虑一下是用agent（中间）。还是用box（最边上）
+                        if (constraint.getFromLocation().equals(agent.getCurrentLocation()) && constraint.getToLocation().equals(targetBoxForPull)) {
+                            return null;
+                        }
+                    }
+                }
+                return new Move(agent, this.timeNow + 1, action, boxForPull);
             default:
                 throw new IllegalStateException("Unexpected value: " + action.type);
         }
@@ -241,7 +302,6 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
             return false;
         }
         LowLevelState other = (LowLevelState) obj;
-        boolean equal = true;
 
         if (this.agent != null) {
             if (!this.agent.equals(other.agent)) {
@@ -270,21 +330,46 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
             }
         }
 
-        if (this.timeNow != other.timeNow) {
-            return false;
-        }
+//        if (this.timeNow != other.timeNow) {
+//            return false;
+//        }
 
         if (this.move != null) {
-            if (!this.move.equals(other.move)) {
+//            if (!this.move.equals(other.move)) {
+//                return false;
+//            }
+            if (other.move == null) {
                 return false;
             }
+
+            if (!this.move.getAgent().equals(other.move.getAgent())) {
+                return false;
+            }
+
+            if (!this.move.getAction().equals(other.move.getAction())) {
+                return false;
+            }
+
+            if (this.move.getBox() == null) {
+                if (other.move.getBox() != null) {
+                    return false;
+                }
+            } else {
+                if (other.move.getBox() == null) {
+                    return false;
+                }
+                if (!this.move.getBox().equals(other.move.getBox())) {
+                    return false;
+                }
+            }
+
         } else {
             if (other.move != null) {
                 return false;
             }
         }
 
-        return equal;
+        return true;
     }
 
     private Box boxAt(Location location) {
@@ -292,7 +377,7 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
     }
 
     public int hashCode() {
-        return Objects.hash(agent, boxes, move, timeNow);
+        return Objects.hash(agent, boxes);
     }
 
     @Override

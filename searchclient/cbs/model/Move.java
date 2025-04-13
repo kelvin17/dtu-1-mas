@@ -42,11 +42,6 @@ public class Move implements AbstractDeepCopy<Move>, Serializable {
         return action;
     }
 
-    public Move copy() {
-        Box box = this.box == null ? null : this.box.deepCopy();
-        return new Move(agent, timeNow, action, box);
-    }
-
     /**
      * Get the location to move to
      * if action is NoOp, return null

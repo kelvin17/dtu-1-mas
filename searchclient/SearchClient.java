@@ -183,18 +183,21 @@ public class SearchClient {
             System.exit(0);
         } else {
             System.err.format("Found solution of length %,d.\n", plan.length);
+            for (int i = 0; i < plan.length; i++) {
+                System.err.format("Step Num %d: ", i);
+                for (int j = 0; j < plan[i].length; j++) {
+                    System.err.format("%s|", plan[i][j].name);
+                }
+                System.err.println();
+            }
 
             for (Action[] jointAction : plan) {
                 System.out.print(jointAction[0].name + "@" + jointAction[0].name);
-                System.err.print(jointAction[0].name + "@" + jointAction[0].name);
                 for (int action = 1; action < jointAction.length; ++action) {
                     System.out.print("|");
-                    System.err.print("|");
                     System.out.print(jointAction[action].name);
-                    System.err.print(jointAction[action].name);
                 }
                 System.out.println();
-                System.err.println();
                 // We must read the server's response to not fill up the stdin buffer and block the server.
                 serverMessages.readLine();
             }
