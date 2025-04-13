@@ -108,12 +108,12 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
                 //4. 检查新加入的指定时点的约束
                 for (Constraint constraint : constraints) {
                     if (constraint.getFromLocation() == null) {
-                        //vertex conflict
+                        //vertex conflict or follow conflict
                         if (constraint.getToLocation().equals(newLocation)) {
                             return null;
                         }
                     } else {
-                        //edge conflict - todo check
+                        //edge conflict
                         if (constraint.getFromLocation().equals(currentLocation) && constraint.getToLocation().equals(newLocation)) {
                             return null;
                         }

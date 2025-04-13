@@ -21,9 +21,9 @@ public class VertexConflict extends AbstractConflict implements Serializable {
     public Constraint[] getPreventingConstraints() {
         return new Constraint[]{
                 //Solution1 add a Constraint to Agent1
-                new Constraint(plan1.getAgent(), getTimeNow(), getLocationOfObj1(), getTargetLocation()),
+                new Constraint(plan1.getAgent(), getTimeNow(), null, getTargetLocation()),
                 //Solution2 add a Constraint to Agent2
-                new Constraint(plan2.getAgent(), getTimeNow(), getLocationOfObj2(), getTargetLocation())
+                new Constraint(plan2.getAgent(), getTimeNow(), null, getTargetLocation())
         };
     }
 
