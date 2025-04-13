@@ -23,12 +23,6 @@ public class LowLevelColorGroup implements AbstractDeepCopy<LowLevelColorGroup>,
         this.boxes = new ArrayList<>();
     }
 
-    public LowLevelColorGroup(Color color, List<Agent> agents, List<Box> boxes) {
-        this.color = color;
-        this.agents = agents;
-        this.boxes = boxes;
-    }
-
     public void addAgent(Agent agent) {
         this.agents.add(agent);
     }

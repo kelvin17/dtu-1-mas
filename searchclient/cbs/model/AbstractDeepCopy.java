@@ -2,7 +2,7 @@ package searchclient.cbs.model;
 
 import java.io.*;
 
-public interface AbstractDeepCopy<T> extends Serializable {
+public interface AbstractDeepCopy<T> {
 
     default T deepCopy() {
         try {
@@ -12,8 +12,7 @@ public interface AbstractDeepCopy<T> extends Serializable {
             oos.flush();
             ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
             ObjectInputStream ois = new ObjectInputStream(bis);
-            T newObj = (T) ois.readObject();
-            return newObj;
+            return (T) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             System.err.printf("Deep copy failed + Obj[%s]\n", this.toString());
             throw new RuntimeException(e);

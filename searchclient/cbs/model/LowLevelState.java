@@ -36,15 +36,13 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         this.loc2Box = new Box[gridNumRows][gridNumCol];
     }
 
-    public LowLevelState(Agent agent, List<Box> boxes, int gridNumRows, int gridNumCol, Box[][] loc2Box, LowLevelState parent, int timeNow, Move move) {
-        this.agent = agent;
-        this.boxes = boxes;
-        this.gridNumRows = gridNumRows;
-        this.gridNumCol = gridNumCol;
-        this.loc2Box = loc2Box;
-        this.parent = parent;
-        this.timeNow = timeNow;
-        this.move = move;
+    //only for deep copy
+    public LowLevelState() {
+        this.agent = null;
+        this.boxes = new ArrayList<>();
+        this.gridNumRows = 0;
+        this.gridNumCol = 0;
+        this.loc2Box = new Box[0][0];
     }
 
     public LowLevelState init() {
