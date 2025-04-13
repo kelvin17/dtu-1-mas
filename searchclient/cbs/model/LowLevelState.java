@@ -63,7 +63,7 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         List<Constraint> constraints = new ArrayList<>();
         Node node = currentNode;
         while (node != null) {
-            if (node.getAddedConstraint() != null && node.getAddedConstraint().getAgent() == this.agent) {
+            if (node.getAddedConstraint() != null && node.getAddedConstraint().getAgent().getAgentId() == this.agent.getAgentId()) {
                 //todo this 是当前state。现在是要往下走一步。所以应该是考虑下一个时间点。
                 if (this.timeNow + 1 == node.getAddedConstraint().getTime()) {
                     constraints.add(node.getAddedConstraint());

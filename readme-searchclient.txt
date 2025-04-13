@@ -33,7 +33,7 @@ The searchclient uses the BFS strategy by default. Use arguments -dfs, -astar, -
     ## run cbs -1
     $ java -jar /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/server.jar -l /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAsoko1_04.lvl -c "java searchclient.NewSearchClient" -g -s 150 -t 180
 
-    $ java -jar /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/server.jar -l /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/cbslevel/MAPF01_sc_a2.lvl -c "java searchclient.NewSearchClient" -g -s 150 -t 180
+    $ java -jar /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/server.jar -l /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/cbslevel/MAPF03C.lvl -c "java searchclient.NewSearchClient" -g -s 150 -t 180
 
     ## 直接调试client代码
     ## NewSearchClient 的 main函数中直接读取level文件即可调试

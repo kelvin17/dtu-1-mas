@@ -47,26 +47,18 @@ public class CBSRunner {
             AbstractConflict firstConflict = conflictDetection.detect(node);
             //find the final solution, when there isn't any conflict
             if (firstConflict == null) {
-                System.err.println("Conflict detected result - No conflict");
+//                System.err.println("Conflict detected result - No conflict");
                 return convertPaths2Actions(node.getSolution());
             }
-            System.err.println("Conflict detected result - " + firstConflict.toString());
+//            System.err.println("Conflict detected result - " + firstConflict.toString());
 
             Constraint[] constraints = firstConflict.getPreventingConstraints();
 
-            Node leftChild = buildChild(node, firstConflict, constraints[0]);
-            Node rightChild = buildChild(node, firstConflict, constraints[1]);
-
-            node.setLeftChild(leftChild);
-            node.setRightChild(rightChild);
-
-            //if child has no new path, the solution is invalid
-            if (leftChild.getSolution().isValid()) {
-                openList.add(leftChild);
-            }
-
-            if (rightChild.getSolution().isValid()) {
-                openList.add(rightChild);
+            for (Constraint constraint : constraints) {
+                Node child = buildChild(node, firstConflict, constraint);
+                if (child.getSolution().isValid()) {
+                    openList.add(child);
+                }
             }
         }
 

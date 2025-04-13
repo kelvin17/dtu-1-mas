@@ -19,6 +19,12 @@ public abstract class AbstractConflict {
     //The origin loc of Agent2
     protected Location locationOfObj2;
 
+    enum ConflictType {
+        VertexConflict,
+        EdgeConflict,
+        FollowConflict
+    }
+
     public AbstractConflict(SingleAgentPlan plan1, SingleAgentPlan plan2, MovableObj movableObj1, MovableObj movableObj2,
                             int timeNow, Location locationOfObj1, Location locationOfObj2, Location targetLocation) {
         this.plan1 = plan1;
@@ -31,7 +37,7 @@ public abstract class AbstractConflict {
         this.targetLocation = targetLocation;
     }
 
-    public abstract String getConflictType();
+    public abstract ConflictType getConflictType();
 
     //todo 还需要再考虑一下有box的情况，这个是否可行
     public static AbstractConflict conflictBetween(SingleAgentPlan plan1, SingleAgentPlan plan2, Move move1, Move move2) {
@@ -45,6 +51,13 @@ public abstract class AbstractConflict {
         if (move1.getCurrentLocation().equals(move2.getMoveTo()) && move2.getCurrentLocation().equals(move1.getMoveTo())) {
             return new EdgeConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation());
         }
+        if (move1.getMoveTo().equals(move2.getCurrentLocation())) {
+            return new FollowConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation());
+        }
+        if (move2.getMoveTo().equals(move1.getCurrentLocation())) {
+            return new FollowConflict(plan2, plan1, plan2.getAgent(), plan1.getAgent(), move2.getTimeNow(), move2.getCurrentLocation(), move1.getCurrentLocation());
+        }
+
         return null;
     }
 

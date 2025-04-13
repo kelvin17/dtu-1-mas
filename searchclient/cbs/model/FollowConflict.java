@@ -2,19 +2,24 @@ package searchclient.cbs.model;
 
 import java.io.Serializable;
 
-/**
- * Model for CBS
- * Represents for the vertex conflict
- */
-public class VertexConflict extends AbstractConflict implements Serializable {
+public class FollowConflict extends AbstractConflict implements Serializable {
 
-    public VertexConflict(SingleAgentPlan plan1, SingleAgentPlan plan2, MovableObj obj1, MovableObj obj2, int timeNow, Location locationOfAgent1, Location locationOfAgent2, Location targetLocation) {
-        super(plan1, plan2, obj1, obj2, timeNow, locationOfAgent1, locationOfAgent2, targetLocation);
+    /**
+     * @param plan1
+     * @param plan2
+     * @param follower       跟随者
+     * @param followee       被跟随者
+     * @param timeNow
+     * @param locationOfObj1 跟随者的位置
+     * @param locationOfObj2 被跟随者当前的位置 - 也就是follower不能去的位置
+     */
+    public FollowConflict(SingleAgentPlan plan1, SingleAgentPlan plan2, MovableObj follower, MovableObj followee, int timeNow, Location locationOfObj1, Location locationOfObj2) {
+        super(plan1, plan2, follower, followee, timeNow, locationOfObj1, locationOfObj2, locationOfObj2);
     }
 
     @Override
     public ConflictType getConflictType() {
-        return ConflictType.VertexConflict;
+        return ConflictType.FollowConflict;
     }
 
     @Override
@@ -22,14 +27,12 @@ public class VertexConflict extends AbstractConflict implements Serializable {
         return new Constraint[]{
                 //Solution1 add a Constraint to Agent1
                 new Constraint(plan1.getAgent(), getTimeNow(), getLocationOfObj1(), getTargetLocation()),
-                //Solution2 add a Constraint to Agent2
-                new Constraint(plan2.getAgent(), getTimeNow(), getLocationOfObj2(), getTargetLocation())
         };
     }
 
     @Override
     public String toString() {
-        return "VertexConflict{" +
+        return "FollowConflict{" +
                 "movableObj1.uniqueId=" + this.movableObj1.getUniqueId() +
                 ", movableObj2.uniqueId=" + this.movableObj2.getUniqueId() +
                 ", timeNow=" + this.timeNow +

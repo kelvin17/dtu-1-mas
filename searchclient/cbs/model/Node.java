@@ -31,14 +31,6 @@ public class Node implements Comparable<Node> {
 
     private final Node parent;
 
-    /**
-     * As there are at most of two methods to solve the conflict{@link #addedConstraint}
-     * leftChild uses one method with a solution to addedConstraint
-     * rightChild uses the other one
-     */
-    private Node leftChild;
-    private Node rightChild;
-
     public Node(Node parent) {
         this.parent = parent;
     }
@@ -63,14 +55,6 @@ public class Node implements Comparable<Node> {
         return solutionCost;
     }
 
-    public void setLeftChild(Node leftChild) {
-        this.leftChild = leftChild;
-    }
-
-    public void setRightChild(Node rightChild) {
-        this.rightChild = rightChild;
-    }
-
     public void setSolution(Solution solution) {
         this.solution = solution;
     }
@@ -81,14 +65,6 @@ public class Node implements Comparable<Node> {
 
     public Node getParent() {
         return parent;
-    }
-
-    public Node getLeftChild() {
-        return leftChild;
-    }
-
-    public Node getRightChild() {
-        return rightChild;
     }
 
     public Constraint getAddedConstraint() {

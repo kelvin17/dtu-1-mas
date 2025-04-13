@@ -13,8 +13,8 @@ public class EdgeConflict extends AbstractConflict implements Serializable {
     }
 
     @Override
-    public String getConflictType() {
-        return "EdgeConflict";
+    public ConflictType getConflictType() {
+        return ConflictType.EdgeConflict;
     }
 
     @Override
