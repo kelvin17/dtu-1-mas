@@ -11,7 +11,7 @@ public abstract class AbstractConflict {
     protected SingleAgentPlan plan2;
     private MovableObj movableObj1;
     private MovableObj movableObj2;
-    private int time;
+    private int timeNow;
     //Used for vertex conflict
     private Location targetLocation;
     //The origin loc of Agent1
@@ -19,15 +19,13 @@ public abstract class AbstractConflict {
     //The origin loc of Agent2
     private Location locationOfObj2;
 
-    public AbstractConflict() {
-
-    }
-
     public AbstractConflict(SingleAgentPlan plan1, SingleAgentPlan plan2, MovableObj movableObj1, MovableObj movableObj2,
-                            int time, Location locationOfObj1, Location locationOfObj2, Location targetLocation) {
+                            int timeNow, Location locationOfObj1, Location locationOfObj2, Location targetLocation) {
+        this.plan1 = plan1;
+        this.plan2 = plan2;
         this.movableObj1 = movableObj1;
         this.movableObj2 = movableObj2;
-        this.time = time;
+        this.timeNow = timeNow;
         this.locationOfObj1 = locationOfObj1;
         this.locationOfObj2 = locationOfObj2;
         this.targetLocation = targetLocation;
@@ -63,8 +61,8 @@ public abstract class AbstractConflict {
         return movableObj2;
     }
 
-    public int getTime() {
-        return time;
+    public int getTimeNow() {
+        return timeNow;
     }
 
     public Location getLocationOfObj1() {

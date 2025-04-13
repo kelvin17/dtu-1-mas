@@ -1,11 +1,16 @@
 package searchclient.cbs.model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Model for Single Agent Plan
+ * Represents the plan of a single agent, including the env, agent, boxes and a effective move list for this plan.
+ * 代表一个单独的代理的计划，包括环境、代理、箱子和使得该计划可解的一个有效移动列表。
  */
-public class SingleAgentPlan {
+public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan> {
 
     private Agent agent;
     private List<Box> boxes = new ArrayList<>();
@@ -16,6 +21,13 @@ public class SingleAgentPlan {
         this.agent = agent;
         this.boxes = boxes;
         this.env = env;
+    }
+
+    public SingleAgentPlan(Agent agent, List<Box> boxes, Map<Integer, Move> moves, Environment env) {
+        this.agent = agent;
+        this.boxes = boxes;
+        this.env = env;
+        this.moves = moves;
     }
 
     public Environment getEnv() {
@@ -110,15 +122,13 @@ public class SingleAgentPlan {
         this.boxes.add(box);
     }
 
-    public SingleAgentPlan copy() {
-        SingleAgentPlan newPlan = new SingleAgentPlan(this.agent.copy(), this.env);
-        for (Box box : this.boxes) {
-            newPlan.addBox(box.copy());
-        }
-        for (Move move : this.moves.values()) {
-            newPlan.addMove(move.copy());
-        }
-        return newPlan;
+    @Override
+    public String toString() {
+        return "SingleAgentPlan{" +
+                "agent=" + agent +
+                ", boxes=" + boxes +
+                ", moves=" + moves +
+                ", env=" + env +
+                '}';
     }
-
 }

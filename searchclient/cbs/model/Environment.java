@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Environment {
+public class Environment implements AbstractDeepCopy<Environment> {
 
     private final int gridNumRows;
     private final int gridNumCol;
@@ -118,6 +118,7 @@ public class Environment {
         this.gridNumCol = gridNumCol;
     }
 
+
     /**
      * @param location
      * @return return true if the location is a wall
@@ -136,5 +137,15 @@ public class Environment {
 
     public int getGridNumCol() {
         return gridNumCol;
+    }
+
+    @Override
+    public String toString() {
+        return "Environment{" +
+                "gridNumRows=" + gridNumRows +
+                ", gridNumCol=" + gridNumCol +
+                ", colorGroups=" + colorGroups +
+                ", WALLS=" + (WALLS == null ? null : WALLS.length) +
+                '}';
     }
 }

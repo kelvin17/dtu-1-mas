@@ -7,7 +7,7 @@ import searchclient.ActionType;
  * Base Model
  * Agent move at timeNow, who is at currentLocation
  */
-public class Move {
+public class Move implements AbstractDeepCopy<Move> {
     private final Agent agent;
     private final Box box;
     private final int timeNow;
@@ -34,7 +34,7 @@ public class Move {
     }
 
     public Move copy() {
-        Box box = this.box == null ? null : this.box.copy();
+        Box box = this.box == null ? null : this.box.deepCopy();
         return new Move(agent, timeNow, action, box);
     }
 
@@ -79,5 +79,15 @@ public class Move {
 
     public Box getBox() {
         return box;
+    }
+
+    @Override
+    public String toString() {
+        return "Move{" +
+                "agent=" + agent +
+                ", box=" + box +
+                ", timeNow=" + timeNow +
+                ", action=" + action +
+                '}';
     }
 }

@@ -4,12 +4,12 @@ import searchclient.Color;
 
 public class MovableObj {
 
-    private final ObjectType objType;
-    private final char uniqueId;
-    private final Color color;
-    private Location initLocation;
-    private Location goalLocation;
-    private Location currentLocation;
+    protected final ObjectType objType;
+    protected final char uniqueId;
+    protected final Color color;
+    protected Location initLocation;
+    protected Location goalLocation;
+    protected Location currentLocation;
 
     public MovableObj(ObjectType objType, char uniqueId, Color color) {
         this.objType = objType;
@@ -59,9 +59,9 @@ public class MovableObj {
 
     public MovableObj copy() {
         MovableObj copy = new MovableObj(this.objType, this.uniqueId, this.color);
-        copy.setInitLocation(this.initLocation.copy());
-        copy.setGoalLocation(this.goalLocation.copy());
-        copy.setCurrentLocation(this.currentLocation.copy());
+        copy.setInitLocation(this.initLocation.deepCopy());
+        copy.setGoalLocation(this.goalLocation.deepCopy());
+        copy.setCurrentLocation(this.currentLocation.deepCopy());
         return copy;
     }
 

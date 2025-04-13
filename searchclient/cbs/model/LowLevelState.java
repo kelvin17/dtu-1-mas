@@ -4,14 +4,15 @@ import searchclient.Action;
 
 import java.util.*;
 
-public class LowLevelState implements Comparable<LowLevelState> {
-    private Agent agent;
+public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCopy<LowLevelState> {
+    private Move move;
+    private final Agent agent;
     private List<Box> boxes = new ArrayList<>();
-    private Box[][] loc2Box;
-    private Environment env;
+    private final Box[][] loc2Box;
     private LowLevelState parent;
     private int timeNow = 0;
-    private Move move;
+    private final int gridNumRows;
+    private final int gridNumCol;
 
     //Extract the moves from the root to this state
     public Map<Integer, Move> extractMoves() {
@@ -27,20 +28,23 @@ public class LowLevelState implements Comparable<LowLevelState> {
         return moves;
     }
 
-    public LowLevelState(Agent agent, List<Box> boxes, Environment env) {
+    public LowLevelState(Agent agent, List<Box> boxes, int gridNumRows, int gridNumCol) {
         this.agent = agent;
         this.boxes = boxes;
-        this.env = env;
-        this.loc2Box = new Box[env.getGridNumRows()][env.getGridNumCol()];
+        this.gridNumRows = gridNumRows;
+        this.gridNumCol = gridNumCol;
+        this.loc2Box = new Box[gridNumRows][gridNumCol];
     }
 
-    public LowLevelState initForChild() {
-        if (!this.boxes.isEmpty()) {
-            for (Box box : this.boxes) {
-                this.loc2Box[box.getCurrentLocation().getRow()][box.getCurrentLocation().getCol()] = box;
-            }
-        }
-        return this;
+    public LowLevelState(Agent agent, List<Box> boxes, int gridNumRows, int gridNumCol, Box[][] loc2Box, LowLevelState parent, int timeNow, Move move) {
+        this.agent = agent;
+        this.boxes = boxes;
+        this.gridNumRows = gridNumRows;
+        this.gridNumCol = gridNumCol;
+        this.loc2Box = loc2Box;
+        this.parent = parent;
+        this.timeNow = timeNow;
+        this.move = move;
     }
 
     public LowLevelState init() {
@@ -54,7 +58,7 @@ public class LowLevelState implements Comparable<LowLevelState> {
         return this;
     }
 
-    public List<LowLevelState> expand(Node currentNode) {
+    public List<LowLevelState> expand(Node currentNode, Environment env) {
         List<LowLevelState> newState = new ArrayList<>();
         List<Constraint> constraints = new ArrayList<>();
         Node node = currentNode;
@@ -68,7 +72,7 @@ public class LowLevelState implements Comparable<LowLevelState> {
         }
 
         for (Action action : Action.values()) {
-            Move move = this.getMove(this.agent, action, constraints);
+            Move move = this.getMove(this.agent, action, constraints, env);
             if (move != null) {
                 LowLevelState child = this.generateChildState(move);
                 newState.add(child);
@@ -83,7 +87,7 @@ public class LowLevelState implements Comparable<LowLevelState> {
      * @param action
      * @return
      */
-    private Move getMove(Agent agent, Action action, List<Constraint> constraints) {
+    private Move getMove(Agent agent, Action action, List<Constraint> constraints, Environment env) {
         switch (action.type) {
             case NoOp:
                 return new Move(agent, this.timeNow + 1, action, null);
@@ -91,7 +95,7 @@ public class LowLevelState implements Comparable<LowLevelState> {
                 Location currentLocation = agent.getCurrentLocation();
                 Location newLocation = new Location(currentLocation.getRow() + action.agentRowDelta,
                         currentLocation.getCol() + action.agentColDelta);
-                if (this.env.isWall(newLocation)) {
+                if (env.isWall(newLocation)) {
                     return null;
                 }
                 //todo 考虑一下这里要不要考虑其他的agent和box
@@ -122,11 +126,7 @@ public class LowLevelState implements Comparable<LowLevelState> {
     }
 
     public LowLevelState generateChildState(Move move) {
-        List<Box> newBoxes = new ArrayList<>();
-        for (Box box : this.boxes) {
-            newBoxes.add(box.copy());
-        }
-        LowLevelState child = new LowLevelState(this.agent.copy(), newBoxes, this.env).initForChild();
+        LowLevelState child = this.deepCopy();
         child.parent = this;
         child.timeNow = this.timeNow + 1;
         child.move = move;
@@ -275,5 +275,19 @@ public class LowLevelState implements Comparable<LowLevelState> {
 
     public int hashCode() {
         return Objects.hash(agent, boxes);
+    }
+
+    @Override
+    public String toString() {
+        return "LowLevelState{" +
+                "agent=" + agent +
+                ", boxes=" + boxes +
+                ", loc2Box=" + Arrays.deepToString(loc2Box) +
+                ", gridNumRows=" + gridNumRows +
+                ", gridNumCol=" + gridNumCol +
+                ", parent=" + parent +
+                ", timeNow=" + timeNow +
+                ", move=" + move +
+                '}';
     }
 }

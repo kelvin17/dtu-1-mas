@@ -4,7 +4,7 @@ package searchclient.cbs.model;
  * Base Model
  * Location representation
  */
-public class Location {
+public class Location implements AbstractDeepCopy<Location> {
     private int row;
     private int col;
 
@@ -26,8 +26,12 @@ public class Location {
         this.col = col;
     }
 
-    public Location copy() {
-        return new Location(row, col);
+    @Override
+    public String toString() {
+        return "Location{" +
+                "row=" + row +
+                ", col=" + col +
+                '}';
     }
 
     @Override

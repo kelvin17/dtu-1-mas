@@ -49,19 +49,6 @@ public class Node implements Comparable<Node> {
         this.addedConstraint = addedConstraint;
     }
 
-    public Node(Solution solution, AbstractConflict selectedConflict, Node parent) {
-        this.solution = solution;
-        this.selectedConflict = selectedConflict;
-        this.parent = parent;
-    }
-
-    public Node(Solution solution, AbstractConflict selectedConflict, Constraint addedConstraint, Node parent) {
-        this.solution = solution;
-        this.selectedConflict = selectedConflict;
-        this.addedConstraint = addedConstraint;
-        this.parent = parent;
-    }
-
     /**
      * the cost of Solution is the sum cost of every agent
      *
@@ -69,7 +56,7 @@ public class Node implements Comparable<Node> {
      */
     public int getSolutionCost() {
         int cost = 0;
-        for (SingleAgentPlan singleAgentPlan : solution) {
+        for (SingleAgentPlan singleAgentPlan : solution.getAgentPlansInOrder()) {
             cost += singleAgentPlan.getCost();
         }
         solutionCost = cost;
@@ -104,16 +91,8 @@ public class Node implements Comparable<Node> {
         return rightChild;
     }
 
-    public AbstractConflict getSelectedConflict() {
-        return selectedConflict;
-    }
-
     public Constraint getAddedConstraint() {
         return addedConstraint;
-    }
-
-    public void setAddedConstraint(Constraint addedConstraint) {
-        this.addedConstraint = addedConstraint;
     }
 
     @Override

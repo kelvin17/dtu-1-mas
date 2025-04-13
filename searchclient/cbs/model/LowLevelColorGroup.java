@@ -5,7 +5,7 @@ import searchclient.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LowLevelColorGroup {
+public class LowLevelColorGroup implements AbstractDeepCopy<LowLevelColorGroup> {
     private final Color color;
     private final List<Agent> agents;
     private final List<Box> boxes;
@@ -14,6 +14,12 @@ public class LowLevelColorGroup {
         this.color = color;
         this.agents = new ArrayList<>();
         this.boxes = new ArrayList<>();
+    }
+
+    public LowLevelColorGroup(Color color, List<Agent> agents, List<Box> boxes) {
+        this.color = color;
+        this.agents = agents;
+        this.boxes = boxes;
     }
 
     public void addAgent(Agent agent) {
@@ -34,5 +40,14 @@ public class LowLevelColorGroup {
 
     public List<Box> getBoxes() {
         return boxes;
+    }
+
+    @Override
+    public String toString() {
+        return "LowLevelColorGroup{" +
+                "color=" + color +
+                ", agents=" + agents +
+                ", boxes=" + boxes +
+                '}';
     }
 }

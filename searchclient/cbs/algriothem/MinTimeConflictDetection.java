@@ -17,7 +17,7 @@ public class MinTimeConflictDetection {
                 SingleAgentPlan plan2 = paths.get(j);
                 AbstractConflict currentConflict = plan1.firstConflict(plan2);
                 if (conflict == null
-                        || (currentConflict != null && currentConflict.getTime() < conflict.getTime())) {
+                        || (currentConflict != null && currentConflict.getTimeNow() < conflict.getTimeNow())) {
                     conflict = currentConflict;
                 }
             }

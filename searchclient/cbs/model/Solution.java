@@ -6,7 +6,7 @@ import java.util.*;
  * Model for CBS
  * For high level of CT
  */
-public class Solution implements Iterable<SingleAgentPlan> {
+public class Solution implements AbstractDeepCopy<Solution> {
 
     private final Map<Integer, SingleAgentPlan> agentPlans = new TreeMap<>();
     private boolean valid = true;
@@ -14,6 +14,15 @@ public class Solution implements Iterable<SingleAgentPlan> {
 
     public SingleAgentPlan getPlanForAgent(int agentId) {
         return this.agentPlans.get(agentId);
+    }
+
+    public Solution() {
+    }
+
+    public Solution(Map<Integer, SingleAgentPlan> agentPlans, boolean valid, int maxSinglePath) {
+        this.agentPlans.putAll(agentPlans);
+        this.valid = valid;
+        this.maxSinglePath = maxSinglePath;
     }
 
     public int getMaxSinglePath() {
@@ -32,17 +41,12 @@ public class Solution implements Iterable<SingleAgentPlan> {
     }
 
     @Override
-    public Iterator<SingleAgentPlan> iterator() {
-        return agentPlans.values().iterator();
-    }
-
-    public Solution copy() {
-        Solution copy = new Solution();
-        copy.maxSinglePath = this.maxSinglePath;
-        for (SingleAgentPlan agentPlan : this.agentPlans.values()) {
-            copy.addOrUpdateAgentPlan(agentPlan.getAgentId(), agentPlan.copy());
-        }
-        return copy;
+    public String toString() {
+        return "Solution{" +
+                "agentPlans=" + agentPlans +
+                ", valid=" + valid +
+                ", maxSinglePath=" + maxSinglePath +
+                '}';
     }
 
     public boolean isValid() {

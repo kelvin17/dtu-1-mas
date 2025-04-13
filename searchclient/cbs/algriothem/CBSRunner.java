@@ -73,7 +73,7 @@ public class CBSRunner {
 
     private Node buildChild(Node parent, AbstractConflict firstConflict, Constraint constraint) {
         Node child = new Node(parent, firstConflict, constraint);
-        Solution childSolution = parent.getSolution().copy();
+        Solution childSolution = parent.getSolution().deepCopy();
         Agent agent = constraint.getAgent();
         SingleAgentPlan singleAgentPlan = agentId2LowGroup.get(agent.getAgentId());
         Map<Integer, Move> newMoves = lowLevelRunner.findPath(child, singleAgentPlan);

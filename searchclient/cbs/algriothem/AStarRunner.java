@@ -30,7 +30,8 @@ public class AStarRunner {
 
         Map<Integer, Move> result = null;
 
-        LowLevelState initState = new LowLevelState(singleAgentPlan.getAgent(), singleAgentPlan.getBoxes(), singleAgentPlan.getEnv()).init();
+        LowLevelState initState = new LowLevelState(singleAgentPlan.getAgent(), singleAgentPlan.getBoxes(), singleAgentPlan.getEnv().getGridNumRows(),
+                singleAgentPlan.getEnv().getGridNumCol()).init();
         AStarFrontier frontier = new AStarFrontier();
         frontier.add(initState);
 
@@ -42,7 +43,7 @@ public class AStarRunner {
                 break;
             }
 
-            for (LowLevelState child : currentState.expand(currentNode)) {
+            for (LowLevelState child : currentState.expand(currentNode, singleAgentPlan.getEnv())) {
                 if (frontier.hasNotVisited(child)) {
                     frontier.add(child);
                 }

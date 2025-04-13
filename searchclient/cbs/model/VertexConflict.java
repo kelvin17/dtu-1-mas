@@ -6,8 +6,8 @@ package searchclient.cbs.model;
  */
 public class VertexConflict extends AbstractConflict {
 
-    public VertexConflict(SingleAgentPlan plan1, SingleAgentPlan plan2, MovableObj obj1, MovableObj obj2, int time, Location locationOfAgent1, Location locationOfAgent2, Location targetLocation) {
-        super(plan1, plan2, obj1, obj2, time, locationOfAgent1, locationOfAgent2, targetLocation);
+    public VertexConflict(SingleAgentPlan plan1, SingleAgentPlan plan2, MovableObj obj1, MovableObj obj2, int timeNow, Location locationOfAgent1, Location locationOfAgent2, Location targetLocation) {
+        super(plan1, plan2, obj1, obj2, timeNow, locationOfAgent1, locationOfAgent2, targetLocation);
     }
 
     @Override
@@ -19,9 +19,9 @@ public class VertexConflict extends AbstractConflict {
     public Constraint[] getPreventingConstraints() {
         return new Constraint[]{
                 //Solution1 add a Constraint to Agent1
-                new Constraint(plan1.getAgent(), getTime(), getLocationOfObj1(), getTargetLocation()),
+                new Constraint(plan1.getAgent(), getTimeNow(), getLocationOfObj1(), getTargetLocation()),
                 //Solution2 add a Constraint to Agent2
-                new Constraint(plan2.getAgent(), getTime(), getLocationOfObj2(), getTargetLocation())
+                new Constraint(plan2.getAgent(), getTimeNow(), getLocationOfObj2(), getTargetLocation())
         };
     }
 }
