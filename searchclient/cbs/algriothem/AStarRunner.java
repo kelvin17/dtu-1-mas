@@ -5,7 +5,7 @@ import searchclient.cbs.model.Move;
 import searchclient.cbs.model.Node;
 import searchclient.cbs.model.SingleAgentPlan;
 
-import java.util.List;
+import java.util.Map;
 
 public class AStarRunner {
 
@@ -26,9 +26,9 @@ public class AStarRunner {
      * @param singleAgentPlan
      * @return
      */
-    public List<Move> findPath(Node currentNode, SingleAgentPlan singleAgentPlan) {
+    public Map<Integer, Move> findPath(Node currentNode, SingleAgentPlan singleAgentPlan) {
 
-        List<Move> result = null;
+        Map<Integer, Move> result = null;
 
         LowLevelState initState = new LowLevelState(singleAgentPlan.getAgent(), singleAgentPlan.getBoxes(), singleAgentPlan.getEnv()).init();
         AStarFrontier frontier = new AStarFrontier();

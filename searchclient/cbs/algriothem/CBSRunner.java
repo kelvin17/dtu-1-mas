@@ -4,6 +4,7 @@ import searchclient.Action;
 import searchclient.State;
 import searchclient.cbs.model.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,9 +76,9 @@ public class CBSRunner {
         Solution childSolution = parent.getSolution().copy();
         Agent agent = constraint.getAgent();
         SingleAgentPlan singleAgentPlan = agentId2LowGroup.get(agent.getAgentId());
-        List<Move> newMoves = lowLevelRunner.findPath(child, singleAgentPlan);
+        Map<Integer, Move> newMoves = lowLevelRunner.findPath(child, singleAgentPlan);
 
-        childSolution.setValid((newMoves != null));
+        childSolution.setValid((newMoves != null && !newMoves.isEmpty()));
         childSolution.addOrUpdateAgentPlan(agent.getAgentId(), singleAgentPlan);
         child.setSolution(childSolution);
         return child;
@@ -96,7 +97,7 @@ public class CBSRunner {
         Action[][] actions = new Action[solution.getMaxSinglePath()][agentPathList.size()];
         for (int i = 0; i < solution.getMaxSinglePath(); i++) {
             for (int j = 0; j < agentPathList.size(); j++) {
-                List<Move> moves = agentPathList.get(j).getMoves();
+                List<Move> moves = new ArrayList<>(agentPathList.get(j).getMoves().values());
                 //as i the max steps of all agents, so some agent may not have this step
                 //todo 如果一个agent到达后，又需要出来，在内部处理掉。从而让moves list的总大小表达agent最终的cost
                 actions[i][j] = (moves.size() > i ? moves.get(i).getAction() : Action.NoOp);
@@ -138,7 +139,7 @@ public class CBSRunner {
 
         Solution solution = new Solution();
         for (SingleAgentPlan singleAgentPlan : agentId2LowGroup.values()) {
-            List<Move> newPath = lowLevelRunner.findPath(rootNode, singleAgentPlan);
+            Map<Integer, Move> newPath = lowLevelRunner.findPath(rootNode, singleAgentPlan);
             if (newPath == null || newPath.isEmpty()) {
                 solution.setValid(false);
                 break;

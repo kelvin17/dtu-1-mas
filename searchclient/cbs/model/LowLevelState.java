@@ -14,17 +14,16 @@ public class LowLevelState implements Comparable<LowLevelState> {
     private Move move;
 
     //Extract the moves from the root to this state
-    public List<Move> extractMoves() {
-        List<Move> moves = new ArrayList<>();
+    public Map<Integer, Move> extractMoves() {
+        Map<Integer, Move> moves = new TreeMap<>();
         LowLevelState current = this;
         while (current != null) {
             if (current.move != null) {
-                moves.add(current.move);
+                moves.put(current.move.getTimeNow(), current.move);
             }
             current = current.parent;
         }
 
-        Collections.reverse(moves);
         return moves;
     }
 

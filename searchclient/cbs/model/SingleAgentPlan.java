@@ -1,9 +1,6 @@
 package searchclient.cbs.model;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Model for Single Agent Plan
@@ -12,7 +9,7 @@ public class SingleAgentPlan {
 
     private Agent agent;
     private List<Box> boxes = new ArrayList<>();
-    private List<Move> moves = new ArrayList<>();
+    private Map<Integer, Move> moves = new TreeMap<>();
     private final Environment env;
 
     public SingleAgentPlan(Agent agent, List<Box> boxes, Environment env) {
@@ -31,10 +28,10 @@ public class SingleAgentPlan {
     }
 
     public void addMove(Move move) {
-        this.moves.add(move);
+        this.moves.put(move.getTimeNow(), move);
     }
 
-    public void setMoves(List<Move> moves) {
+    public void setMoves(Map<Integer, Move> moves) {
         this.moves = moves;
     }
 
@@ -52,7 +49,7 @@ public class SingleAgentPlan {
         return moves.size();
     }
 
-    public List<Move> getMoves() {
+    public Map<Integer, Move> getMoves() {
         return this.moves;
     }
 
@@ -118,7 +115,7 @@ public class SingleAgentPlan {
         for (Box box : this.boxes) {
             newPlan.addBox(box.copy());
         }
-        for (Move move : this.moves) {
+        for (Move move : this.moves.values()) {
             newPlan.addMove(move.copy());
         }
         return newPlan;

@@ -23,8 +23,8 @@ public class NewSearchClient {
 
         String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAsoko1_04.lvl";
         // Parse the level.
-//        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
-        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
+        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
+//        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
 //        State initialState = SearchClient.parseLevel(serverMessages);
         Environment environment = Environment.parseLevel(serverMessages);
 

@@ -17,7 +17,7 @@ public class Agent extends MovableObj {
         return newAgent;
     }
 
-    public int getAgentId() {
+    public char getAgentId() {
         return this.getUniqueId();
     }
 
