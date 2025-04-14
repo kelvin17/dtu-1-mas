@@ -1,10 +1,7 @@
 package searchclient.cbs.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Model for Single Agent Plan
@@ -72,12 +69,60 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
         int plan2EndTime = otherPlan.moves.size();
         int minEndTime = Math.min(plan1EndTime, plan2EndTime);
         int maxEndTime = Math.max(plan1EndTime, plan2EndTime);
+        Box[][] tmpBoxLocations1 = new Box[env.getGridNumRows()][env.getGridNumCol()];
+        Box[][] tmpBoxLocations2 = new Box[env.getGridNumRows()][env.getGridNumCol()];
+
+        this.getBoxes().forEach(box -> {
+            tmpBoxLocations1[box.getInitLocation().getRow()][box.getInitLocation().getCol()] = box;
+        });
+        otherPlan.getBoxes().forEach(box -> {
+            tmpBoxLocations2[box.getInitLocation().getRow()][box.getInitLocation().getCol()] = box;
+        });
+
         //move 的 time是从1开始的。表示它是走到了 time 时刻的位置
         for (int i = 1; i <= minEndTime; i++) {
             Move move1 = this.moves.get(i);
             Move move2 = otherPlan.moves.get(i);
+            //1. simple check move
             AbstractConflict conflict = AbstractConflict.conflictBetween(this, otherPlan, move1, move2);
             if (conflict != null) return conflict;
+            //2. check env conflict same as VertexConflic
+            //time_i 时刻后，box的全局新位置
+            if (move1.getBox() != null) {
+                Box tmp = tmpBoxLocations1[move1.getBox().getCurrentLocation().getRow()][move1.getBox().getCurrentLocation().getCol()];
+                if (!move1.getBox().equals(tmp)) {
+                    throw new IllegalArgumentException("There must have the box :" + move1.getBox());
+                }
+                tmpBoxLocations1[move1.getBoxTargetLocation().getRow()][move1.getBoxTargetLocation().getCol()] = tmp;
+                tmpBoxLocations1[move1.getBox().getCurrentLocation().getRow()][move1.getBox().getCurrentLocation().getCol()] = null;
+            }
+
+            if (move2.getBox() != null) {
+                Box tmp = tmpBoxLocations2[move2.getBox().getCurrentLocation().getRow()][move2.getBox().getCurrentLocation().getCol()];
+                if (!move2.getBox().equals(tmp)) {
+                    System.err.printf("There must have the box %s, but is %s\n", move2.getBox(), tmp);
+                    throw new IllegalArgumentException("There must have the box");
+                }
+                tmpBoxLocations2[move2.getBoxTargetLocation().getRow()][move2.getBoxTargetLocation().getCol()] = tmp;
+                tmpBoxLocations2[move2.getBox().getCurrentLocation().getRow()][move2.getBox().getCurrentLocation().getCol()] = null;
+            }
+
+            //检查在plan2中箱子是否挡住move1了。所以用move1的目标位置去检查plan2的箱子
+            if (move1.getMoveTo() != null) {
+                Box checkForMove1 = tmpBoxLocations2[move1.getMoveTo().getRow()][move1.getMoveTo().getCol()];
+                if (checkForMove1 != null) {
+                    return new VertexConflict(this, otherPlan, this.agent, otherPlan.agent, i,
+                            move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo(), true);
+                }
+            }
+            //检查在plan1中箱子是否挡住move2了。所以用move1的目标位置去检查plan2的箱子
+            if (move2.getMoveTo() != null) {
+                Box checkForMove2 = tmpBoxLocations1[move2.getMoveTo().getRow()][move2.getMoveTo().getCol()];
+                if (checkForMove2 != null) {
+                    return new VertexConflict(otherPlan, this, otherPlan.agent, this.agent, i,
+                            move2.getCurrentLocation(), move1.getCurrentLocation(), move2.getMoveTo(), true);
+                }
+            }
         }
 
         //2. check that whether one entity at the path of another when it is already at its goal
@@ -102,7 +147,7 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
                 Location moveTo = move2.getMoveTo();
                 if (stayLocations.contains(moveTo)) {
                     return new VertexConflict(earlyEndingPlan, laterEndingPlan, earlyEndingPlan.agent, laterEndingPlan.agent, time,
-                            moveTo, move2.getCurrentLocation(), moveTo);
+                            moveTo, move2.getCurrentLocation(), moveTo, false);
                 }
             }
         }

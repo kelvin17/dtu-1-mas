@@ -73,13 +73,10 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         }
 
         for (Action action : Action.values()) {
-            Move move = this.getNextMove(this.agent, action, constraints, env);
+            Move move = this.getNextMove(this.agent, action, constraints, env, currentNode);
             if (move != null) {
                 LowLevelState child = this.generateChildState(move);
                 newStates.add(child);
-                if (child.agent.getCurrentLocation().equals(new Location(3, 17))) {
-                    System.err.printf("Adding move %s to state %s\n", action, child.agent.getCurrentLocation());
-                }
             }
         }
 
@@ -91,7 +88,7 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
      * @param action
      * @return
      */
-    private Move getNextMove(Agent agent, Action action, List<Constraint> constraints, Environment env) {
+    private Move getNextMove(Agent agent, Action action, List<Constraint> constraints, Environment env, Node currentNode) {
         switch (action.type) {
             case NoOp:
                 return new Move(agent, this.timeNow + 1, action, null);

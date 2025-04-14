@@ -85,6 +85,20 @@ public class Move implements AbstractDeepCopy<Move>, Serializable {
         return box;
     }
 
+    public Location getBoxTargetLocation() {
+        switch (this.action.type) {
+            case Move:
+            case NoOp:
+                throw new IllegalArgumentException(this.action.name + " action has not box");
+            case Push:
+            case Pull:
+                return new Location(this.box.getCurrentLocation().getRow() + this.action.boxRowDelta,
+                        this.box.getCurrentLocation().getCol() + this.action.boxColDelta);
+            default:
+                throw new IllegalArgumentException("Unknown action : " + this.action);
+        }
+    }
+
     @Override
     public String toString() {
         return "Move{" +

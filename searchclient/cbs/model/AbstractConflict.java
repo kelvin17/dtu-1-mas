@@ -46,7 +46,8 @@ public abstract class AbstractConflict {
             return null;
         }
         if (move1.getMoveTo().equals(move2.getMoveTo())) {
-            return new VertexConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo());
+            return new VertexConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(),
+                    move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo(), false);
         }
         if (move1.getCurrentLocation().equals(move2.getMoveTo()) && move2.getCurrentLocation().equals(move1.getMoveTo())) {
             return new EdgeConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation());
