@@ -23,17 +23,11 @@ Starting the server using the searchclient:
 
 The searchclient uses the BFS strategy by default. Use arguments -dfs, -astar, -wastar, or -greedy to set alternative search strategies (after you implement them). For instance, to use DFS on the same level as above:
     $ java -jar ../server.jar -l ../levels/SAD1.lvl -c "java searchclient.SearchClient -dfs" -g -s 150 -t 180
-
-    $ cd /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/out/production/searchclient_java/
     $ java -jar /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/server.jar -l /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAD1.lvl -c "java searchclient.SearchClient -astar" -g -s 150 -t 180
 
-    ## run group agent method
-    $ java -jar /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/server.jar -l /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAD1.lvl -c "java searchclient.SearchClient -astar -newdistance" -g -s 150 -t 180
-
     ## run cbs -1
-    $ java -jar /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/server.jar -l /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAsoko1_04.lvl -c "java searchclient.NewSearchClient" -g -s 150 -t 180
-
-    $ java -jar /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/server.jar -l /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/cbslevel/MAPF03C.lvl -c "java searchclient.NewSearchClient" -g -s 150 -t 180
+    $ cd /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/out/production/searchclient_java/
+    $ java -jar /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/server.jar -l /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/MAPF03C.lvl -c "java searchclient.NewSearchClient" -g -s 150 -t 180
 
     ## 直接调试client代码
     ## NewSearchClient 的 main函数中直接读取level文件即可调试
