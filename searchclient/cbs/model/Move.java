@@ -52,12 +52,13 @@ public class Move implements AbstractDeepCopy<Move>, Serializable {
      */
     public Location getMoveTo() {
         if (this.action == Action.NoOp) {
-            //todo check whether this is correct
-            return null;
+            //todo check whether this is correct - have some problem
+            return this.agent.getCurrentLocation();
         } else if (this.action.type == ActionType.Push) {
             return new Location(this.box.getCurrentLocation().getRow() + this.action.boxRowDelta,
                     this.box.getCurrentLocation().getCol() + this.action.boxColDelta);
         } else {
+            // move or pull
             return new Location(this.agent.getCurrentLocation().getRow() + this.action.agentRowDelta,
                     this.agent.getCurrentLocation().getCol() + this.action.agentColDelta);
         }
@@ -77,7 +78,7 @@ public class Move implements AbstractDeepCopy<Move>, Serializable {
             return this.box.getCurrentLocation();
         } else {
             //NoOp todo check whether this is correct
-            return null;
+            return this.agent.getCurrentLocation();
         }
     }
 

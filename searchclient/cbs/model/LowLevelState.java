@@ -332,10 +332,10 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
 //        }
 
         if (this.move != null) {
-//            if (!this.move.equals(other.move)) {
-//                return false;
-//            }
             if (other.move == null) {
+                return false;
+            }
+            if (this.move.getTimeNow() != other.move.getTimeNow()){
                 return false;
             }
 
@@ -348,16 +348,12 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
             }
 
             if (this.move.getBox() == null) {
-                if (other.move.getBox() != null) {
-                    return false;
-                }
+                return other.move.getBox() == null;
             } else {
                 if (other.move.getBox() == null) {
                     return false;
                 }
-                if (!this.move.getBox().equals(other.move.getBox())) {
-                    return false;
-                }
+                return this.move.getBox().equals(other.move.getBox());
             }
 
         } else {
@@ -374,7 +370,7 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
     }
 
     public int hashCode() {
-        return Objects.hash(agent, boxes);
+        return Objects.hash(agent, boxes, move);
     }
 
     @Override

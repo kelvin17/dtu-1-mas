@@ -28,4 +28,43 @@ public class Agent extends MovableObj implements AbstractDeepCopy<Agent>, Serial
                 ", currentLocation=" + this.getCurrentLocation() +
                 "}";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Agent box = (Agent) obj;
+        boolean equals = (uniqueId == box.uniqueId
+                && objType == box.objType
+                && color.equals(box.color)
+                && initLocation.equals(box.initLocation))
+                && currentLocation.equals(box.currentLocation);
+        if (!equals) {
+            return false;
+        }
+        if (this.getGoalLocation() == null) {
+            if (box.getGoalLocation() != null) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            if (this.getGoalLocation().equals(box.getGoalLocation())) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Character.hashCode(uniqueId);
+        result = 31 * result + objType.hashCode();
+        result = 31 * result + color.hashCode();
+        result = 31 * result + initLocation.hashCode();
+        result = 31 * result + (goalLocation != null ? goalLocation.hashCode() : 0);
+        result = 31 * result + currentLocation.hashCode();
+        return result;
+    }
 }

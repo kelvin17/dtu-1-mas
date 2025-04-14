@@ -39,11 +39,25 @@ public abstract class AbstractConflict {
 
     public abstract ConflictType getConflictType();
 
-    //todo 还需要再考虑一下有box的情况，这个是否可行
+    //todo 还需要再考虑一下有box的情况，这个是否可行 - box 在外面处理了
     public static AbstractConflict conflictBetween(SingleAgentPlan plan1, SingleAgentPlan plan2, Move move1, Move move2) {
-        if (move1.getAction().type == ActionType.NoOp || move2.getAction().type == ActionType.NoOp) {
+        if (move1.getAction().type == ActionType.NoOp && move2.getAction().type == ActionType.NoOp) {
             // NoOp action, no conflict
             return null;
+        }
+        if (move1.getAction().type == ActionType.NoOp) {
+            if (move2.getMoveTo() == move1.getMoveTo()) {
+                //只需要给move2加一个冲突
+                return new VertexConflict(plan2, plan1, plan2.getAgent(), plan1.getAgent(), move2.getTimeNow(),
+                        move2.getCurrentLocation(), move1.getCurrentLocation(), move2.getMoveTo(), true);
+            }
+        }
+        if (move2.getAction().type == ActionType.NoOp) {
+            if (move1.getMoveTo() == move2.getMoveTo()) {
+                //只需要给move1加一个冲突
+                return new VertexConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(),
+                        move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo(), true);
+            }
         }
         if (move1.getMoveTo().equals(move2.getMoveTo())) {
             return new VertexConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(),
