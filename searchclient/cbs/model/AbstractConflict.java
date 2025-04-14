@@ -2,6 +2,8 @@ package searchclient.cbs.model;
 
 import searchclient.ActionType;
 
+import java.util.Objects;
+
 /**
  * Model for CBS
  */
@@ -46,14 +48,14 @@ public abstract class AbstractConflict {
             return null;
         }
         if (move1.getAction().type == ActionType.NoOp) {
-            if (move2.getMoveTo() == move1.getMoveTo()) {
+            if (move2.getMoveTo().equals(move1.getMoveTo())) {
                 //只需要给move2加一个冲突
                 return new VertexConflict(plan2, plan1, plan2.getAgent(), plan1.getAgent(), move2.getTimeNow(),
                         move2.getCurrentLocation(), move1.getCurrentLocation(), move2.getMoveTo(), true);
             }
         }
         if (move2.getAction().type == ActionType.NoOp) {
-            if (move1.getMoveTo() == move2.getMoveTo()) {
+            if (move1.getMoveTo().equals(move2.getMoveTo())) {
                 //只需要给move1加一个冲突
                 return new VertexConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(),
                         move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo(), true);
@@ -103,5 +105,25 @@ public abstract class AbstractConflict {
 
     public Location getTargetLocation() {
         return targetLocation;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(plan1, plan2, movableObj1, movableObj2, timeNow, targetLocation, locationOfObj1, locationOfObj2);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        AbstractConflict that = (AbstractConflict) obj;
+        return timeNow == that.timeNow
+                && Objects.equals(plan1, that.plan1)
+                && Objects.equals(plan2, that.plan2)
+                && Objects.equals(movableObj1, that.movableObj1)
+                && Objects.equals(movableObj2, that.movableObj2)
+                && Objects.equals(targetLocation, that.targetLocation)
+                && Objects.equals(locationOfObj1, that.locationOfObj1)
+                && Objects.equals(locationOfObj2, that.locationOfObj2);
     }
 }

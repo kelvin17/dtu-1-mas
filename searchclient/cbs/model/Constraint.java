@@ -1,8 +1,10 @@
 package searchclient.cbs.model;
 
+import java.util.Objects;
+
 /**
  * Model for CBS
- *  This Constraint will be added to the Node
+ * This Constraint will be added to the Node
  */
 public class Constraint {
 
@@ -42,5 +44,21 @@ public class Constraint {
 
     public Agent getAgent() {
         return agent;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(agent, time, fromLocation, toLocation);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Constraint that = (Constraint) obj;
+        return time == that.time
+                && Objects.equals(agent, that.agent)
+                && Objects.equals(fromLocation, that.fromLocation)
+                && Objects.equals(toLocation, that.toLocation);
     }
 }

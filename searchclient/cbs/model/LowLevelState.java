@@ -300,69 +300,17 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         }
         LowLevelState other = (LowLevelState) obj;
 
-        if (this.agent != null) {
-            if (!this.agent.equals(other.agent)) {
-                return false;
-            }
-        } else {
-            if (other.agent != null) {
-                return false;
-            }
+        boolean equals = Objects.equals(agent, other.agent);
+        if (!equals) {
+            return false;
         }
 
-        if (!this.boxes.isEmpty()) {
-            if (this.boxes.size() != other.boxes.size()) {
-                return false;
-            }
-
-            for (Box box : this.boxes) {
-                Box otherBox = other.boxAt(box.getCurrentLocation());
-                if (otherBox == null || !otherBox.equals(box)) {
-                    return false;
-                }
-            }
-        } else {
-            if (!other.boxes.isEmpty()) {
-                return false;
-            }
+        equals = Objects.equals(this.move, other.move);
+        if (!equals) {
+            return false;
         }
 
-//        if (this.timeNow != other.timeNow) {
-//            return false;
-//        }
-
-        if (this.move != null) {
-            if (other.move == null) {
-                return false;
-            }
-            if (this.move.getTimeNow() != other.move.getTimeNow()){
-                return false;
-            }
-
-            if (!this.move.getAgent().equals(other.move.getAgent())) {
-                return false;
-            }
-
-            if (!this.move.getAction().equals(other.move.getAction())) {
-                return false;
-            }
-
-            if (this.move.getBox() == null) {
-                return other.move.getBox() == null;
-            } else {
-                if (other.move.getBox() == null) {
-                    return false;
-                }
-                return this.move.getBox().equals(other.move.getBox());
-            }
-
-        } else {
-            if (other.move != null) {
-                return false;
-            }
-        }
-
-        return true;
+        return Objects.deepEquals(this.boxes, other.boxes);
     }
 
     private Box boxAt(Location location) {

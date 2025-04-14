@@ -72,12 +72,9 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
         Box[][] tmpBoxLocations1 = new Box[env.getGridNumRows()][env.getGridNumCol()];
         Box[][] tmpBoxLocations2 = new Box[env.getGridNumRows()][env.getGridNumCol()];
 
-        this.getBoxes().forEach(box -> {
-            tmpBoxLocations1[box.getInitLocation().getRow()][box.getInitLocation().getCol()] = box;
-        });
-        otherPlan.getBoxes().forEach(box -> {
-            tmpBoxLocations2[box.getInitLocation().getRow()][box.getInitLocation().getCol()] = box;
-        });
+        //初始化箱子的位置
+        this.getBoxes().forEach(box -> tmpBoxLocations1[box.getInitLocation().getRow()][box.getInitLocation().getCol()] = box.deepCopy());
+        otherPlan.getBoxes().forEach(box -> tmpBoxLocations2[box.getInitLocation().getRow()][box.getInitLocation().getCol()] = box.deepCopy());
 
         //move 的 time是从1开始的。表示它是走到了 time 时刻的位置
         for (int i = 1; i <= minEndTime; i++) {
@@ -86,42 +83,42 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
             //1. simple check move
             AbstractConflict conflict = AbstractConflict.conflictBetween(this, otherPlan, move1, move2);
             if (conflict != null) return conflict;
-            //2. check env conflict same as VertexConflic
-            //time_i 时刻后，box的全局新位置
+
+            //2. check env conflict same as Vertex Conflic 这里箱子的位置是i-1时刻的。因为箱子无法自己移动。如果移动了，那么冲突在上面可以检测。这里主要检测的就是不动的箱子对于agent的影响
+            //检查在plan2中箱子是否挡住move1了。所以用move1的目标位置去检查plan2的箱子
+            Box checkForMove1 = tmpBoxLocations2[move1.getMoveTo().getRow()][move1.getMoveTo().getCol()];
+            if (checkForMove1 != null) {
+                return new VertexConflict(this, otherPlan, this.agent, otherPlan.agent, i, move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo(), true);
+            }
+
+            //检查在plan1中箱子是否挡住move2了。所以用move1的目标位置去检查plan2的箱子
+            Box checkForMove2 = tmpBoxLocations1[move2.getMoveTo().getRow()][move2.getMoveTo().getCol()];
+            if (checkForMove2 != null) {
+                return new VertexConflict(otherPlan, this, otherPlan.agent, this.agent, i, move2.getCurrentLocation(), move1.getCurrentLocation(), move2.getMoveTo(), true);
+            }
+
+            //更新走完这一步，box的全局新位置
             if (move1.getBox() != null) {
                 Box tmp = tmpBoxLocations1[move1.getBox().getCurrentLocation().getRow()][move1.getBox().getCurrentLocation().getCol()];
-                if (!move1.getBox().equals(tmp)) {
+                if (!move1.getBox().originEqual(tmp)) {
                     throw new IllegalArgumentException("There must have the box :" + move1.getBox());
                 }
-                tmpBoxLocations1[move1.getBoxTargetLocation().getRow()][move1.getBoxTargetLocation().getCol()] = tmp;
-                tmpBoxLocations1[move1.getBox().getCurrentLocation().getRow()][move1.getBox().getCurrentLocation().getCol()] = null;
+                tmpBoxLocations1[tmp.getCurrentLocation().getRow()][tmp.getCurrentLocation().getCol()] = null;
+
+                tmp.setCurrentLocation(move1.getBoxTargetLocation());
+                tmpBoxLocations1[tmp.getCurrentLocation().getRow()][tmp.getCurrentLocation().getCol()] = tmp;
             }
 
             if (move2.getBox() != null) {
                 Box tmp = tmpBoxLocations2[move2.getBox().getCurrentLocation().getRow()][move2.getBox().getCurrentLocation().getCol()];
-                if (!move2.getBox().equals(tmp)) {
+                if (!move2.getBox().originEqual(tmp)) {
                     System.err.printf("There must have the box %s, but is %s\n", move2.getBox(), tmp);
                     throw new IllegalArgumentException("There must have the box");
                 }
-                tmpBoxLocations2[move2.getBoxTargetLocation().getRow()][move2.getBoxTargetLocation().getCol()] = tmp;
-                tmpBoxLocations2[move2.getBox().getCurrentLocation().getRow()][move2.getBox().getCurrentLocation().getCol()] = null;
-            }
 
-            //检查在plan2中箱子是否挡住move1了。所以用move1的目标位置去检查plan2的箱子
-            if (move1.getMoveTo() != null) {
-                Box checkForMove1 = tmpBoxLocations2[move1.getMoveTo().getRow()][move1.getMoveTo().getCol()];
-                if (checkForMove1 != null) {
-                    return new VertexConflict(this, otherPlan, this.agent, otherPlan.agent, i,
-                            move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo(), true);
-                }
-            }
-            //检查在plan1中箱子是否挡住move2了。所以用move1的目标位置去检查plan2的箱子
-            if (move2.getMoveTo() != null) {
-                Box checkForMove2 = tmpBoxLocations1[move2.getMoveTo().getRow()][move2.getMoveTo().getCol()];
-                if (checkForMove2 != null) {
-                    return new VertexConflict(otherPlan, this, otherPlan.agent, this.agent, i,
-                            move2.getCurrentLocation(), move1.getCurrentLocation(), move2.getMoveTo(), true);
-                }
+                tmpBoxLocations2[tmp.getCurrentLocation().getRow()][tmp.getCurrentLocation().getCol()] = null;
+                tmp.setCurrentLocation(move2.getBoxTargetLocation());
+                tmpBoxLocations2[tmp.getCurrentLocation().getRow()][tmp.getCurrentLocation().getCol()] = tmp;
             }
         }
 
@@ -146,8 +143,7 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
                 Move move2 = laterEndingPlan.getMoves().get(time);
                 Location moveTo = move2.getMoveTo();
                 if (stayLocations.contains(moveTo)) {
-                    return new VertexConflict(earlyEndingPlan, laterEndingPlan, earlyEndingPlan.agent, laterEndingPlan.agent, time,
-                            moveTo, move2.getCurrentLocation(), moveTo, false);
+                    return new VertexConflict(earlyEndingPlan, laterEndingPlan, earlyEndingPlan.agent, laterEndingPlan.agent, time, moveTo, move2.getCurrentLocation(), moveTo, false);
                 }
             }
         }
@@ -171,5 +167,20 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
                 ", moves=" + moves +
                 ", env=" + env +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(agent, boxes, moves);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        SingleAgentPlan that = (SingleAgentPlan) obj;
+        return Objects.equals(agent, that.agent) &&
+                Objects.equals(boxes, that.boxes) &&
+                Objects.equals(moves, that.moves);
     }
 }

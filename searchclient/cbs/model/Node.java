@@ -73,8 +73,19 @@ public class Node implements Comparable<Node> {
 
     @Override
     public boolean equals(Object obj) {
-        return super.equals(obj);
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Node node = (Node) obj;
+        return Objects.equals(selectedConflict, node.selectedConflict) &&
+                Objects.equals(addedConstraint, node.addedConstraint) &&
+                Objects.equals(solution, node.solution);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(selectedConflict, addedConstraint, solution);
+    }
+
 
     @Override
     public int compareTo(Node o) {

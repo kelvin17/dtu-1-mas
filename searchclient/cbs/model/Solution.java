@@ -47,11 +47,7 @@ public class Solution implements AbstractDeepCopy<Solution>, Serializable {
 
     @Override
     public String toString() {
-        return "Solution{" +
-                "agentPlans=" + agentPlans +
-                ", valid=" + valid +
-                ", maxSinglePath=" + maxSinglePath +
-                '}';
+        return "Solution{" + "agentPlans=" + agentPlans + ", valid=" + valid + ", maxSinglePath=" + maxSinglePath + '}';
     }
 
     public boolean isValid() {
@@ -60,5 +56,18 @@ public class Solution implements AbstractDeepCopy<Solution>, Serializable {
 
     public void setValid(boolean valid) {
         this.valid = valid;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(agentPlans);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Solution solution = (Solution) obj;
+        return Objects.deepEquals(agentPlans, solution.agentPlans);
     }
 }

@@ -4,6 +4,7 @@ import searchclient.Action;
 import searchclient.ActionType;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Base Model
@@ -52,15 +53,12 @@ public class Move implements AbstractDeepCopy<Move>, Serializable {
      */
     public Location getMoveTo() {
         if (this.action == Action.NoOp) {
-            //todo check whether this is correct - have some problem
             return this.agent.getCurrentLocation();
         } else if (this.action.type == ActionType.Push) {
-            return new Location(this.box.getCurrentLocation().getRow() + this.action.boxRowDelta,
-                    this.box.getCurrentLocation().getCol() + this.action.boxColDelta);
+            return new Location(this.box.getCurrentLocation().getRow() + this.action.boxRowDelta, this.box.getCurrentLocation().getCol() + this.action.boxColDelta);
         } else {
             // move or pull
-            return new Location(this.agent.getCurrentLocation().getRow() + this.action.agentRowDelta,
-                    this.agent.getCurrentLocation().getCol() + this.action.agentColDelta);
+            return new Location(this.agent.getCurrentLocation().getRow() + this.action.agentRowDelta, this.agent.getCurrentLocation().getCol() + this.action.agentColDelta);
         }
     }
 
@@ -73,11 +71,12 @@ public class Move implements AbstractDeepCopy<Move>, Serializable {
         if (this.action.type == ActionType.Move) {
             return this.agent.getCurrentLocation();
         } else if (this.action.type == ActionType.Pull) {
-            return this.agent.getCurrentLocation();
+//            return this.agent.getCurrentLocation();
+            return this.box.getCurrentLocation();//改成边界
         } else if (this.action.type == ActionType.Push) {
-            return this.box.getCurrentLocation();
+//            return this.box.getCurrentLocation();
+            return this.agent.getCurrentLocation();
         } else {
-            //NoOp todo check whether this is correct
             return this.agent.getCurrentLocation();
         }
     }
@@ -93,8 +92,7 @@ public class Move implements AbstractDeepCopy<Move>, Serializable {
                 throw new IllegalArgumentException(this.action.name + " action has not box");
             case Push:
             case Pull:
-                return new Location(this.box.getCurrentLocation().getRow() + this.action.boxRowDelta,
-                        this.box.getCurrentLocation().getCol() + this.action.boxColDelta);
+                return new Location(this.box.getCurrentLocation().getRow() + this.action.boxRowDelta, this.box.getCurrentLocation().getCol() + this.action.boxColDelta);
             default:
                 throw new IllegalArgumentException("Unknown action : " + this.action);
         }
@@ -102,11 +100,25 @@ public class Move implements AbstractDeepCopy<Move>, Serializable {
 
     @Override
     public String toString() {
-        return "Move{" +
-                "agent=" + agent +
-                ", box=" + box +
-                ", timeNow=" + timeNow +
-                ", action=" + action +
-                '}';
+        return "Move{" + "agent=" + agent + ", box=" + box + ", timeNow=" + timeNow + ", action=" + action + '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        Move move = (Move) obj;
+
+        if (timeNow != move.timeNow) return false;
+        if (!agent.equals(move.agent)) return false;
+        if (!action.equals(move.action)) return false;
+        return Objects.equals(box, move.box);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(agent, timeNow, action, box);
     }
 }

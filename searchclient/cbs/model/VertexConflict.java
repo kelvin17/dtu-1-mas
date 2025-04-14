@@ -47,6 +47,7 @@ public class VertexConflict extends AbstractConflict implements Serializable {
                 ", targetLocation=" + this.targetLocation +
                 ", locationOfObj1=" + this.locationOfObj1 +
                 ", locationOfObj2=" + this.locationOfObj2 +
+                ", isSingle=" + this.isSingle +
                 '}';
     }
 }
