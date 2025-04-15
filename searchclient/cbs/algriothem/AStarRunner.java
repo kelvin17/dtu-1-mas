@@ -34,12 +34,11 @@ public class AStarRunner {
         AStarFrontier frontier = new AStarFrontier();
         frontier.add(initState);
 
-        Map<Integer, Move> result = new TreeMap<>();
         while (!frontier.isEmpty() && !checkTimeout()) {
             LowLevelState currentState = frontier.pop();
             if (currentState.isGoal()) {
-                result = currentState.extractMoves();
-                System.err.printf("#Finish-Lower-level, agent=%s ,size=%d\n", singleAgentPlan.getAgent().getAgentId(), result.size());
+                singleAgentPlan.update2Final(currentState);
+                System.err.printf("#Finish-Lower-level, agent=%s , size=%d\n", singleAgentPlan.getAgent().getAgentId(), singleAgentPlan.getCost());
                 findPath = true;
                 break;
             }
@@ -50,8 +49,6 @@ public class AStarRunner {
                 }
             }
         }
-
-        singleAgentPlan.setMoves(result);
         return findPath;
     }
 

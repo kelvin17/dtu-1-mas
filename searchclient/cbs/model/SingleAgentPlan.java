@@ -11,17 +11,39 @@ import java.util.*;
 public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Serializable {
 
     private Agent agent;
-    private List<Box> boxes = new ArrayList<>();
+    private Map<String, Box> boxes = new HashMap<>();
     private Map<Integer, Move> moves = new TreeMap<>();
     private Environment env;
 
-    public SingleAgentPlan(Agent agent, List<Box> boxes, Environment env) {
-        this.agent = agent;
-        this.boxes = boxes;
-        this.env = env;
-    }
+    private Location agentFinalLocation;
+    private Map<String, Location> boxesFinalLocation = new HashMap<>();
 
     public SingleAgentPlan() {
+    }
+
+    /**
+     * Update the plan to the final state
+     * 1. get the moves from the final state
+     * 2. set the agent's final location by the final state - used to check the conflict
+     * 3. update the boxes' final location by the final state - used to check the conflict
+     *
+     * @param goalState
+     */
+    public void update2Final(LowLevelState goalState) {
+        this.moves = goalState.extractMoves();
+
+        this.agentFinalLocation = goalState.getAgent().getCurrentLocation();
+
+        for (String uniqueId : this.boxes.keySet()) {
+            Box goalBox = goalState.getBoxes().get(uniqueId);
+            if (goalBox != null) {
+                this.boxesFinalLocation.put(uniqueId, goalBox.getCurrentLocation().deepCopy());
+            } else {
+                throw new IllegalArgumentException("Box " + uniqueId + " not found in goal state");
+            }
+
+        }
+
     }
 
     public Environment getEnv() {
@@ -47,8 +69,8 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
      * @return
      */
     public int getCost() {
-        if (moves.isEmpty()) return 0;
-        return moves.size();
+        if (this.moves.isEmpty()) return 0;
+        return this.moves.size();
     }
 
     public Map<Integer, Move> getMoves() {
@@ -73,8 +95,8 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
         Box[][] tmpBoxLocations2 = new Box[env.getGridNumRows()][env.getGridNumCol()];
 
         //初始化箱子的位置
-        this.getBoxes().forEach(box -> tmpBoxLocations1[box.getInitLocation().getRow()][box.getInitLocation().getCol()] = box.deepCopy());
-        otherPlan.getBoxes().forEach(box -> tmpBoxLocations2[box.getInitLocation().getRow()][box.getInitLocation().getCol()] = box.deepCopy());
+        this.getBoxes().values().forEach(box -> tmpBoxLocations1[box.getInitLocation().getRow()][box.getInitLocation().getCol()] = box.deepCopy());
+        otherPlan.getBoxes().values().forEach(box -> tmpBoxLocations2[box.getInitLocation().getRow()][box.getInitLocation().getCol()] = box.deepCopy());
 
         //move 的 time是从1开始的。表示它是走到了 time 时刻的位置
         for (int i = 1; i <= minEndTime; i++) {
@@ -128,14 +150,8 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
             SingleAgentPlan laterEndingPlan = (plan1EndTime > plan2EndTime ? this : otherPlan);
 
             List<Location> stayLocations = new ArrayList<>();
-            if (earlyEndingPlan.agent.getGoalLocation() != null) {
-                stayLocations.add(earlyEndingPlan.agent.getGoalLocation());
-            }
-            for (Box box : earlyEndingPlan.boxes) {
-                if (box.getGoalLocation() != null) {
-                    stayLocations.add(box.getGoalLocation());
-                }
-            }
+            stayLocations.add(earlyEndingPlan.getAgentFinalLocation());
+            stayLocations.addAll(earlyEndingPlan.getBoxesFinalLocation().values());
 
             //如果plan2 先结束 - 则去检测plan1是否会经过2的goal - 只检测vertex Conflict即可
             //这里需要考虑所有的plan下所有的对象 agent+boxes - by stayLocations
@@ -151,12 +167,12 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
         return null;
     }
 
-    public List<Box> getBoxes() {
+    public Map<String, Box> getBoxes() {
         return this.boxes;
     }
 
     public void addBox(Box box) {
-        this.boxes.add(box);
+        this.boxes.put(box.getUniqueId(), box);
     }
 
     @Override
@@ -182,5 +198,13 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
         return Objects.equals(agent, that.agent) &&
                 Objects.equals(boxes, that.boxes) &&
                 Objects.equals(moves, that.moves);
+    }
+
+    public Location getAgentFinalLocation() {
+        return agentFinalLocation;
+    }
+
+    public Map<String, Location> getBoxesFinalLocation() {
+        return boxesFinalLocation;
     }
 }

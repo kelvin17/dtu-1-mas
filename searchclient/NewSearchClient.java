@@ -23,7 +23,8 @@ public class NewSearchClient {
 
 //        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/cbslevel/MAPF03C.lvl";
 //        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAD1.lvl";
-        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/cbslevel/MAsimple1-Design-3.lvl";
+        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/MAsimple1.lvl";
+//        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/MAsimple4.lvl";
         // Parse the level.
         BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
 //        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
@@ -31,9 +32,9 @@ public class NewSearchClient {
 
         // Search for a plan.
         Action[][] plan = null;
+        CBSRunner cbsRunner = new CBSRunner();
         try {
             //        System.err.format("Starting %s.\n");
-            CBSRunner cbsRunner = new CBSRunner();
             plan = cbsRunner.findSolution(environment);
         } catch (OutOfMemoryError ex) {
             System.err.println("Maximum memory usage exceeded.");
@@ -44,6 +45,7 @@ public class NewSearchClient {
         // Print plan to server.
         if (plan == null) {
             System.err.println("Unable to solve level.");
+            System.err.println("Aborting by time out: " + cbsRunner.isAbortedForTimeout());
             System.exit(0);
         } else {
             System.err.format("Found solution of length %,d.\n", plan.length);

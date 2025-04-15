@@ -1,7 +1,6 @@
 package searchclient.cbs.algriothem;
 
 import searchclient.Action;
-import searchclient.State;
 import searchclient.cbs.model.*;
 
 import java.util.ArrayList;
@@ -113,18 +112,28 @@ public class CBSRunner {
     }
 
     private Node initRoot(Environment environment) {
+        Map<Character, Integer> boxType2Index = new HashMap<>();
+        for (Character key : environment.getBoxType2GoalMap().keySet()) {
+            boxType2Index.put(key, 0);
+        }
         //static group boxes to agent todo 还需要考虑一下agent没有goal的特殊情况
-        for (LowLevelColorGroup colorGroup : environment.getColorGroups()) {
+        for (LowLevelColorGroup colorGroup : environment.getColorGroups().values()) {
             int agentCounts = colorGroup.getAgents().size();
             int boxCounts = colorGroup.getBoxes().size();
             if (agentCounts == 1) {
-                SingleAgentPlan singleAgentPlan = new SingleAgentPlan(colorGroup.getAgents().get(0), colorGroup.getBoxes(), environment);
+                SingleAgentPlan singleAgentPlan = new SingleAgentPlan(colorGroup.getAgents().get(0), environment);
+                for (Box box : colorGroup.getBoxes()) {
+                    assignGoal2Box(box, environment, boxType2Index);
+                    singleAgentPlan.addBox(box);
+                }
                 singleAgentPlanList.add(singleAgentPlan);
             } else {
                 for (int i = 0; i < agentCounts; i++) {
                     SingleAgentPlan singleAgentPlan = new SingleAgentPlan(colorGroup.getAgents().get(i), environment);
                     for (int j = i; j < boxCounts; j = j + agentCounts) {
-                        singleAgentPlan.addBox(colorGroup.getBoxes().get(j));
+                        Box box = colorGroup.getBoxes().get(j);
+                        assignGoal2Box(box, environment, boxType2Index);
+                        singleAgentPlan.addBox(box);
                     }
                     singleAgentPlanList.add(singleAgentPlan);
                 }
@@ -146,23 +155,23 @@ public class CBSRunner {
         rootNode.setSolution(solution);
 
         return rootNode;
-
     }
 
-    private Location getGoalLocationForAgent(int agentId) {
-        for (int row = 1; row < State.goals.length - 1; row++) {
-            for (int col = 1; col < State.goals[row].length - 1; col++) {
-                char goal = State.goals[row][col];
-
-                if ('0' <= goal && goal <= '9') {
-                    if (agentId == Integer.valueOf(goal)) {
-                        new Location(row, col);
-                    }
-                }
-            }
+    /**
+     * 1. assign goal location for box
+     * 2. update the index of box goal list
+     *
+     * @param box
+     * @param environment
+     * @param type2CurrentIndex
+     */
+    private void assignGoal2Box(Box box, Environment environment, Map<Character, Integer> type2CurrentIndex) {
+        int index = type2CurrentIndex.get(box.getBoxTypeLetter());
+        List<Location> goalsForBoxType = environment.getBoxType2GoalMap().get(box.getBoxTypeLetter());
+        if (goalsForBoxType != null && !goalsForBoxType.isEmpty()) {
+            box.setGoalLocation(goalsForBoxType.get(index));
+            type2CurrentIndex.put(box.getBoxTypeLetter(), (index + 1));
         }
-
-        return null;
     }
 
     public boolean isAbortedForTimeout() {

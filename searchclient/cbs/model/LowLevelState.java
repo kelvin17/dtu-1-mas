@@ -8,12 +8,20 @@ import java.util.*;
 public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCopy<LowLevelState>, Serializable {
     private Move move;
     private final Agent agent;
-    private List<Box> boxes = new ArrayList<>();
+    private Map<String, Box> boxes = new HashMap<>();
     private final Box[][] loc2Box;
     private LowLevelState parent;
     private int timeNow = 0;
     private final int gridNumRows;
     private final int gridNumCol;
+
+    public Agent getAgent() {
+        return agent;
+    }
+
+    public Map<String, Box> getBoxes() {
+        return boxes;
+    }
 
     //Extract the moves from the root to this state
     public Map<Integer, Move> extractMoves() {
@@ -29,12 +37,14 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         return moves;
     }
 
-    public LowLevelState(Agent agent, List<Box> boxes, int gridNumRows, int gridNumCol) {
+    public LowLevelState(Agent agent, Map<String, Box> boxes, int gridNumRows, int gridNumCol) {
         this.agent = agent;
-        this.boxes = boxes;
         this.gridNumRows = gridNumRows;
         this.gridNumCol = gridNumCol;
         this.loc2Box = new Box[gridNumRows][gridNumCol];
+        if (boxes != null) {
+            this.boxes = boxes;
+        }
     }
 
     public static LowLevelState initRootStateForPlan(SingleAgentPlan singleAgentPlan) {
@@ -42,7 +52,7 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
                 singleAgentPlan.getEnv().getGridNumCol());
         rootState.agent.setCurrentLocation(rootState.agent.getInitLocation());
         if (!rootState.boxes.isEmpty()) {
-            for (Box box : rootState.boxes) {
+            for (Box box : rootState.boxes.values()) {
                 box.setCurrentLocation(box.getInitLocation());
                 rootState.loc2Box[box.getCurrentLocation().getRow()][box.getCurrentLocation().getCol()] = box;
             }
@@ -52,7 +62,6 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
 
     public LowLevelState() {
         this.agent = null;
-        this.boxes = new ArrayList<>();
         this.gridNumRows = 0;
         this.gridNumCol = 0;
         this.loc2Box = new Box[0][0];
@@ -247,7 +256,7 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
             }
         }
 
-        for (Box box : this.boxes) {
+        for (Box box : this.boxes.values()) {
             if (box.getGoalLocation() != null) {
                 if (!box.getCurrentLocation().equals(box.getGoalLocation())) {
                     return false;
@@ -260,7 +269,7 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
     //manhattan distance heuristic
     public long getHeuristic() {
         int heuristicValue = 0;
-        for (Box box : this.boxes) {
+        for (Box box : this.boxes.values()) {
             if (box.getGoalLocation() != null) {
                 int mhtDis = Math.abs(box.getCurrentLocation().getRow() - box.getGoalLocation().getRow())
                         + Math.abs(box.getCurrentLocation().getCol() - box.getGoalLocation().getCol());

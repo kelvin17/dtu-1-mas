@@ -14,7 +14,8 @@ public class Environment implements AbstractDeepCopy<Environment>, Serializable 
 
     private final int gridNumRows;
     private final int gridNumCol;
-    private final List<LowLevelColorGroup> colorGroups;
+    private final Map<Color, LowLevelColorGroup> colorGroups;
+    private final Map<Character, List<Location>> boxType2GoalMap;
     private final boolean[][] WALLS;
 
     public static Environment parseLevel(BufferedReader serverMessages) throws IOException {
@@ -32,8 +33,9 @@ public class Environment implements AbstractDeepCopy<Environment>, Serializable 
         String line = serverMessages.readLine();
 
         Map<Character, Agent> agents = new HashMap<>();
-        Map<Character, Box> boxes = new HashMap<>();
-        List<LowLevelColorGroup> colorGroups = new ArrayList<>();
+        Map<Color, LowLevelColorGroup> colorGroupMap = new HashMap<>();
+        Map<Character, List<Location>> boxType2GoalMap = new HashMap<>();
+        Map<Character, Color> boxLetter2Color = new HashMap<>();
 
         while (!line.startsWith("#")) {
             String[] split = line.split(":");
@@ -47,12 +49,10 @@ public class Environment implements AbstractDeepCopy<Environment>, Serializable 
                     colorGroup.addAgent(agent);
                     agents.put(c, agent);
                 } else if ('A' <= c && c <= 'Z') {
-                    Box box = new Box(c, color);
-                    colorGroup.addBox(box);
-                    boxes.put(c, box);
+                    boxLetter2Color.put(c, color);
                 }
             }
-            colorGroups.add(colorGroup);
+            colorGroupMap.put(colorGroup.getColor(), colorGroup);
             line = serverMessages.readLine();
         }
 
@@ -76,11 +76,12 @@ public class Environment implements AbstractDeepCopy<Environment>, Serializable 
 
                 Location initLoc = new Location(row, col);
                 if ('0' <= c && c <= '9') {
-                    MovableObj agent = agents.get(c);
+                    Agent agent = agents.get(c);
                     agent.setInitLocation(initLoc);
                 } else if ('A' <= c && c <= 'Z') {
-                    MovableObj box = boxes.get(c);
-                    box.setInitLocation(initLoc);
+                    Color color = boxLetter2Color.get(c);
+                    Box box = new Box(c, color, initLoc);
+                    colorGroupMap.get(color).addBox(box);
                 } else if (c == '+') {
                     walls[row][col] = true;
                 }
@@ -97,32 +98,33 @@ public class Environment implements AbstractDeepCopy<Environment>, Serializable 
                 Location goalLoc = new Location(row, col);
 
                 if ('0' <= c && c <= '9') {
-                    MovableObj agent = agents.get(c);
+                    Agent agent = agents.get(c);
                     agent.setGoalLocation(goalLoc);
                 } else if ('A' <= c && c <= 'Z') {
-                    MovableObj box = boxes.get(c);
-                    box.setGoalLocation(goalLoc);
+                    boxType2GoalMap.computeIfAbsent(c, k -> new ArrayList<>()).add(goalLoc);
                 }
             }
             ++row;
             line = serverMessages.readLine();
         }
 
-        return new Environment(colorGroups, walls, numRows, numCols);
+        return new Environment(colorGroupMap, walls, numRows, numCols, boxType2GoalMap);
     }
 
-    public Environment(List<LowLevelColorGroup> colorGroups, boolean[][] walls,
-                       int gridNumRows, int gridNumCol) {
+    public Environment(Map<Color, LowLevelColorGroup> colorGroups, boolean[][] walls,
+                       int gridNumRows, int gridNumCol, Map<Character, List<Location>> boxType2GoalMap) {
         WALLS = walls;
         this.colorGroups = colorGroups;
         this.gridNumRows = gridNumRows;
         this.gridNumCol = gridNumCol;
+        this.boxType2GoalMap = boxType2GoalMap;
     }
 
     public Environment() {
         gridNumRows = 0;
         gridNumCol = 0;
-        colorGroups = new ArrayList<>();
+        colorGroups = new HashMap<>();
+        boxType2GoalMap = new HashMap<>();
         WALLS = new boolean[0][0];
     }
 
@@ -135,7 +137,7 @@ public class Environment implements AbstractDeepCopy<Environment>, Serializable 
         return WALLS[location.getRow()][location.getCol()];
     }
 
-    public List<LowLevelColorGroup> getColorGroups() {
+    public Map<Color, LowLevelColorGroup> getColorGroups() {
         return colorGroups;
     }
 
@@ -155,5 +157,9 @@ public class Environment implements AbstractDeepCopy<Environment>, Serializable 
                 ", colorGroups=" + colorGroups +
                 ", WALLS=" + (WALLS == null ? null : WALLS.length) +
                 '}';
+    }
+
+    public Map<Character, List<Location>> getBoxType2GoalMap() {
+        return boxType2GoalMap;
     }
 }
