@@ -39,6 +39,11 @@ public class AStarRunner {
             if (currentState.isGoal()) {
                 singleAgentPlan.update2Final(currentState);
                 System.err.printf("#Finish-Lower-level, agent=%s , size=%d\n", singleAgentPlan.getAgent().getAgentId(), singleAgentPlan.getCost());
+                System.err.println("Current Plan");
+                for (Map.Entry<Integer, Move> item : singleAgentPlan.getMoves().entrySet()) {
+                    System.err.printf("step:%d, Move:%s, Agent:%s, Box:%s\n", item.getKey(), item.getValue().getAction().name, item.getValue().getAgent().getAgentId(), item.getValue().getBox() == null ? "" : item.getValue().getBox().getBoxTypeLetter());
+                }
+
                 findPath = true;
                 break;
             }

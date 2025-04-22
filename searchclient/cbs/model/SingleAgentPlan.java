@@ -159,7 +159,8 @@ public class SingleAgentPlan implements AbstractDeepCopy<SingleAgentPlan>, Seria
                 Move move2 = laterEndingPlan.getMoves().get(time);
                 Location moveTo = move2.getMoveTo();
                 if (stayLocations.contains(moveTo)) {
-                    return new VertexConflict(earlyEndingPlan, laterEndingPlan, earlyEndingPlan.agent, laterEndingPlan.agent, time, moveTo, move2.getCurrentLocation(), moveTo, false);
+                    return new VertexConflict(laterEndingPlan, earlyEndingPlan, laterEndingPlan.agent, earlyEndingPlan.agent,
+                            time, move2.getCurrentLocation(), moveTo, moveTo, true);
                 }
             }
         }

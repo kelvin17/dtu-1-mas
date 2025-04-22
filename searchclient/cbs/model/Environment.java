@@ -155,6 +155,7 @@ public class Environment implements AbstractDeepCopy<Environment>, Serializable 
                 "gridNumRows=" + gridNumRows +
                 ", gridNumCol=" + gridNumCol +
                 ", colorGroups=" + colorGroups +
+                ", boxType2GoalMap=" + boxType2GoalMap +
                 ", WALLS=" + (WALLS == null ? null : WALLS.length) +
                 '}';
     }

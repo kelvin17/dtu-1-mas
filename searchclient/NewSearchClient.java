@@ -23,7 +23,7 @@ public class NewSearchClient {
 
 //        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/cbslevel/MAPF03C.lvl";
 //        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAD1.lvl";
-        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/MAsimple1.lvl";
+        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/MAsimple1-Design.lvl";
 //        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/MAsimple4.lvl";
         // Parse the level.
         BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
