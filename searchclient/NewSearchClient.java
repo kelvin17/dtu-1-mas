@@ -21,11 +21,7 @@ public class NewSearchClient {
         // We can also print comments to stdout by prefixing with a #.
         System.out.println("#This is a comment.");
 
-//        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/cbslevel/MAPF03C.lvl";
-//        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAD1.lvl";
         String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/MAsimple2.lvl";
-//        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/MAsimple4.lvl";
-        // Parse the level.
         BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
 //        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
         Environment environment = Environment.parseLevel(serverMessages);
