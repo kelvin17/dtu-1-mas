@@ -31,18 +31,5 @@ public class MapConverterHelper {
 
         return result;
     }
-
-//    public static void main(String[] args) {
-//        Map<String, List<String>> inputMap = new HashMap<>();
-//        inputMap.put("a", Arrays.asList("a1", "a2", "a3", "a4"));
-//        inputMap.put("b", Arrays.asList("b1", "b2"));
-//        inputMap.put("c", Arrays.asList("c1", "c2", "c3", "c4"));
-//
-//        List<Map<String, String>> listOfMaps = convertMapToListOfMaps(inputMap);
-//
-//        for (Map<String, String> map : listOfMaps) {
-//            System.out.println(map);
-//        }
-//    }
 }
 

@@ -61,7 +61,6 @@ public class Box extends MovableObj implements AbstractDeepCopy<Box>, Serializab
         }
     }
 
-    //todo box允许相同的box-char - 改造ok
     @Override
     public int hashCode() {
         int result = uniqueId.hashCode();
