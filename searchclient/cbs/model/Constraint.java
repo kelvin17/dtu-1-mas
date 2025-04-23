@@ -9,9 +9,15 @@ import java.util.Objects;
 public class Constraint {
 
     /**
+     * from MetaId to this constraint
+     */
+    private final String fromMetaId;
+    /**
      * The agent this constraint applied to at the specific time {@link #time}.
      */
     private final Agent agent;
+
+    private final String belongToMetaId;
 
     private final int time;
 
@@ -23,11 +29,17 @@ public class Constraint {
 
     private final Location toLocation;
 
-    public Constraint(Agent agent, int time, Location fromLocation, Location toLocation) {
+    public Constraint(String fromMetaId, Agent agent, String belongToMetaId, int time, Location fromLocation, Location toLocation) {
+        this.fromMetaId = fromMetaId;
         this.agent = agent;
+        this.belongToMetaId = belongToMetaId;
         this.time = time;
         this.fromLocation = fromLocation;
         this.toLocation = toLocation;
+    }
+
+    public String getFromMetaId() {
+        return fromMetaId;
     }
 
     public int getTime() {
@@ -48,7 +60,7 @@ public class Constraint {
 
     @Override
     public int hashCode() {
-        return Objects.hash(agent, time, fromLocation, toLocation);
+        return Objects.hash(fromMetaId, agent, time, fromLocation, toLocation);
     }
 
     @Override
@@ -57,8 +69,13 @@ public class Constraint {
         if (obj == null || getClass() != obj.getClass()) return false;
         Constraint that = (Constraint) obj;
         return time == that.time
+                && Objects.equals(fromMetaId, that.fromMetaId)
                 && Objects.equals(agent, that.agent)
                 && Objects.equals(fromLocation, that.fromLocation)
                 && Objects.equals(toLocation, that.toLocation);
+    }
+
+    public String getBelongToMetaId() {
+        return belongToMetaId;
     }
 }

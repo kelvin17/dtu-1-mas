@@ -23,29 +23,37 @@ public class NewSearchClient {
 
 //        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/cbslevel/MAPF03C.lvl";
 //        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAD1.lvl";
-        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/MAsimple1-Design.lvl";
+        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/MAsimple2.lvl";
 //        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/MAsimple4.lvl";
         // Parse the level.
         BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
 //        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
         Environment environment = Environment.parseLevel(serverMessages);
 
+        int superB = -1;//watch dog for Max
+        if (args.length > 0) {
+            superB = Integer.parseInt(args[0]);
+            System.err.printf("Parameter of B provided = %d. MA-CBS.\n", superB);
+        } else {
+            System.err.println("No parameter of B provided. Defaulting to Basic CBS.");
+        }
+
         // Search for a plan.
         Action[][] plan = null;
         CBSRunner cbsRunner = new CBSRunner();
+        boolean timeout = false;
         try {
-            //        System.err.format("Starting %s.\n");
-            plan = cbsRunner.findSolution(environment);
+            plan = cbsRunner.findSolution(environment, superB);
         } catch (OutOfMemoryError ex) {
             System.err.println("Maximum memory usage exceeded.");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (TimeoutException e) {
+            timeout = true;
         }
 
         // Print plan to server.
         if (plan == null) {
             System.err.println("Unable to solve level.");
-            System.err.println("Aborting by time out: " + cbsRunner.isAbortedForTimeout());
+            System.err.printf("Aborting by time out: %s\n", timeout ? "yes" : "no");
             System.exit(0);
         } else {
             System.err.format("Found solution of length %,d.\n", plan.length);

@@ -24,6 +24,10 @@ public class Agent extends MovableObj implements AbstractDeepCopy<Agent>, Serial
         return this.agentChar;
     }
 
+    public int getAgentIdNum() {
+        return Character.getNumericValue(this.agentChar);
+    }
+
     @Override
     public String toString() {
         return "Agent {uniqueId=" + this.uniqueId +

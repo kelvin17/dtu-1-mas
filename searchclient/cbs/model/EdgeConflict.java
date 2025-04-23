@@ -8,8 +8,8 @@ import java.io.Serializable;
  */
 public class EdgeConflict extends AbstractConflict implements Serializable {
 
-    public EdgeConflict(SingleAgentPlan plan1, SingleAgentPlan plan2, MovableObj obj1, MovableObj obj2, int timeNow, Location locationOfObj1, Location locationOfObj2) {
-        super(plan1, plan2, obj1, obj2, timeNow, locationOfObj1, locationOfObj2, null);
+    public EdgeConflict(MetaAgentPlan plan1, MetaAgentPlan plan2, Agent agent1, Agent agent2, int timeNow, Location locationOfObj1, Location locationOfObj2) {
+        super(plan1, plan2, agent1, agent2, timeNow, locationOfObj1, locationOfObj2, null);
     }
 
     @Override
@@ -21,17 +21,17 @@ public class EdgeConflict extends AbstractConflict implements Serializable {
     public Constraint[] getPreventingConstraints() {
         return new Constraint[]{
                 //Solution1, add Constraint to Agent1 from own location to location of Agent2
-                new Constraint(plan1.getAgent(), getTimeNow(), getLocationOfObj1(), getLocationOfObj2()),
+                new Constraint(this.plan2.getMetaId(), this.agent1, this.plan1.getMetaId(), getTimeNow(), getLocationOfObj1(), getLocationOfObj2()),
                 //Solution2, add Constraint to Agent2 from own location to location of Agent1
-                new Constraint(plan2.getAgent(), getTimeNow(), getLocationOfObj2(), getLocationOfObj1())
+                new Constraint(this.plan1.getMetaId(), this.agent2, this.plan2.getMetaId(), getTimeNow(), getLocationOfObj2(), getLocationOfObj1())
         };
     }
 
     @Override
     public String toString() {
         return "EdgeConflict{" +
-                "movableObj1.uniqueId=" + this.movableObj1.getUniqueId() +
-                ", movableObj2.uniqueId=" + this.movableObj2.getUniqueId() +
+                "agent1.uniqueId=" + this.agent1.getAgentId() +
+                ", agent2.uniqueId=" + this.agent2.getAgentId() +
                 ", timeNow=" + this.timeNow +
                 ", targetLocation=" + this.targetLocation +
                 ", locationOfObj1=" + this.locationOfObj1 +

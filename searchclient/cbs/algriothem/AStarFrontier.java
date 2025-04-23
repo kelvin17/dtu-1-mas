@@ -37,6 +37,10 @@ public class AStarFrontier implements Frontier<LowLevelState> {
         return this.queue.size();
     }
 
+    public int getVisitedSize() {
+        return this.visited.size();
+    }
+
     @Override
     public boolean contains(LowLevelState item) {
         return this.visited.contains(item);

@@ -9,45 +9,49 @@ import java.util.*;
  */
 public class Solution implements AbstractDeepCopy<Solution>, Serializable {
 
-    private final Map<Character, SingleAgentPlan> agentPlans = new TreeMap<>();
+    private final Map<String, MetaAgentPlan> metaPlans = new TreeMap<>();
     private boolean valid = true;
-    private int maxSinglePath = 0;
+    private int maxMetaPath = 0;
 
-    public SingleAgentPlan getPlanForAgent(Character agentId) {
-        return this.agentPlans.get(agentId);
+    public MetaAgentPlan getPlanForAgent(String metaId) {
+        return this.metaPlans.get(metaId);
     }
 
     public Solution() {
     }
 
-    public int getMaxSinglePath() {
-        return maxSinglePath;
+    public Map<String, MetaAgentPlan> getMetaPlans() {
+        return metaPlans;
     }
 
-    public void addAgentPlan(Character agentId, SingleAgentPlan agentPlan) {
-        if (agentPlan.getMoveSize() > this.maxSinglePath) {
-            this.maxSinglePath = agentPlan.getMoveSize();
+    public int getMaxMetaPath() {
+        return maxMetaPath;
+    }
+
+    public void addMetaAgentPlan(String metaId, MetaAgentPlan metaAgentPlan) {
+        if (metaAgentPlan.getMaxMoveSize() > this.maxMetaPath) {
+            this.maxMetaPath = metaAgentPlan.getMaxMoveSize();
         }
-        this.agentPlans.put(agentId, agentPlan);
+        this.metaPlans.put(metaId, metaAgentPlan);
     }
 
     public void updateMaxSinglePath() {
         int newMaxSinglePath = 0;
-        for (SingleAgentPlan singleAgentPlan : this.agentPlans.values()) {
-            if (singleAgentPlan.getMoveSize() > newMaxSinglePath) {
-                newMaxSinglePath = singleAgentPlan.getMoveSize();
+        for (MetaAgentPlan metaAgentPlan : this.metaPlans.values()) {
+            if (metaAgentPlan.getMaxMoveSize() > newMaxSinglePath) {
+                newMaxSinglePath = metaAgentPlan.getMaxMoveSize();
             }
         }
-        this.maxSinglePath = newMaxSinglePath;
+        this.maxMetaPath = newMaxSinglePath;
     }
 
-    public List<SingleAgentPlan> getAgentPlansInOrder() {
-        return new ArrayList<>(this.agentPlans.values());
+    public List<MetaAgentPlan> getMetaPlansInOrder() {
+        return new ArrayList<>(this.metaPlans.values());
     }
 
     @Override
     public String toString() {
-        return "Solution{" + "agentPlans=" + agentPlans + ", valid=" + valid + ", maxSinglePath=" + maxSinglePath + '}';
+        return "Solution{" + "agentPlans=" + metaPlans + ", valid=" + valid + ", maxSinglePath=" + maxMetaPath + '}';
     }
 
     public boolean isValid() {
@@ -60,7 +64,7 @@ public class Solution implements AbstractDeepCopy<Solution>, Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(agentPlans);
+        return Objects.hash(metaPlans);
     }
 
     @Override
@@ -68,6 +72,6 @@ public class Solution implements AbstractDeepCopy<Solution>, Serializable {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Solution solution = (Solution) obj;
-        return Objects.deepEquals(agentPlans, solution.agentPlans);
+        return Objects.deepEquals(metaPlans, solution.metaPlans);
     }
 }

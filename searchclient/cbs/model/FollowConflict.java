@@ -13,7 +13,7 @@ public class FollowConflict extends AbstractConflict implements Serializable {
      * @param locationOfObj1 跟随者的位置
      * @param locationOfObj2 被跟随者当前的位置 - 也就是follower不能去的位置
      */
-    public FollowConflict(SingleAgentPlan plan1, SingleAgentPlan plan2, MovableObj follower, MovableObj followee, int timeNow, Location locationOfObj1, Location locationOfObj2) {
+    public FollowConflict(MetaAgentPlan plan1, MetaAgentPlan plan2, Agent follower, Agent followee, int timeNow, Location locationOfObj1, Location locationOfObj2) {
         super(plan1, plan2, follower, followee, timeNow, locationOfObj1, locationOfObj2, locationOfObj2);
     }
 
@@ -26,15 +26,15 @@ public class FollowConflict extends AbstractConflict implements Serializable {
     public Constraint[] getPreventingConstraints() {
         return new Constraint[]{
                 //Solution1 add a Constraint to Agent1
-                new Constraint(plan1.getAgent(), getTimeNow(), null, getTargetLocation()),
+                new Constraint(plan2.getMetaId(), agent1, plan1.getMetaId(), getTimeNow(), null, getTargetLocation()),
         };
     }
 
     @Override
     public String toString() {
         return "FollowConflict{" +
-                "movableObj1.uniqueId=" + this.movableObj1.getUniqueId() +
-                ", movableObj2.uniqueId=" + this.movableObj2.getUniqueId() +
+                "agent1.uniqueId=" + this.agent1.getAgentId() +
+                ", agent2.uniqueId=" + this.agent2.getAgentId() +
                 ", timeNow=" + this.timeNow +
                 ", targetLocation=" + this.targetLocation +
                 ", locationOfObj1=" + this.locationOfObj1 +

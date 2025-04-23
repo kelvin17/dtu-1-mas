@@ -9,10 +9,10 @@ import java.util.Objects;
  */
 public abstract class AbstractConflict {
 
-    protected SingleAgentPlan plan1;
-    protected SingleAgentPlan plan2;
-    protected MovableObj movableObj1;
-    protected MovableObj movableObj2;
+    protected MetaAgentPlan plan1;
+    protected MetaAgentPlan plan2;
+    protected Agent agent1;
+    protected Agent agent2;
     protected int timeNow;
     //Used for vertex conflict
     protected Location targetLocation;
@@ -27,12 +27,12 @@ public abstract class AbstractConflict {
         FollowConflict
     }
 
-    public AbstractConflict(SingleAgentPlan plan1, SingleAgentPlan plan2, MovableObj movableObj1, MovableObj movableObj2,
+    public AbstractConflict(MetaAgentPlan plan1, MetaAgentPlan plan2, Agent agent1, Agent agent2,
                             int timeNow, Location locationOfObj1, Location locationOfObj2, Location targetLocation) {
         this.plan1 = plan1;
         this.plan2 = plan2;
-        this.movableObj1 = movableObj1;
-        this.movableObj2 = movableObj2;
+        this.agent1 = agent1;
+        this.agent2 = agent2;
         this.timeNow = timeNow;
         this.locationOfObj1 = locationOfObj1;
         this.locationOfObj2 = locationOfObj2;
@@ -42,7 +42,7 @@ public abstract class AbstractConflict {
     public abstract ConflictType getConflictType();
 
     //todo 还需要再考虑一下有box的情况，这个是否可行 - box 在外面处理了
-    public static AbstractConflict conflictBetween(SingleAgentPlan plan1, SingleAgentPlan plan2, Move move1, Move move2) {
+    public static AbstractConflict conflictBetween(MetaAgentPlan plan1, MetaAgentPlan plan2, Move move1, Move move2) {
         if (move1.getAction().type == ActionType.NoOp && move2.getAction().type == ActionType.NoOp) {
             // NoOp action, no conflict
             return null;
@@ -50,29 +50,29 @@ public abstract class AbstractConflict {
         if (move1.getAction().type == ActionType.NoOp) {
             if (move2.getMoveTo().equals(move1.getMoveTo())) {
                 //只需要给move2加一个冲突
-                return new VertexConflict(plan2, plan1, plan2.getAgent(), plan1.getAgent(), move2.getTimeNow(),
+                return new VertexConflict(plan2, plan1, move2.getAgent(), move1.getAgent(), move2.getTimeNow(),
                         move2.getCurrentLocation(), move1.getCurrentLocation(), move2.getMoveTo(), true);
             }
         }
         if (move2.getAction().type == ActionType.NoOp) {
             if (move1.getMoveTo().equals(move2.getMoveTo())) {
                 //只需要给move1加一个冲突
-                return new VertexConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(),
+                return new VertexConflict(plan1, plan2, move1.getAgent(), move2.getAgent(), move1.getTimeNow(),
                         move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo(), true);
             }
         }
         if (move1.getMoveTo().equals(move2.getMoveTo())) {
-            return new VertexConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(),
+            return new VertexConflict(plan1, plan2, move1.getAgent(), move2.getAgent(), move1.getTimeNow(),
                     move1.getCurrentLocation(), move2.getCurrentLocation(), move1.getMoveTo(), false);
         }
         if (move1.getCurrentLocation().equals(move2.getMoveTo()) && move2.getCurrentLocation().equals(move1.getMoveTo())) {
-            return new EdgeConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation());
+            return new EdgeConflict(plan1, plan2, move1.getAgent(), move2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation());
         }
         if (move1.getMoveTo().equals(move2.getCurrentLocation())) {
-            return new FollowConflict(plan1, plan2, plan1.getAgent(), plan2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation());
+            return new FollowConflict(plan1, plan2, move1.getAgent(), move2.getAgent(), move1.getTimeNow(), move1.getCurrentLocation(), move2.getCurrentLocation());
         }
         if (move2.getMoveTo().equals(move1.getCurrentLocation())) {
-            return new FollowConflict(plan2, plan1, plan2.getAgent(), plan1.getAgent(), move2.getTimeNow(), move2.getCurrentLocation(), move1.getCurrentLocation());
+            return new FollowConflict(plan2, plan1, move2.getAgent(), move1.getAgent(), move2.getTimeNow(), move2.getCurrentLocation(), move1.getCurrentLocation());
         }
 
         return null;
@@ -83,12 +83,20 @@ public abstract class AbstractConflict {
      */
     public abstract Constraint[] getPreventingConstraints();
 
-    public MovableObj getMovableObj1() {
-        return movableObj1;
+    public Agent getAgent1() {
+        return agent1;
     }
 
-    public MovableObj getMovableObj2() {
-        return movableObj2;
+    public Agent getAgent2() {
+        return agent2;
+    }
+    
+    public MetaAgentPlan getPlan1() {
+        return plan1;
+    }
+
+    public MetaAgentPlan getPlan2() {
+        return plan2;
     }
 
     public int getTimeNow() {
@@ -109,7 +117,7 @@ public abstract class AbstractConflict {
 
     @Override
     public int hashCode() {
-        return Objects.hash(plan1, plan2, movableObj1, movableObj2, timeNow, targetLocation, locationOfObj1, locationOfObj2);
+        return Objects.hash(plan1, plan2, agent1, agent2, timeNow, targetLocation, locationOfObj1, locationOfObj2);
     }
 
     @Override
@@ -120,8 +128,8 @@ public abstract class AbstractConflict {
         return timeNow == that.timeNow
                 && Objects.equals(plan1, that.plan1)
                 && Objects.equals(plan2, that.plan2)
-                && Objects.equals(movableObj1, that.movableObj1)
-                && Objects.equals(movableObj2, that.movableObj2)
+                && Objects.equals(agent1, that.agent1)
+                && Objects.equals(agent2, that.agent2)
                 && Objects.equals(targetLocation, that.targetLocation)
                 && Objects.equals(locationOfObj1, that.locationOfObj1)
                 && Objects.equals(locationOfObj2, that.locationOfObj2);

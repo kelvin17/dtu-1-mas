@@ -17,6 +17,7 @@ public class Environment implements AbstractDeepCopy<Environment>, Serializable 
     private final Map<Color, LowLevelColorGroup> colorGroups;
     private final Map<Character, List<Location>> boxType2GoalMap;
     private final boolean[][] WALLS;
+    private int agentNums;
 
     public static Environment parseLevel(BufferedReader serverMessages) throws IOException {
         // We can assume that the level file is conforming to specification, since the server verifies this.
@@ -108,16 +109,17 @@ public class Environment implements AbstractDeepCopy<Environment>, Serializable 
             line = serverMessages.readLine();
         }
 
-        return new Environment(colorGroupMap, walls, numRows, numCols, boxType2GoalMap);
+        return new Environment(colorGroupMap, walls, numRows, numCols, boxType2GoalMap, agents.size());
     }
 
     public Environment(Map<Color, LowLevelColorGroup> colorGroups, boolean[][] walls,
-                       int gridNumRows, int gridNumCol, Map<Character, List<Location>> boxType2GoalMap) {
+                       int gridNumRows, int gridNumCol, Map<Character, List<Location>> boxType2GoalMap, int agentNums) {
         WALLS = walls;
         this.colorGroups = colorGroups;
         this.gridNumRows = gridNumRows;
         this.gridNumCol = gridNumCol;
         this.boxType2GoalMap = boxType2GoalMap;
+        this.agentNums = agentNums;
     }
 
     public Environment() {
@@ -157,10 +159,15 @@ public class Environment implements AbstractDeepCopy<Environment>, Serializable 
                 ", colorGroups=" + colorGroups +
                 ", boxType2GoalMap=" + boxType2GoalMap +
                 ", WALLS=" + (WALLS == null ? null : WALLS.length) +
+                ", agentNums=" + agentNums +
                 '}';
     }
 
     public Map<Character, List<Location>> getBoxType2GoalMap() {
         return boxType2GoalMap;
+    }
+
+    public int getAgentNums() {
+        return agentNums;
     }
 }

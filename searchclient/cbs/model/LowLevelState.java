@@ -1,13 +1,14 @@
 package searchclient.cbs.model;
 
 import searchclient.Action;
+import searchclient.cbs.utils.MapConverterHelper;
 
 import java.io.Serializable;
 import java.util.*;
 
 public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCopy<LowLevelState>, Serializable {
-    private Move move;
-    private final Agent agent;
+    private Map<Character, Move> agentMove = new HashMap<>();
+    private Map<Character, Agent> agents = new HashMap<>();
     private Map<String, Box> boxes = new HashMap<>();
     private final Box[][] loc2Box;
     private LowLevelState parent;
@@ -15,8 +16,12 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
     private final int gridNumRows;
     private final int gridNumCol;
 
-    public Agent getAgent() {
-        return agent;
+    public LowLevelState getParent() {
+        return parent;
+    }
+
+    public Map<Character, Agent> getAgents() {
+        return this.agents;
     }
 
     public Map<String, Box> getBoxes() {
@@ -24,12 +29,13 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
     }
 
     //Extract the moves from the root to this state
-    public Map<Integer, Move> extractMoves() {
+    public Map<Integer, Move> extractMovesForOneAgent(Character agentId) {
         Map<Integer, Move> moves = new TreeMap<>();
         LowLevelState current = this;
         while (current != null) {
-            if (current.move != null) {
-                moves.put(current.move.getTimeNow(), current.move);
+            Move move = current.agentMove.get(agentId);
+            if (move != null) {
+                moves.put(move.getTimeNow(), move);
             }
             current = current.parent;
         }
@@ -37,8 +43,8 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         return moves;
     }
 
-    public LowLevelState(Agent agent, Map<String, Box> boxes, int gridNumRows, int gridNumCol) {
-        this.agent = agent;
+    public LowLevelState(Map<Character, Agent> agents, Map<String, Box> boxes, int gridNumRows, int gridNumCol) {
+        this.agents = agents;
         this.gridNumRows = gridNumRows;
         this.gridNumCol = gridNumCol;
         this.loc2Box = new Box[gridNumRows][gridNumCol];
@@ -47,10 +53,14 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         }
     }
 
-    public static LowLevelState initRootStateForPlan(SingleAgentPlan singleAgentPlan) {
-        LowLevelState rootState = new LowLevelState(singleAgentPlan.getAgent(), singleAgentPlan.getBoxes(), singleAgentPlan.getEnv().getGridNumRows(),
-                singleAgentPlan.getEnv().getGridNumCol());
-        rootState.agent.setCurrentLocation(rootState.agent.getInitLocation());
+    public static LowLevelState initRootStateForPlan(MetaAgentPlan metaAgentPlan) {
+        LowLevelState rootState = new LowLevelState(metaAgentPlan.getAgents(), metaAgentPlan.getBoxes(), metaAgentPlan.getEnv().getGridNumRows(),
+                metaAgentPlan.getEnv().getGridNumCol());
+
+        for (Agent agent : metaAgentPlan.getAgents().values()) {
+            agent.setCurrentLocation(agent.getInitLocation());
+        }
+
         if (!rootState.boxes.isEmpty()) {
             for (Box box : rootState.boxes.values()) {
                 box.setCurrentLocation(box.getInitLocation());
@@ -61,10 +71,13 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
     }
 
     public LowLevelState() {
-        this.agent = null;
         this.gridNumRows = 0;
         this.gridNumCol = 0;
         this.loc2Box = new Box[0][0];
+    }
+
+    private List<Character> getAgentIds() {
+        return this.agents.values().stream().map(Agent::getAgentId).toList();
     }
 
     public List<LowLevelState> expand(Node currentNode, Environment env) {
@@ -72,24 +85,77 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         List<Constraint> constraints = new ArrayList<>();
         Node node = currentNode;
         while (node != null) {
-            if (node.getAddedConstraint() != null && node.getAddedConstraint().getAgent().getAgentId() == this.agent.getAgentId()) {
-                //this is the state of parent. Now we need to check if the constraint is added for its child
-                if (this.timeNow + 1 == node.getAddedConstraint().getTime()) {
-                    constraints.add(node.getAddedConstraint());
+            if (node.getAddedConstraint() != null && this.getAgentIds().contains(node.getAddedConstraint().getAgent().getAgentId())) {
+                boolean isInner = false;
+                List<String> agentIdList = List.of(node.getAddedConstraint().getFromMetaId().split("-"));
+                for (Character agentId : this.getAgentIds()) {
+                    if (agentIdList.contains(agentId.toString())) {
+                        isInner = true;
+                        break;
+                    }
+                }
+
+                if (!isInner) {
+                    //this is the state of parent. Now we need to check if the constraint is added for its child
+                    if (this.timeNow + 1 == node.getAddedConstraint().getTime()) {
+                        constraints.add(node.getAddedConstraint());
+                    }
                 }
             }
             node = node.getParent();
         }
 
-        for (Action action : Action.values()) {
-            Move move = this.getNextMove(this.agent, action, constraints, env, currentNode);
-            if (move != null) {
-                LowLevelState child = this.generateChildState(move);
+        Map<Character, List<Move>> agentAvailableMoves = new HashMap<>();
+        //1. get single agent in a metaGroup actions
+        for (Agent agent : this.agents.values()) {
+            for (Action action : Action.values()) {
+                Move move = this.getNextMove(agent, action, constraints, env, currentNode);
+                if (move != null) {
+                    agentAvailableMoves.computeIfAbsent(agent.getAgentId(), k -> new ArrayList<>()).add(move);
+                }
+            }
+        }
+
+        //2. joint moves from different agent. every item in the list is a map of agentId to move
+        List<Map<Character, Move>> availableJoints = MapConverterHelper.convertMapToListOfMaps(agentAvailableMoves);
+
+        //3. use viablePairs to generate new states
+        for (Map<Character, Move> pairs : availableJoints) {
+            if (checkInnerConflict(pairs)) {
+                LowLevelState child = this.generateChildState(pairs);
                 newStates.add(child);
             }
         }
 
         return newStates;
+    }
+
+    private boolean checkInnerConflict(Map<Character, Move> pairs) {
+        for (Move move : pairs.values()) {
+            for (Move move1 : pairs.values()) {
+                if (move.getAgent().getAgentId() != move1.getAgent().getAgentId()) {
+                    //box conflict
+                    if (move.getBox() != null && move.getBox().equals(move1.getBox())) {
+                        return false;
+                    }
+                    //vertex conflict
+                    if (move.getMoveTo().equals(move1.getMoveTo())) {
+                        return false;
+                    }
+                    //edge conflict
+                    if (move1.getMoveTo().equals(move.getCurrentLocation()) &&
+                            move1.getCurrentLocation().equals(move.getMoveTo())) {
+                        return false;
+                    }
+                    //follow conflict
+                    if (move.getMoveTo().equals(move1.getCurrentLocation())
+                            || move.getCurrentLocation().equals(move1.getMoveTo())) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -132,7 +198,7 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
             case Push:
                 Location targetBox = new Location(agent.getCurrentLocation().getRow() + action.agentRowDelta, agent.getCurrentLocation().getCol() + action.agentColDelta);
                 Box box = this.boxAt(targetBox);
-                if (box == null) {
+                if (box == null || !box.getColor().equals(agent.getColor())) {
                     return null;
                 }
 
@@ -164,7 +230,7 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
             case Pull:
                 Location targetBoxForPull = new Location(agent.getCurrentLocation().getRow() - action.boxRowDelta, agent.getCurrentLocation().getCol() - action.boxColDelta);
                 Box boxForPull = this.boxAt(targetBoxForPull);
-                if (boxForPull == null) {
+                if (boxForPull == null || !boxForPull.getColor().equals(agent.getColor())) {
                     return null;
                 }
                 Location newOccupiedLocationForPull = new Location(agent.getCurrentLocation().getRow() + action.agentRowDelta, agent.getCurrentLocation().getCol() + action.agentColDelta);
@@ -196,33 +262,39 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         }
     }
 
-    public LowLevelState generateChildState(Move move) {
+    public LowLevelState generateChildState(Map<Character, Move> AgentId2move) {
         LowLevelState child = this.deepCopy();
         child.parent = this;
         child.timeNow = this.timeNow + 1;
-        child.move = move;
 
-        switch (move.getAction().type) {
-            case NoOp:
-                break;
-            case Move:
-                Location newAgentLoc = new Location(child.agent.getCurrentLocation().getRow() + move.getAction().agentRowDelta,
-                        child.agent.getCurrentLocation().getCol() + move.getAction().agentColDelta);
-                child.agent.setCurrentLocation(newAgentLoc);
-                break;
-            case Pull:
-            case Push:
-                Location newAgentLocForBox = new Location(child.agent.getCurrentLocation().getRow() + move.getAction().agentRowDelta,
-                        child.agent.getCurrentLocation().getCol() + move.getAction().agentColDelta);
-                child.agent.setCurrentLocation(newAgentLocForBox);
+        for (Map.Entry<Character, Move> entry : AgentId2move.entrySet()) {
+            Character agentId = entry.getKey();
+            Move move = entry.getValue();
+            child.agentMove.put(agentId, move);
+            Agent agent = child.getAgents().get(agentId);
 
-                Box box = move.getBox();
-                Location newBoxLoc = new Location(box.getCurrentLocation().getRow() + move.getAction().boxRowDelta,
-                        box.getCurrentLocation().getCol() + move.getAction().boxColDelta);
-                child.updateBoxLocation(box.getCurrentLocation(), newBoxLoc);
-                break;
-            default:
-                throw new IllegalStateException("generateChildState Unexpected value: " + move.getAction().type);
+            switch (move.getAction().type) {
+                case NoOp:
+                    break;
+                case Move:
+                    Location newAgentLoc = new Location(agent.getCurrentLocation().getRow() + move.getAction().agentRowDelta,
+                            agent.getCurrentLocation().getCol() + move.getAction().agentColDelta);
+                    agent.setCurrentLocation(newAgentLoc);
+                    break;
+                case Pull:
+                case Push:
+                    Location newAgentLocForBox = new Location(agent.getCurrentLocation().getRow() + move.getAction().agentRowDelta,
+                            agent.getCurrentLocation().getCol() + move.getAction().agentColDelta);
+                    agent.setCurrentLocation(newAgentLocForBox);
+
+                    Box box = move.getBox();
+                    Location newBoxLoc = new Location(box.getCurrentLocation().getRow() + move.getAction().boxRowDelta,
+                            box.getCurrentLocation().getCol() + move.getAction().boxColDelta);
+                    child.updateBoxLocation(box.getCurrentLocation(), newBoxLoc);
+                    break;
+                default:
+                    throw new IllegalStateException("generateChildState Unexpected value: " + move.getAction().type);
+            }
         }
         return child;
     }
@@ -250,9 +322,11 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
      * @return
      */
     public boolean isGoal() {
-        if (this.agent.getGoalLocation() != null) {
-            if (!this.agent.getCurrentLocation().equals(this.agent.getGoalLocation())) {
-                return false;
+        for (Agent agent : agents.values()) {
+            if (agent.getGoalLocation() != null) {
+                if (!agent.getCurrentLocation().equals(agent.getGoalLocation())) {
+                    return false;
+                }
             }
         }
 
@@ -277,10 +351,12 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
             }
         }
 
-        if (this.agent.getGoalLocation() != null) {
-            int mhtDis = Math.abs(this.agent.getCurrentLocation().getRow() - this.agent.getGoalLocation().getRow())
-                    + Math.abs(this.agent.getCurrentLocation().getCol() - this.agent.getGoalLocation().getCol());
-            heuristicValue = Math.max(heuristicValue, mhtDis);
+        for (Agent agent : agents.values()) {
+            if (agent.getGoalLocation() != null) {
+                int mhtDis = Math.abs(agent.getCurrentLocation().getRow() - agent.getGoalLocation().getRow())
+                        + Math.abs(agent.getCurrentLocation().getCol() - agent.getGoalLocation().getCol());
+                heuristicValue = Math.max(heuristicValue, mhtDis);
+            }
         }
 
         return heuristicValue;
@@ -309,15 +385,15 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         }
         LowLevelState other = (LowLevelState) obj;
 
-        boolean equals = Objects.equals(agent, other.agent);
+        boolean equals = Objects.deepEquals(agents, other.agents);
         if (!equals) {
             return false;
         }
 
-        equals = Objects.equals(this.move, other.move);
-        if (!equals) {
-            return false;
-        }
+//        equals = Objects.deepEquals(this.agentMove, other.agentMove);
+//        if (!equals) {
+//            return false;
+//        }
 
         return Objects.deepEquals(this.boxes, other.boxes);
     }
@@ -327,20 +403,21 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
     }
 
     public int hashCode() {
-        return Objects.hash(agent, boxes, move);
+//        return Objects.hash(agents, boxes, agentMove);
+        return Objects.hash(agents, boxes);
     }
 
     @Override
     public String toString() {
         return "LowLevelState{" +
-                "agent=" + agent +
+                "agents=" + agents +
                 ", boxes=" + boxes +
                 ", loc2Box=" + Arrays.deepToString(loc2Box) +
                 ", gridNumRows=" + gridNumRows +
                 ", gridNumCol=" + gridNumCol +
                 ", parent=" + parent +
                 ", timeNow=" + timeNow +
-                ", move=" + move +
+                ", agentMove=" + agentMove +
                 '}';
     }
 }

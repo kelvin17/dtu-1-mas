@@ -24,10 +24,6 @@ public class Node implements Comparable<Node> {
      * The path for agent a_i is consistent with the constraints of a_i
      */
     private Solution solution;
-    /**
-     * The cost of the current solution(using SIC) , and it is referred to as the f-value of the node
-     */
-    private int solutionCost = 0;
 
     private final Node parent;
 
@@ -48,11 +44,10 @@ public class Node implements Comparable<Node> {
      */
     public int getSolutionCost() {
         int cost = 0;
-        for (SingleAgentPlan singleAgentPlan : solution.getAgentPlansInOrder()) {
-            cost += singleAgentPlan.getCost();
+        for (MetaAgentPlan metaAgentPlan : solution.getMetaPlansInOrder()) {
+            cost += metaAgentPlan.getCost();
         }
-        solutionCost = cost;
-        return solutionCost;
+        return cost;
     }
 
     public void setSolution(Solution solution) {
