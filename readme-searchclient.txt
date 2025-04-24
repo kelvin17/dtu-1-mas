@@ -25,9 +25,13 @@ The searchclient uses the BFS strategy by default. Use arguments -dfs, -astar, -
     $ java -jar ../server.jar -l ../levels/SAD1.lvl -c "java searchclient.SearchClient -dfs" -g -s 150 -t 180
     $ java -jar /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/server.jar -l /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/levels/SAD1.lvl -c "java searchclient.SearchClient -astar" -g -s 150 -t 180
 
-    ## run cbs -1
+    ## run cbs 说明
     $ cd /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/out/production/searchclient_java/
     $ java -jar /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/server.jar -l /Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/MAPF03C.lvl -c "java searchclient.NewSearchClient" -g -s 150 -t 180
+
+    $ "java searchclient.NewSearchClient" 不加参数，说明是basic版本，不合并冲突
+    $ "java searchclient.NewSearchClient 5" 加上参数，说明是ma-cbs版本，当两个meta-agent发生冲突累计超能过5次，才会合并冲突
+
 
     ## 直接调试client代码
     ## NewSearchClient 的 main函数中直接读取level文件即可调试
