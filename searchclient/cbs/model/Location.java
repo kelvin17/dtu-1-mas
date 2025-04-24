@@ -1,16 +1,18 @@
 package searchclient.cbs.model;
 
-import java.io.Serializable;
-
 /**
  * Base Model
  * Location representation
  */
-public class Location implements AbstractDeepCopy<Location>, Serializable {
+public class Location {
     private int row;
     private int col;
 
     public Location() {
+    }
+
+    public Location deepCopy() {
+        return new Location(this.row, this.col);
     }
 
     public Location(int row, int col) {

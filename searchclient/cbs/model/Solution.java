@@ -1,13 +1,12 @@
 package searchclient.cbs.model;
 
-import java.io.Serializable;
 import java.util.*;
 
 /**
  * Model for CBS
  * For high level of CT
  */
-public class Solution implements AbstractDeepCopy<Solution>, Serializable {
+public class Solution {
 
     private final Map<String, MetaAgentPlan> metaPlans = new TreeMap<>();
     private boolean valid = true;
@@ -17,8 +16,17 @@ public class Solution implements AbstractDeepCopy<Solution>, Serializable {
         return this.metaPlans.get(metaId);
     }
 
-    public Solution() {
+    public Solution deepCopy() {
+        Solution solution = new Solution();
+        for (Map.Entry<String, MetaAgentPlan> entry : this.metaPlans.entrySet()) {
+            String metaId = entry.getKey();
+            MetaAgentPlan metaAgentPlan = entry.getValue().deepCopy();
+            solution.addMetaAgentPlan(metaId, metaAgentPlan);
+        }
+        solution.setValid(this.valid);
+        return solution;
     }
+
 
     public Map<String, MetaAgentPlan> getMetaPlans() {
         return metaPlans;

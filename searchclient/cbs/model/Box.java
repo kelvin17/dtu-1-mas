@@ -5,7 +5,7 @@ import searchclient.Color;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class Box extends MovableObj implements AbstractDeepCopy<Box>, Serializable {
+public class Box extends MovableObj {
 
     private final char boxTypeLetter;
 
@@ -25,20 +25,18 @@ public class Box extends MovableObj implements AbstractDeepCopy<Box>, Serializab
     public boolean originEqual(Box other) {
         if (other == null) return false;
 
-        boolean equal = this.getUniqueId().equals(other.getUniqueId())
+        return this.getUniqueId().equals(other.getUniqueId())
                 && this.objType == other.objType
                 && this.getColor().equals(other.getColor())
                 && this.getInitLocation().equals(other.getInitLocation());
+    }
 
-        if (!equal) {
-            return false;
-        }
-
-        if (this.getGoalLocation() == null) {
-            return other.getGoalLocation() == null;
-        } else {
-            return this.getGoalLocation().equals(other.getGoalLocation());
-        }
+    public Box deepCopy() {
+        Box box = new Box(this.boxTypeLetter, this.getColor(), this.getInitLocation().deepCopy());
+        box.setCurrentLocation(this.getCurrentLocation().deepCopy());
+        Location goalLocation = this.getGoalLocation() != null ? this.getGoalLocation().deepCopy() : null;
+        box.setGoalLocation(goalLocation);
+        return box;
     }
 
     @Override
@@ -46,28 +44,15 @@ public class Box extends MovableObj implements AbstractDeepCopy<Box>, Serializab
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Box box = (Box) obj;
-        boolean equals = (Objects.equals(uniqueId, box.uniqueId)
-                && objType == box.objType
-                && color.equals(box.color)
+        return (Objects.equals(uniqueId, box.uniqueId)
                 && initLocation.equals(box.initLocation))
                 && currentLocation.equals(box.currentLocation);
-        if (!equals) {
-            return false;
-        }
-        if (this.getGoalLocation() == null) {
-            return box.getGoalLocation() == null;
-        } else {
-            return this.getGoalLocation().equals(box.getGoalLocation());
-        }
     }
 
     @Override
     public int hashCode() {
         int result = uniqueId.hashCode();
-        result = 31 * result + objType.hashCode();
-        result = 31 * result + color.hashCode();
         result = 31 * result + initLocation.hashCode();
-        result = 31 * result + (goalLocation != null ? goalLocation.hashCode() : 0);
         result = 31 * result + currentLocation.hashCode();
         return result;
     }

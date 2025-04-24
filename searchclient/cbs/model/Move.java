@@ -3,31 +3,27 @@ package searchclient.cbs.model;
 import searchclient.Action;
 import searchclient.ActionType;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Base Model
  * Agent move at timeNow, who is at currentLocation
  */
-public class Move implements AbstractDeepCopy<Move>, Serializable {
+public class Move {
     private final Agent agent;
     private final Box box;
     private final int timeNow;
     private final Action action;
-
-    public Move() {
-        this.agent = null;
-        this.timeNow = 0;
-        this.action = null;
-        this.box = null;
-    }
 
     public Move(Agent agent, int timeNow, Action action, Box box) {
         this.agent = agent;
         this.timeNow = timeNow;
         this.action = action;
         this.box = box;
+    }
+
+    public Move deepCopy() {
+        return new Move(this.agent.deepCopy(), this.timeNow, this.action, this.box != null ? this.box.deepCopy() : null);
     }
 
     public Agent getAgent() {

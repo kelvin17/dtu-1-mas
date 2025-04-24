@@ -6,7 +6,7 @@ import searchclient.cbs.utils.MapConverterHelper;
 import java.io.Serializable;
 import java.util.*;
 
-public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCopy<LowLevelState>, Serializable {
+public class LowLevelState implements Comparable<LowLevelState>, Serializable {
     private Map<Character, Move> agentMove = new HashMap<>();
     private Map<Character, Agent> agents = new HashMap<>();
     private Map<String, Box> boxes = new HashMap<>();
@@ -15,9 +15,18 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
     private int timeNow = 0;
     private final int gridNumRows;
     private final int gridNumCol;
+    private boolean allInOne;
 
     public LowLevelState getParent() {
         return parent;
+    }
+
+    public int getGridNumRows() {
+        return this.gridNumRows;
+    }
+
+    public int getGridNumCol() {
+        return this.gridNumCol;
     }
 
     public Map<Character, Agent> getAgents() {
@@ -50,6 +59,29 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         this.loc2Box = new Box[gridNumRows][gridNumCol];
         if (boxes != null) {
             this.boxes = boxes;
+        }
+    }
+
+    public LowLevelState(LowLevelState parent) {
+        this.parent = parent;
+        this.gridNumRows = parent.gridNumRows;
+        this.gridNumCol = parent.gridNumCol;
+        this.allInOne = parent.allInOne;
+        this.agentMove = new HashMap<>();
+
+        for (Map.Entry<Character, Agent> entry : parent.agents.entrySet()) {
+            this.agents.put(entry.getKey(), entry.getValue().deepCopy());
+        }
+
+        for (Map.Entry<String, Box> entry : parent.boxes.entrySet()) {
+            this.boxes.put(entry.getKey(), entry.getValue().deepCopy());
+        }
+
+        this.loc2Box = new Box[this.gridNumRows][this.gridNumCol];
+        if (!this.boxes.isEmpty()) {
+            for (Box box : this.boxes.values()) {
+                this.loc2Box[box.getCurrentLocation().getRow()][box.getCurrentLocation().getCol()] = box;
+            }
         }
     }
 
@@ -263,8 +295,8 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
     }
 
     public LowLevelState generateChildState(Map<Character, Move> AgentId2move) {
-        LowLevelState child = this.deepCopy();
-        child.parent = this;
+
+        LowLevelState child = new LowLevelState(this);
         child.timeNow = this.timeNow + 1;
 
         for (Map.Entry<Character, Move> entry : AgentId2move.entrySet()) {
@@ -385,15 +417,18 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
         }
         LowLevelState other = (LowLevelState) obj;
 
+        //        if (!this.allInOne) {
+        if (this.agents.size() == 1) {
+            if (this.timeNow != other.timeNow) {
+                return false;
+            }
+        }
+
+
         boolean equals = Objects.deepEquals(agents, other.agents);
         if (!equals) {
             return false;
         }
-
-//        equals = Objects.deepEquals(this.agentMove, other.agentMove);
-//        if (!equals) {
-//            return false;
-//        }
 
         return Objects.deepEquals(this.boxes, other.boxes);
     }
@@ -403,8 +438,11 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
     }
 
     public int hashCode() {
-//        return Objects.hash(agents, boxes, agentMove);
-        return Objects.hash(agents, boxes);
+        if (this.agents.size() > 1) {
+            return Objects.hash(agents, boxes);
+        } else {
+            return Objects.hash(agents, boxes, timeNow);
+        }
     }
 
     @Override
@@ -419,5 +457,13 @@ public class LowLevelState implements Comparable<LowLevelState>, AbstractDeepCop
                 ", timeNow=" + timeNow +
                 ", agentMove=" + agentMove +
                 '}';
+    }
+
+    public boolean isAllInOne() {
+        return allInOne;
+    }
+
+    public void setAllInOne(boolean allInOne) {
+        this.allInOne = allInOne;
     }
 }

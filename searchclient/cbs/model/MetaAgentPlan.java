@@ -8,7 +8,7 @@ import java.util.*;
  * Represents the plan of multiple agent, including the env, agent, boxes and a effective move list for this plan.
  * 代表一个单独的代理的计划，包括环境、代理、箱子和使得该计划可解的一个有效移动列表。
  */
-public class MetaAgentPlan implements AbstractDeepCopy<MetaAgentPlan>, Serializable {
+public class MetaAgentPlan {
 
     private Map<Character, Agent> agents = new HashMap<>();
     private Map<String, Box> boxes = new HashMap<>();
@@ -17,9 +17,6 @@ public class MetaAgentPlan implements AbstractDeepCopy<MetaAgentPlan>, Serializa
 
     private Map<Character, Location> agentsFinalLocations = new HashMap<>();
     private Map<String, Location> boxesFinalLocation = new HashMap<>();
-
-    public MetaAgentPlan() {
-    }
 
     /**
      * Update the plan to the final state
@@ -52,6 +49,36 @@ public class MetaAgentPlan implements AbstractDeepCopy<MetaAgentPlan>, Serializa
     public MetaAgentPlan(Map<Character, Agent> agents, Environment env) {
         this.agents = agents;
         this.env = env;
+    }
+
+    public MetaAgentPlan deepCopy() {
+        Map<Character, Agent> agents = new HashMap<>();
+        for (Map.Entry<Character, Agent> entry : this.agents.entrySet()) {
+            agents.put(entry.getKey(), entry.getValue().deepCopy());
+        }
+
+        MetaAgentPlan plan = new MetaAgentPlan(agents, this.env);
+        for (Map.Entry<String, Box> entry : this.boxes.entrySet()) {
+            plan.addBox(entry.getValue().deepCopy());
+        }
+
+        for (Map.Entry<Character, Map<Integer, Move>> entry : this.agentMoves.entrySet()) {
+            Map<Integer, Move> moves = new HashMap<>();
+            for (Map.Entry<Integer, Move> moveEntry : entry.getValue().entrySet()) {
+                moves.put(moveEntry.getKey(), moveEntry.getValue().deepCopy());
+            }
+            plan.agentMoves.put(entry.getKey(), moves);
+        }
+
+        for (Map.Entry<Character, Location> entry : this.agentsFinalLocations.entrySet()) {
+            plan.agentsFinalLocations.put(entry.getKey(), entry.getValue().deepCopy());
+        }
+
+        for (Map.Entry<String, Location> entry : this.boxesFinalLocation.entrySet()) {
+            plan.boxesFinalLocation.put(entry.getKey(), entry.getValue().deepCopy());
+        }
+
+        return plan;
     }
 
     /**
@@ -137,30 +164,35 @@ public class MetaAgentPlan implements AbstractDeepCopy<MetaAgentPlan>, Serializa
                     if (checkForMove2 != null) {
                         return new VertexConflict(otherPlan, this, otherMove.getAgent(), thisMove.getAgent(), i, otherMove.getCurrentLocation(), thisMove.getCurrentLocation(), otherMove.getMoveTo(), true);
                     }
+                }
+            }
 
-                    //更新走完这一步，box的全局新位置
-                    if (thisMove.getBox() != null) {
-                        Box tmp = tmpBoxLocations1[thisMove.getBox().getCurrentLocation().getRow()][thisMove.getBox().getCurrentLocation().getCol()];
-                        if (!thisMove.getBox().originEqual(tmp)) {
-                            throw new IllegalArgumentException("There must have the box :" + thisMove.getBox());
-                        }
-                        tmpBoxLocations1[tmp.getCurrentLocation().getRow()][tmp.getCurrentLocation().getCol()] = null;
+            //更新走完这一步，box的全局新位置
+            for (Move thisMove : moveInThisPlan) {
+                if (thisMove.getBox() != null) {
+                    Box tmp = tmpBoxLocations1[thisMove.getBox().getCurrentLocation().getRow()][thisMove.getBox().getCurrentLocation().getCol()];
+                    if (!thisMove.getBox().originEqual(tmp)) {
+                        System.err.printf("There must have the box %s, but is %s\n", thisMove.getBox(), tmp);
+                        throw new IllegalArgumentException("There must have the box");
+                    }
+                    tmpBoxLocations1[tmp.getCurrentLocation().getRow()][tmp.getCurrentLocation().getCol()] = null;
 
-                        tmp.setCurrentLocation(thisMove.getBoxTargetLocation());
-                        tmpBoxLocations1[tmp.getCurrentLocation().getRow()][tmp.getCurrentLocation().getCol()] = tmp;
+                    tmp.setCurrentLocation(thisMove.getBoxTargetLocation());
+                    tmpBoxLocations1[tmp.getCurrentLocation().getRow()][tmp.getCurrentLocation().getCol()] = tmp;
+                }
+            }
+
+            for (Move otherMove : moveInOtherPlan) {
+                if (otherMove.getBox() != null) {
+                    Box tmp = tmpBoxLocations2[otherMove.getBox().getCurrentLocation().getRow()][otherMove.getBox().getCurrentLocation().getCol()];
+                    if (!otherMove.getBox().originEqual(tmp)) {
+                        System.err.printf("There must have the box %s, but is %s\n", otherMove.getBox(), tmp);
+                        throw new IllegalArgumentException("There must have the box");
                     }
 
-                    if (otherMove.getBox() != null) {
-                        Box tmp = tmpBoxLocations2[otherMove.getBox().getCurrentLocation().getRow()][otherMove.getBox().getCurrentLocation().getCol()];
-                        if (!otherMove.getBox().originEqual(tmp)) {
-                            System.err.printf("There must have the box %s, but is %s\n", otherMove.getBox(), tmp);
-                            throw new IllegalArgumentException("There must have the box");
-                        }
-
-                        tmpBoxLocations2[tmp.getCurrentLocation().getRow()][tmp.getCurrentLocation().getCol()] = null;
-                        tmp.setCurrentLocation(otherMove.getBoxTargetLocation());
-                        tmpBoxLocations2[tmp.getCurrentLocation().getRow()][tmp.getCurrentLocation().getCol()] = tmp;
-                    }
+                    tmpBoxLocations2[tmp.getCurrentLocation().getRow()][tmp.getCurrentLocation().getCol()] = null;
+                    tmp.setCurrentLocation(otherMove.getBoxTargetLocation());
+                    tmpBoxLocations2[tmp.getCurrentLocation().getRow()][tmp.getCurrentLocation().getCol()] = tmp;
                 }
             }
         }

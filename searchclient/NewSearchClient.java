@@ -21,9 +21,9 @@ public class NewSearchClient {
         // We can also print comments to stdout by prefixing with a #.
         System.out.println("#This is a comment.");
 
-        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/MAsimple2.lvl";
-        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
-//        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
+        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/planB.lvl";
+//        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
+        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
         Environment environment = Environment.parseLevel(serverMessages);
 
         int superB = -1;//watch dog for Max
@@ -44,6 +44,9 @@ public class NewSearchClient {
             System.err.println("Maximum memory usage exceeded.");
         } catch (TimeoutException e) {
             timeout = true;
+        } catch (Exception e) {
+            System.err.println("An unexpected error occurred: " + e.getMessage());
+            e.printStackTrace();
         }
 
         // Print plan to server.

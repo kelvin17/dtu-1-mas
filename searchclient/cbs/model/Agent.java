@@ -5,7 +5,7 @@ import searchclient.Color;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class Agent extends MovableObj implements AbstractDeepCopy<Agent>, Serializable {
+public class Agent extends MovableObj implements Serializable {
 
     private Location goalLocation;
 
@@ -22,6 +22,15 @@ public class Agent extends MovableObj implements AbstractDeepCopy<Agent>, Serial
 
     public char getAgentId() {
         return this.agentChar;
+    }
+
+    public Agent deepCopy() {
+        Agent agent = new Agent(this.agentChar, this.getColor());
+        agent.setInitLocation(this.getInitLocation().deepCopy());
+        agent.setCurrentLocation(this.getCurrentLocation().deepCopy());
+        Location goalLocation = this.getGoalLocation() != null ? this.getGoalLocation().deepCopy() : null;
+        agent.setGoalLocation(goalLocation);
+        return agent;
     }
 
     public int getAgentIdNum() {
@@ -44,28 +53,15 @@ public class Agent extends MovableObj implements AbstractDeepCopy<Agent>, Serial
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Agent agent = (Agent) obj;
-        boolean equals = (Objects.equals(uniqueId, agent.uniqueId)
-                && objType == agent.objType
-                && color.equals(agent.color)
+        return (Objects.equals(uniqueId, agent.uniqueId)
                 && initLocation.equals(agent.initLocation))
                 && currentLocation.equals(agent.currentLocation);
-        if (!equals) {
-            return false;
-        }
-        if (this.getGoalLocation() == null) {
-            return agent.getGoalLocation() == null;
-        } else {
-            return this.getGoalLocation().equals(agent.getGoalLocation());
-        }
     }
 
     @Override
     public int hashCode() {
         int result = uniqueId.hashCode();
-        result = 31 * result + objType.hashCode();
-        result = 31 * result + color.hashCode();
         result = 31 * result + initLocation.hashCode();
-        result = 31 * result + (goalLocation != null ? goalLocation.hashCode() : 0);
         result = 31 * result + currentLocation.hashCode();
         return result;
     }

@@ -22,8 +22,7 @@ public class CBSRunner {
     private List<MetaAgentPlan> metaAgentPlanList = new ArrayList<>();
 
     public CBSRunner() {
-//        this.startTime = System.currentTimeMillis();
-        this.startTime = System.nanoTime();
+        this.startTime = System.currentTimeMillis();
         this.lowLevelRunner = new AStarRunner(startTime, DEFAULT_TIMEOUT);
         this.conflictDetection = new MinTimeConflictDetection();
     }
@@ -51,7 +50,7 @@ public class CBSRunner {
             if (firstConflict == null) {
                 return convertPaths2Actions(node.getSolution());
             }
-            System.err.println("Conflict detected result - " + firstConflict);
+//            System.err.println("Conflict detected result - " + firstConflict);
             //update cmMatrix
             updateCMMatrix(cmMatrix, firstConflict);
 
@@ -86,8 +85,9 @@ public class CBSRunner {
         node.getSolution().getMetaPlans().remove(plan2.getMetaId());
         node.getSolution().addMetaAgentPlan(metaAgentPlan.getMetaId(), metaAgentPlan);
 
-        //todo 在内部处理掉对于内部的冲突的过滤 - 见：searchclient.cbs.model.LowLevelState.expand
-        boolean findNewPath = lowLevelRunner.findPath(node, metaAgentPlan);
+        //在内部处理掉对于内部的冲突的过滤 - 见：searchclient.cbs.model.LowLevelState.expand
+        boolean allInOne = node.getSolution().getMetaPlans().size() == 1;
+        boolean findNewPath = lowLevelRunner.findPath(node, metaAgentPlan, allInOne);
         node.getSolution().setValid(findNewPath);
         if (findNewPath) {
             node.getSolution().updateMaxSinglePath();
@@ -112,7 +112,8 @@ public class CBSRunner {
         Solution childSolution = parentCTNode.getSolution().deepCopy();
 //        Agent agent = constraint.getAgent();
         MetaAgentPlan currentAgentPlan = childSolution.getPlanForAgent(constraint.getBelongToMetaId());
-        boolean findNewPath = lowLevelRunner.findPath(childCTNode, currentAgentPlan);
+        boolean allInOne = childSolution.getMetaPlans().size() == 1;
+        boolean findNewPath = lowLevelRunner.findPath(childCTNode, currentAgentPlan, allInOne);
 
         childSolution.setValid(findNewPath);
         if (findNewPath) {
@@ -169,7 +170,7 @@ public class CBSRunner {
         for (Character key : environment.getBoxType2GoalMap().keySet()) {
             boxType2Index.put(key, 0);
         }
-        //static group boxes to agent todo 还需要考虑一下agent没有goal的特殊情况
+        //static group boxes to agent
         for (LowLevelColorGroup colorGroup : environment.getColorGroups().values()) {
             int agentCounts = colorGroup.getAgents().size();
             int boxCounts = colorGroup.getBoxes().size();
@@ -203,8 +204,9 @@ public class CBSRunner {
         Node rootNode = new Node(null);
 
         Solution solution = new Solution();
+        boolean allInOne = metaAgentPlanList.size() == 1;
         for (MetaAgentPlan metaAgentPlan : metaAgentPlanList) {
-            boolean findPath = lowLevelRunner.findPath(rootNode, metaAgentPlan);
+            boolean findPath = lowLevelRunner.findPath(rootNode, metaAgentPlan, allInOne);
             if (!findPath) {
                 //it will be invalid if anyone agent cannot find a path
                 solution.setValid(false);

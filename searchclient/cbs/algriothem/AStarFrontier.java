@@ -10,7 +10,7 @@ import java.util.Set;
 public class AStarFrontier implements Frontier<LowLevelState> {
 
     private PriorityQueue<LowLevelState> queue;
-    private Set<LowLevelState> visited = new HashSet<LowLevelState>();
+    private Set<LowLevelState> generated = new HashSet<>();
 
     public AStarFrontier() {
         this.queue = new PriorityQueue<>(LowLevelState::compareTo);
@@ -19,7 +19,7 @@ public class AStarFrontier implements Frontier<LowLevelState> {
     @Override
     public void add(LowLevelState item) {
         this.queue.add(item);
-        this.visited.add(item);
+        this.generated.add(item);
     }
 
     @Override
@@ -38,17 +38,17 @@ public class AStarFrontier implements Frontier<LowLevelState> {
     }
 
     public int getVisitedSize() {
-        return this.visited.size();
+        return this.generated.size();
     }
 
     @Override
     public boolean contains(LowLevelState item) {
-        return this.visited.contains(item);
+        return this.generated.contains(item);
     }
 
     @Override
     public boolean hasNotVisited(LowLevelState item) {
-        return !this.visited.contains(item);
+        return !this.generated.contains(item);
     }
 
     @Override
