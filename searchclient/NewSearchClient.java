@@ -22,8 +22,8 @@ public class NewSearchClient {
         System.out.println("#This is a comment.");
 
         String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/planB.lvl";
-//        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
-        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
+        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
+//        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
         Environment environment = Environment.parseLevel(serverMessages);
 
         int superB = -1;//watch dog for Max

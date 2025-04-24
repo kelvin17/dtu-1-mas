@@ -67,10 +67,8 @@ public class Move {
         if (this.action.type == ActionType.Move) {
             return this.agent.getCurrentLocation();
         } else if (this.action.type == ActionType.Pull) {
-//            return this.agent.getCurrentLocation();
             return this.box.getCurrentLocation();//改成边界
         } else if (this.action.type == ActionType.Push) {
-//            return this.box.getCurrentLocation();
             return this.agent.getCurrentLocation();
         } else {
             return this.agent.getCurrentLocation();
@@ -85,10 +83,22 @@ public class Move {
         switch (this.action.type) {
             case Move:
             case NoOp:
-                throw new IllegalArgumentException(this.action.name + " action has not box");
+                return null;
             case Push:
             case Pull:
                 return new Location(this.box.getCurrentLocation().getRow() + this.action.boxRowDelta, this.box.getCurrentLocation().getCol() + this.action.boxColDelta);
+            default:
+                throw new IllegalArgumentException("Unknown action : " + this.action);
+        }
+    }
+
+    public Location getAgentTargetLocation() {
+        switch (this.action.type) {
+            case Move:
+            case Push:
+            case Pull:
+            case NoOp:
+                return new Location(this.agent.getCurrentLocation().getRow() + this.action.agentRowDelta, this.agent.getCurrentLocation().getCol() + this.action.agentColDelta);
             default:
                 throw new IllegalArgumentException("Unknown action : " + this.action);
         }

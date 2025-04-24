@@ -16,10 +16,6 @@ public class Agent extends MovableObj implements Serializable {
         this.agentChar = uniqueId;
     }
 
-    public Agent() {
-        super();
-    }
-
     public char getAgentId() {
         return this.agentChar;
     }

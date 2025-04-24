@@ -1,6 +1,5 @@
 package searchclient.cbs.model;
 
-import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -214,7 +213,10 @@ public class MetaAgentPlan {
                     Move move2 = moves.get(time);
                     Location moveTo = move2.getMoveTo();
                     if (stayLocations.contains(moveTo)) {
-                        return new VertexConflict(laterEndingPlan, earlyEndingPlan, move2.getAgent(), null,
+                        List<Agent> agents = earlyEndingPlan.getAgents().values().stream().toList();
+                        int index = new Random().nextInt(agents.size());
+                        Agent agentEarly = agents.get(index);
+                        return new VertexConflict(laterEndingPlan, earlyEndingPlan, move2.getAgent(), agentEarly,
                                 time, move2.getCurrentLocation(), moveTo, moveTo, true);
                     }
 

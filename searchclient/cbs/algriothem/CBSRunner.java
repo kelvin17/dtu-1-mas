@@ -50,7 +50,7 @@ public class CBSRunner {
             if (firstConflict == null) {
                 return convertPaths2Actions(node.getSolution());
             }
-//            System.err.println("Conflict detected result - " + firstConflict);
+            System.err.println("Conflict detected result - " + firstConflict);
             //update cmMatrix
             updateCMMatrix(cmMatrix, firstConflict);
 

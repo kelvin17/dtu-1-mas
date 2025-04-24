@@ -86,8 +86,7 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
     }
 
     public static LowLevelState initRootStateForPlan(MetaAgentPlan metaAgentPlan) {
-        LowLevelState rootState = new LowLevelState(metaAgentPlan.getAgents(), metaAgentPlan.getBoxes(), metaAgentPlan.getEnv().getGridNumRows(),
-                metaAgentPlan.getEnv().getGridNumCol());
+        LowLevelState rootState = new LowLevelState(metaAgentPlan.getAgents(), metaAgentPlan.getBoxes(), metaAgentPlan.getEnv().getGridNumRows(), metaAgentPlan.getEnv().getGridNumCol());
 
         for (Agent agent : metaAgentPlan.getAgents().values()) {
             agent.setCurrentLocation(agent.getInitLocation());
@@ -175,13 +174,31 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
                         return false;
                     }
                     //edge conflict
-                    if (move1.getMoveTo().equals(move.getCurrentLocation()) &&
-                            move1.getCurrentLocation().equals(move.getMoveTo())) {
+                    if (move1.getMoveTo().equals(move.getCurrentLocation()) && move1.getCurrentLocation().equals(move.getMoveTo())) {
                         return false;
                     }
                     //follow conflict
-                    if (move.getMoveTo().equals(move1.getCurrentLocation())
-                            || move.getCurrentLocation().equals(move1.getMoveTo())) {
+                    if (move.getMoveTo().equals(move1.getCurrentLocation()) || move.getCurrentLocation().equals(move1.getMoveTo())) {
+                        return false;
+                    }
+
+                    Location agent1Loc = move.getAgentTargetLocation();
+                    Location box1Loc = move.getBoxTargetLocation();
+
+                    Location agent2Loc = move1.getAgentTargetLocation();
+                    Location box2Loc = move1.getBoxTargetLocation();
+
+                    if (agent1Loc.equals(agent2Loc)
+                            || agent1Loc.equals(box2Loc)
+                            || agent2Loc.equals(box1Loc)) {
+                        return false;
+                    }
+
+                    if (box1Loc != null && box1Loc.equals(box2Loc)) {
+                        return false;
+                    }
+
+                    if (box2Loc != null && box2Loc.equals(box1Loc)) {
                         return false;
                     }
                 }
@@ -201,8 +218,7 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
                 return new Move(agent, this.timeNow + 1, action, null);
             case Move:
                 Location currentLocation = agent.getCurrentLocation();
-                Location newLocation = new Location(currentLocation.getRow() + action.agentRowDelta,
-                        currentLocation.getCol() + action.agentColDelta);
+                Location newLocation = new Location(currentLocation.getRow() + action.agentRowDelta, currentLocation.getCol() + action.agentColDelta);
                 //1. check是不是墙
                 if (env.isWall(newLocation)) {
                     return null;
@@ -309,19 +325,16 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
                 case NoOp:
                     break;
                 case Move:
-                    Location newAgentLoc = new Location(agent.getCurrentLocation().getRow() + move.getAction().agentRowDelta,
-                            agent.getCurrentLocation().getCol() + move.getAction().agentColDelta);
+                    Location newAgentLoc = new Location(agent.getCurrentLocation().getRow() + move.getAction().agentRowDelta, agent.getCurrentLocation().getCol() + move.getAction().agentColDelta);
                     agent.setCurrentLocation(newAgentLoc);
                     break;
                 case Pull:
                 case Push:
-                    Location newAgentLocForBox = new Location(agent.getCurrentLocation().getRow() + move.getAction().agentRowDelta,
-                            agent.getCurrentLocation().getCol() + move.getAction().agentColDelta);
+                    Location newAgentLocForBox = new Location(agent.getCurrentLocation().getRow() + move.getAction().agentRowDelta, agent.getCurrentLocation().getCol() + move.getAction().agentColDelta);
                     agent.setCurrentLocation(newAgentLocForBox);
 
                     Box box = move.getBox();
-                    Location newBoxLoc = new Location(box.getCurrentLocation().getRow() + move.getAction().boxRowDelta,
-                            box.getCurrentLocation().getCol() + move.getAction().boxColDelta);
+                    Location newBoxLoc = new Location(box.getCurrentLocation().getRow() + move.getAction().boxRowDelta, box.getCurrentLocation().getCol() + move.getAction().boxColDelta);
                     child.updateBoxLocation(box.getCurrentLocation(), newBoxLoc);
                     break;
                 default:
@@ -377,16 +390,14 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
         int heuristicValue = 0;
         for (Box box : this.boxes.values()) {
             if (box.getGoalLocation() != null) {
-                int mhtDis = Math.abs(box.getCurrentLocation().getRow() - box.getGoalLocation().getRow())
-                        + Math.abs(box.getCurrentLocation().getCol() - box.getGoalLocation().getCol());
+                int mhtDis = Math.abs(box.getCurrentLocation().getRow() - box.getGoalLocation().getRow()) + Math.abs(box.getCurrentLocation().getCol() - box.getGoalLocation().getCol());
                 heuristicValue += mhtDis;
             }
         }
 
         for (Agent agent : agents.values()) {
             if (agent.getGoalLocation() != null) {
-                int mhtDis = Math.abs(agent.getCurrentLocation().getRow() - agent.getGoalLocation().getRow())
-                        + Math.abs(agent.getCurrentLocation().getCol() - agent.getGoalLocation().getCol());
+                int mhtDis = Math.abs(agent.getCurrentLocation().getRow() - agent.getGoalLocation().getRow()) + Math.abs(agent.getCurrentLocation().getCol() - agent.getGoalLocation().getCol());
                 heuristicValue = Math.max(heuristicValue, mhtDis);
             }
         }
@@ -447,16 +458,7 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
 
     @Override
     public String toString() {
-        return "LowLevelState{" +
-                "agents=" + agents +
-                ", boxes=" + boxes +
-                ", loc2Box=" + Arrays.deepToString(loc2Box) +
-                ", gridNumRows=" + gridNumRows +
-                ", gridNumCol=" + gridNumCol +
-                ", parent=" + parent +
-                ", timeNow=" + timeNow +
-                ", agentMove=" + agentMove +
-                '}';
+        return "LowLevelState{" + "agents=" + agents + ", boxes=" + boxes + ", loc2Box=" + Arrays.deepToString(loc2Box) + ", gridNumRows=" + gridNumRows + ", gridNumCol=" + gridNumCol + ", parent=" + parent + ", timeNow=" + timeNow + ", agentMove=" + agentMove + '}';
     }
 
     public boolean isAllInOne() {
