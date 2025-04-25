@@ -10,13 +10,13 @@
     Background: one box-letter may have multiple boxes. So how to assign the goal location to box?
     Current implementation: currently, we use static assignment.
 
-## 3. The end state of a sub-task blocks other tasks
+## 3. The end state of a sub-task blocks other tasks - have fixed by MA-CBS
 
     Background: refer to MAsimple4.lvl. The end state of a sub-task blocks other tasks
     Current implementation: currently, we do not solve this problem. After a sub-task is completed, its subsequent operations are all Noop. Even if a conflict is detected, only one-sided constraints are added to another sub-task. It
     will not re-plan itself. So it will always block the road.
 
-## 4. The inter-blocking problem is temporarily unsolved
+## 4. The inter-blocking problem is temporarily unsolved - have fixed by MA-CBS
 
     Background: refer to MAsimple3.lvl, MAsimple2.lvl
 

@@ -39,8 +39,8 @@ public class AStarRunner {
             LowLevelState currentState = frontier.pop();
             if (currentState.isGoal()) {
                 metaAgentPlan.update2Final(currentState);
-//                System.err.printf("#Finish-Lower-level, MetaId=%s , size=%d, VisitedSize=%,8d\n", metaAgentPlan.getMetaId(), metaAgentPlan.getCost(),
-//                        frontier.getVisitedSize());
+                System.err.printf("#Finish-Lower-level, MetaId=%s , size=%d, VisitedSize=%,8d\n", metaAgentPlan.getMetaId(), metaAgentPlan.getCost(),
+                        frontier.getVisitedSize());
 //                System.err.println("Current Plan");
 //                for (Map.Entry<Integer, Move> item : singleAgentPlan.getMoves().entrySet()) {
 //                    System.err.printf("step:%d, Move:%s, Agent:%s, Box:%s\n", item.getKey(), item.getValue().getAction().name, item.getValue().getAgent().getAgentId(), item.getValue().getBox() == null ? "" : item.getValue().getBox().getBoxTypeLetter());
@@ -50,11 +50,11 @@ public class AStarRunner {
                 break;
             }
 
-            if (frontier.getVisitedSize() % 1000 == 0) {
-                double elapsedTime = (System.currentTimeMillis() - this.startTime) / 1_000d;
-                System.err.printf("#Current-Lower-level, MetaId=%s , VisitedSize=%,4d, FrontierReminderSize=%,4d, time cost=%3.3f s\n",
-                        metaAgentPlan.getMetaId(), frontier.getVisitedSize(), frontier.size(), elapsedTime);
-            }
+//            if (frontier.getVisitedSize() % 1000 == 0) {
+//                double elapsedTime = (System.currentTimeMillis() - this.startTime) / 1_000d;
+//                System.err.printf("#Current-Lower-level, MetaId=%s , VisitedSize=%,4d, FrontierReminderSize=%,4d, time cost=%3.3f s\n",
+//                        metaAgentPlan.getMetaId(), frontier.getVisitedSize(), frontier.size(), elapsedTime);
+//            }
 
             for (LowLevelState child : currentState.expand(currentNode, metaAgentPlan.getEnv())) {
                 if (frontier.hasNotVisited(child)) {
