@@ -50,11 +50,11 @@ public class AStarRunner {
                 break;
             }
 
-//            if (frontier.getVisitedSize() % 1000 == 0) {
-//                double elapsedTime = (System.currentTimeMillis() - this.startTime) / 1_000d;
-//                System.err.printf("#Current-Lower-level, MetaId=%s , VisitedSize=%,4d, FrontierReminderSize=%,4d, time cost=%3.3f s\n",
-//                        metaAgentPlan.getMetaId(), frontier.getVisitedSize(), frontier.size(), elapsedTime);
-//            }
+            if (frontier.getVisitedSize() % 1000 == 0) {
+                double elapsedTime = (System.currentTimeMillis() - this.startTime) / 1_000d;
+                System.err.printf("#Current-Lower-level, MetaId=%s , VisitedSize=%,4d, FrontierReminderSize=%,4d, time cost=%3.3f s\n",
+                        metaAgentPlan.getMetaId(), frontier.getVisitedSize(), frontier.size(), elapsedTime);
+            }
 
             for (LowLevelState child : currentState.expand(currentNode, metaAgentPlan.getEnv())) {
                 if (frontier.hasNotVisited(child)) {
