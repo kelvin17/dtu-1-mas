@@ -21,9 +21,9 @@ public class NewSearchClient {
         // We can also print comments to stdout by prefixing with a #.
         System.out.println("#This is a comment.");
 
-        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/planB.lvl";
-        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
-//        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
+        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/MAthomasAppartment_redblue.lvl";
+//        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
+        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
         Environment environment = Environment.parseLevel(serverMessages);
 
         int superB = -1;//watch dog for Max
@@ -55,14 +55,14 @@ public class NewSearchClient {
             System.err.printf("Aborting by time out: %s\n", timeout ? "yes" : "no");
             System.exit(0);
         } else {
-            System.err.format("Found solution of length %,d.\n", plan.length);
-            for (int i = 0; i < plan.length; i++) {
-                System.err.format("Step Num %d: ", i);
-                for (int j = 0; j < plan[i].length; j++) {
-                    System.err.format("%s|", plan[i][j].name);
-                }
-                System.err.println();
-            }
+//            System.err.format("Found solution of length %,d.\n", plan.length);
+//            for (int i = 0; i < plan.length; i++) {
+//                System.err.format("Step Num %d: ", i);
+//                for (int j = 0; j < plan[i].length; j++) {
+//                    System.err.format("%s|", plan[i][j].name);
+//                }
+//                System.err.println();
+//            }
 
             for (Action[] jointAction : plan) {
                 System.out.print(jointAction[0].name + "@" + jointAction[0].name);
