@@ -3,11 +3,9 @@ package searchclient.cbs.algriothem;
 import searchclient.Action;
 import searchclient.TimeoutException;
 import searchclient.cbs.model.*;
+import searchclient.cbs.utils.AStarReachabilityChecker;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CBSRunner {
 
@@ -170,36 +168,169 @@ public class CBSRunner {
         for (Character key : environment.getBoxType2GoalMap().keySet()) {
             boxType2Index.put(key, 0);
         }
-        //static group boxes to agent
-        for (LowLevelColorGroup colorGroup : environment.getColorGroups().values()) {
-            int agentCounts = colorGroup.getAgents().size();
-            int boxCounts = colorGroup.getBoxes().size();
-            if (agentCounts == 1) {
-                Map<Character, Agent> agents = new HashMap<>();
-                Agent agent = colorGroup.getAgents().get(0);
-                agents.put(agent.getAgentId(), agent);
-                MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agents, environment);
-                for (Box box : colorGroup.getBoxes()) {
-                    assignGoal2Box(box, environment, boxType2Index);
-                    metaAgentPlan.addBox(box);
-                }
-                metaAgentPlanList.add(metaAgentPlan);
-            } else {
-                for (int i = 0; i < agentCounts; i++) {
-                    Map<Character, Agent> agents = new HashMap<>();
-                    Agent agent = colorGroup.getAgents().get(i);
-                    agents.put(agent.getAgentId(), agent);
 
-                    MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agents, environment);
-                    for (int j = i; j < boxCounts; j = j + agentCounts) {
-                        Box box = colorGroup.getBoxes().get(j);
-                        assignGoal2Box(box, environment, boxType2Index);
-                        metaAgentPlan.addBox(box);
+        AStarReachabilityChecker checker = new AStarReachabilityChecker();
+
+// 遍历每个颜色组
+        for (LowLevelColorGroup colorGroup : environment.getColorGroups().values()) {
+            List<Agent> agents = colorGroup.getAgents();
+            List<Box> boxes = colorGroup.getBoxes();
+
+            if (agents.size() == 1) {
+                // 单 agent：直接分配所有 box
+                Agent agent = agents.get(0);
+                Map<Character, Agent> agentMap = new HashMap<>();
+                agentMap.put(agent.getAgentId(), agent);
+
+                MetaAgentPlan plan = new MetaAgentPlan(agentMap, environment);
+                for (Box box : boxes) {
+                    assignGoal2Box(box, environment, boxType2Index);
+                    plan.addBox(box);
+                }
+                metaAgentPlanList.add(plan);
+            } else {
+                // 多 agent 情况：贪心 + 距离优先 + 负载均衡
+                Map<Agent, List<Box>> assignment = new HashMap<>();
+                Map<Character, Integer> agentLoad = new HashMap<>();
+                List<AssignmentOption> options = new ArrayList<>();
+                Set<String> assignedBoxes = new HashSet<>();
+
+                for (Agent agent : agents) {
+                    assignment.put(agent, new ArrayList<>());
+                    agentLoad.put(agent.getAgentId(), 0);
+                }
+
+                // 1. 计算可达性和曼哈顿距离
+                for (Agent agent : agents) {
+                    for (Box box : boxes) {
+                        if (checker.reachable(agent.getInitLocation(), box.getInitLocation(), environment)) {
+                            int manhattan = Math.abs(agent.getInitLocation().getRow() - box.getInitLocation().getRow())
+                                    + Math.abs(agent.getInitLocation().getCol() - box.getInitLocation().getCol());
+                            options.add(new AssignmentOption(agent, box, manhattan));
+                        }
                     }
-                    metaAgentPlanList.add(metaAgentPlan);
+                }
+
+                // 2. 排序：距离优先，其次agent负载少
+                options.sort((o1, o2) -> {
+                    if (o1.distance != o2.distance) {
+                        return Integer.compare(o1.distance, o2.distance);
+                    } else {
+                        return Integer.compare(agentLoad.get(o1.agent.getAgentId()), agentLoad.get(o2.agent.getAgentId()));
+                    }
+                });
+
+                // 3. 贪心分配
+                for (AssignmentOption opt : options) {
+                    if (!assignedBoxes.contains(opt.box.getUniqueId())) {
+                        assignment.get(opt.agent).add(opt.box);
+                        assignedBoxes.add(opt.box.getUniqueId());
+                        agentLoad.put(opt.agent.getAgentId(), agentLoad.get(opt.agent.getAgentId()) + 1);
+                    }
+                }
+
+                // 4. 检查是否所有 box 分配成功
+                if (assignedBoxes.size() != boxes.size()) {
+                    throw new RuntimeException("有 Box 无法被任何 agent reach：" + (boxes.size() - assignedBoxes.size()));
+                }
+
+                // 5. 构建 MetaAgentPlan
+                for (Agent agent : agents) {
+                    Map<Character, Agent> agentMap = new HashMap<>();
+                    agentMap.put(agent.getAgentId(), agent);
+
+                    MetaAgentPlan plan = new MetaAgentPlan(agentMap, environment);
+                    for (Box box : assignment.get(agent)) {
+                        assignGoal2Box(box, environment, boxType2Index);
+                        plan.addBox(box);
+                    }
+                    metaAgentPlanList.add(plan);
                 }
             }
         }
+
+
+        //AStarReachabilityChecker checker = new AStarReachabilityChecker();
+
+        // 遍历每个颜色组
+//        for (LowLevelColorGroup colorGroup : environment.getColorGroups().values()) {
+//            List<Agent> agents = colorGroup.getAgents();
+//            List<Box> boxes = colorGroup.getBoxes();
+//
+//            if (agents.size() == 1) {
+//                // 单 agent：直接分配所有 box
+//                Agent agent = agents.get(0);
+//                Map<Character, Agent> agentMap = new HashMap<>();
+//                agentMap.put(agent.getAgentId(), agent);
+//
+//                MetaAgentPlan plan = new MetaAgentPlan(agentMap, environment);
+//                for (Box box : boxes) {
+//                    assignGoal2Box(box, environment, boxType2Index);
+//                    plan.addBox(box);
+//                }
+//                metaAgentPlanList.add(plan);
+//            } else {
+//                // 多 agent 情况，静态处理：基于总曼哈顿距离的负载分配
+//                Map<Agent, List<Box>> assignment = new HashMap<>();
+//                Map<Character, Integer> agentTotalDistance = new HashMap<>();
+//                List<AssignmentOption> options = new ArrayList<>();
+//                Set<String> assignedBoxes = new HashSet<>();
+//
+//                for (Agent agent : agents) {
+//                    assignment.put(agent, new ArrayList<>());
+//                    agentTotalDistance.put(agent.getAgentId(), 0);
+//                }
+//
+//                // 1. 计算所有可达的 agent-box 对及其距离
+//                for (Agent agent : agents) {
+//                    for (Box box : boxes) {
+//                        if (checker.reachable(agent.getInitLocation(), box.getInitLocation(), environment)) {
+//                            int manhattan = Math.abs(agent.getInitLocation().getRow() - box.getInitLocation().getRow())
+//                                    + Math.abs(agent.getInitLocation().getCol() - box.getInitLocation().getCol());
+//                            options.add(new AssignmentOption(agent, box, manhattan));
+//                        }
+//                    }
+//                }
+//
+//                // 2. 静态排序：按 “agent 当前已承担的总距离 + 该 box 距离” 升序
+//                options.sort((o1, o2) -> {
+//                    int cost1 = agentTotalDistance.get(o1.agent.getAgentId()) + o1.distance;
+//                    int cost2 = agentTotalDistance.get(o2.agent.getAgentId()) + o2.distance;
+//                    return Integer.compare(cost1, cost2);
+//                });
+//
+//                // 3. 进行分配（静态一次性分配）
+//                for (AssignmentOption opt : options) {
+//                    if (!assignedBoxes.contains(opt.box.getUniqueId())) {
+//                        assignment.get(opt.agent).add(opt.box);
+//                        assignedBoxes.add(opt.box.getUniqueId());
+//
+//                        // 更新该 agent 的总距离负载
+//                        agentTotalDistance.put(opt.agent.getAgentId(),
+//                                agentTotalDistance.get(opt.agent.getAgentId()) + opt.distance);
+//                    }
+//                }
+//
+//                // 4. 检查是否所有 box 被分配
+//                if (assignedBoxes.size() != boxes.size()) {
+//                    throw new RuntimeException("有 Box 无法被任何 agent reach：" + (boxes.size() - assignedBoxes.size()));
+//                }
+//
+//                // 5. 构造每个 agent 的 MetaAgentPlan
+//                for (Agent agent : agents) {
+//                    Map<Character, Agent> agentMap = new HashMap<>();
+//                    agentMap.put(agent.getAgentId(), agent);
+//
+//                    MetaAgentPlan plan = new MetaAgentPlan(agentMap, environment);
+//                    for (Box box : assignment.get(agent)) {
+//                        assignGoal2Box(box, environment, boxType2Index);
+//                        plan.addBox(box);
+//                    }
+//                    metaAgentPlanList.add(plan);
+//                }
+//            }
+//        }
+
 
         Node rootNode = new Node(null);
 

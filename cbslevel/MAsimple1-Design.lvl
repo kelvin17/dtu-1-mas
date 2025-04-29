@@ -3,14 +3,14 @@ hospital
 #levelname
 MAsimple1-Design
 #colors
-red: 0,A,B,C
+red: 0,2,3,A,B,C
 green: 1,D,E
 #initial
 ++++++++++++++++++++++++++++
 +       E     0        A   +
-+     1                    +
++     1            2       +
 + +++++++++++++++++    C   +
-+                 D    B   +
++    3            D    B   +
 ++++++++++++++++++++++++++++
 #goal
 ++++++++++++++++++++++++++++

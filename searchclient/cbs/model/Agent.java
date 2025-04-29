@@ -54,13 +54,21 @@ public class Agent extends MovableObj implements Serializable {
                 && currentLocation.equals(agent.currentLocation);
     }
 
+//    @Override
+//    public int hashCode() {
+//        int result = uniqueId.hashCode();
+//        result = 31 * result + initLocation.hashCode();
+//        result = 31 * result + currentLocation.hashCode();
+//        return result;
+//    }
     @Override
     public int hashCode() {
-        int result = uniqueId.hashCode();
-        result = 31 * result + initLocation.hashCode();
-        result = 31 * result + currentLocation.hashCode();
+        int result = (uniqueId != null ? uniqueId.hashCode() : 0);
+        result = 31 * result + (initLocation != null ? initLocation.hashCode() : 0);
+        result = 31 * result + (currentLocation != null ? currentLocation.hashCode() : 0);
         return result;
     }
+
 
     public void setGoalLocation(Location goalLocation) {
         this.goalLocation = goalLocation;
