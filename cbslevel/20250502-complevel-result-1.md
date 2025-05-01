@@ -6,11 +6,12 @@ Flower.lvl
 Spds.lvl
 sadbois.lvl
 PIAF.lvl
+JarvisExe.lvl
 
 待处理问题：
 AIAgents.lvl - 没有agent的box成为了墙
 JAMP.lvl 有agent没有init位置 - 过滤一下
-YummAI.lvl - 有agent没有初始位置 - 需要过滤
+YummAI.lvl - 有agent没有初始位置 - 需要过滤 ++ box 可达性问题
 EulerPpl.lvl - box 可达性问题
 SinbadAil.lvl - 有box 不可达 goal的问题
 Qbit.lvl - 有box 不可达 goal的问题
@@ -42,7 +43,6 @@ Greeders.lvl
 YSERIOUS.lvl
 Monad.lvl
 Bouncer.lvl
-JarvisExe.lvl
 RainyDay.lvl
 BfsFreaks.lvl
 SALTY.lvl
