@@ -1,6 +1,7 @@
 package searchclient.cbs.model;
 
 import searchclient.Color;
+import searchclient.cbs.utils.AStarReachabilityChecker;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,6 +18,15 @@ public class Environment {
     private final Map<Character, List<Location>> boxType2GoalMap;
     private final boolean[][] WALLS;
     private int agentNums;
+    private Map<Location, Map<Location, AStarReachabilityChecker.ReachableResult>> costMap;
+
+    public Map<Location, Map<Location, AStarReachabilityChecker.ReachableResult>> getCostMap() {
+        return costMap;
+    }
+
+    public void setCostMap(Map<Location, Map<Location, AStarReachabilityChecker.ReachableResult>> costMap) {
+        this.costMap = costMap;
+    }
 
     public static Environment parseLevel(BufferedReader serverMessages) throws IOException {
         // We can assume that the level file is conforming to specification, since the server verifies this.
@@ -36,6 +46,8 @@ public class Environment {
         Map<Color, LowLevelColorGroup> colorGroupMap = new HashMap<>();
         Map<Character, List<Location>> boxType2GoalMap = new HashMap<>();
         Map<Character, Color> boxLetter2Color = new HashMap<>();
+        List<Location> goalCells = new ArrayList<>();
+        List<Location> freeCells = new ArrayList<>();
 
         while (!line.startsWith("#")) {
             String[] split = line.split(":");
@@ -97,22 +109,51 @@ public class Environment {
                 char c = line.charAt(col);
                 Location goalLoc = new Location(row, col);
 
+                if (c == '+') {
+                    continue;
+                }
+
                 if ('0' <= c && c <= '9') {
                     Agent agent = agents.get(c);
                     agent.setGoalLocation(goalLoc);
+                    goalCells.add(goalLoc);
                 } else if ('A' <= c && c <= 'Z') {
                     boxType2GoalMap.computeIfAbsent(c, k -> new ArrayList<>()).add(goalLoc);
+                    goalCells.add(goalLoc);
                 }
+
+                freeCells.add(goalLoc);
             }
             ++row;
             line = serverMessages.readLine();
         }
 
-        return new Environment(colorGroupMap, walls, numRows, numCols, boxType2GoalMap, agents.size());
+        //todo delete agents or boxes which don't have init loc
+        //make the location of boxes which haven't agent as a wall
+
+        Environment env = new Environment(colorGroupMap, walls, numRows, numCols, boxType2GoalMap, agents.size());
+        env.setCostMap(env.calculateCostMap(goalCells, freeCells));
+        return env;
+    }
+
+    private Map<Location, Map<Location, AStarReachabilityChecker.ReachableResult>> calculateCostMap(List<Location> goalCells, List<Location> freeCells) {
+        long start = System.currentTimeMillis();
+        Map<Location, Map<Location, AStarReachabilityChecker.ReachableResult>> costMap = new HashMap<>();
+        for (Location freeCell : freeCells) {
+            for (Location goalCell : goalCells) {
+                AStarReachabilityChecker.ReachableResult result = AStarReachabilityChecker.reachable(freeCell, goalCell, this);
+                costMap.computeIfAbsent(freeCell, k -> new HashMap<>()).put(goalCell, result);
+            }
+        }
+
+        System.err.println("Time to calculate cost map: " + (System.currentTimeMillis() - start) + "ms");
+
+        return costMap;
     }
 
     public Environment(Map<Color, LowLevelColorGroup> colorGroups, boolean[][] walls,
-                       int gridNumRows, int gridNumCol, Map<Character, List<Location>> boxType2GoalMap, int agentNums) {
+                       int gridNumRows, int gridNumCol, Map<Character, List<Location>> boxType2GoalMap,
+                       int agentNums) {
         WALLS = walls;
         this.colorGroups = colorGroups;
         this.gridNumRows = gridNumRows;

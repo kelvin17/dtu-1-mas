@@ -12,7 +12,6 @@ public class MetaAgentPlan {
     private Map<Character, Agent> agents = new HashMap<>();
     private Map<String, Box> boxes = new HashMap<>();
     private Map<Character, Map<Integer, Move>> agentMoves = new HashMap<>();
-    private Environment env;
 
     private Map<Character, Location> agentsFinalLocations = new HashMap<>();
     private Map<String, Location> boxesFinalLocation = new HashMap<>();
@@ -41,13 +40,8 @@ public class MetaAgentPlan {
         }
     }
 
-    public Environment getEnv() {
-        return env;
-    }
-
-    public MetaAgentPlan(Map<Character, Agent> agents, Environment env) {
+    public MetaAgentPlan(Map<Character, Agent> agents) {
         this.agents = agents;
-        this.env = env;
     }
 
     public MetaAgentPlan deepCopy() {
@@ -56,7 +50,7 @@ public class MetaAgentPlan {
             agents.put(entry.getKey(), entry.getValue().deepCopy());
         }
 
-        MetaAgentPlan plan = new MetaAgentPlan(agents, this.env);
+        MetaAgentPlan plan = new MetaAgentPlan(agents);
         for (Map.Entry<String, Box> entry : this.boxes.entrySet()) {
             plan.addBox(entry.getValue().deepCopy());
         }
@@ -122,6 +116,7 @@ public class MetaAgentPlan {
 
     public AbstractConflict firstConflict(MetaAgentPlan otherPlan) {
         //1. check every step, either vertex or edge conflict may happen
+        Environment env = AppContext.getEnv();
         int plan1EndTime = this.getMaxMoveSize();
         int plan2EndTime = otherPlan.getMaxMoveSize();
         int minEndTime = Math.min(plan1EndTime, plan2EndTime);
@@ -237,11 +232,10 @@ public class MetaAgentPlan {
 
     @Override
     public String toString() {
-        return "SingleAgentPlan{" +
+        return "MetaAgentPlan{" +
                 "agent=" + agents +
                 ", boxes=" + boxes +
                 ", moves=" + agentMoves +
-                ", env=" + env +
                 '}';
     }
 

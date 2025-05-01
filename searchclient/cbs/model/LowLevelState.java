@@ -1,6 +1,8 @@
 package searchclient.cbs.model;
 
 import searchclient.Action;
+import searchclient.Color;
+import searchclient.cbs.utils.AStarReachabilityChecker;
 import searchclient.cbs.utils.MapConverterHelper;
 
 import java.io.Serializable;
@@ -12,13 +14,17 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
     private Map<String, Box> boxes = new HashMap<>();
     private final Box[][] loc2Box;
     private LowLevelState parent;
-    private int timeNow = 0;
+    public int timeNow = 0;
     private final int gridNumRows;
     private final int gridNumCol;
     private boolean allInOne;
 
     public LowLevelState getParent() {
         return parent;
+    }
+
+    public Map<Character, Move> getAgentMove() {
+        return agentMove;
     }
 
     public int getGridNumRows() {
@@ -86,7 +92,8 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
     }
 
     public static LowLevelState initRootStateForPlan(MetaAgentPlan metaAgentPlan) {
-        LowLevelState rootState = new LowLevelState(metaAgentPlan.getAgents(), metaAgentPlan.getBoxes(), metaAgentPlan.getEnv().getGridNumRows(), metaAgentPlan.getEnv().getGridNumCol());
+        Environment env = AppContext.getEnv();
+        LowLevelState rootState = new LowLevelState(metaAgentPlan.getAgents(), metaAgentPlan.getBoxes(), env.getGridNumRows(), env.getGridNumCol());
 
         for (Agent agent : metaAgentPlan.getAgents().values()) {
             agent.setCurrentLocation(agent.getInitLocation());
@@ -111,7 +118,8 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
         return this.agents.values().stream().map(Agent::getAgentId).toList();
     }
 
-    public List<LowLevelState> expand(Node currentNode, Environment env) {
+    public List<LowLevelState> expand(Node currentNode) {
+        Environment env = AppContext.getEnv();
         List<LowLevelState> newStates = new ArrayList<>();
         List<Constraint> constraints = new ArrayList<>();
         Node node = currentNode;
@@ -387,18 +395,53 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
 
     //manhattan distance heuristic
     public long getHeuristic() {
+        Environment env = AppContext.getEnv();
         int heuristicValue = 0;
+        Map<Color, List<Box>> reminderBox = new HashMap<>();
         for (Box box : this.boxes.values()) {
             if (box.getGoalLocation() != null) {
-                int mhtDis = Math.abs(box.getCurrentLocation().getRow() - box.getGoalLocation().getRow()) + Math.abs(box.getCurrentLocation().getCol() - box.getGoalLocation().getCol());
+//                int mhtDis = Math.abs(box.getCurrentLocation().getRow() - box.getGoalLocation().getRow()) + Math.abs(box.getCurrentLocation().getCol() - box.getGoalLocation().getCol());
+
+                AStarReachabilityChecker.ReachableResult result = env.getCostMap().get(box.getCurrentLocation()).get(box.getGoalLocation());
+                if (!result.isReachable()) {
+                    throw new IllegalStateException("box " + box.getCurrentLocation() + " is not reachable to " + box.getGoalLocation());
+                }
+                int mhtDis = result.getSteps();
                 heuristicValue += mhtDis;
+
+                if (mhtDis > 0) {
+                    List<Box> boxList = reminderBox.computeIfAbsent(box.getColor(), k -> new ArrayList<>());
+                    boxList.add(box);
+                }
             }
         }
 
-        for (Agent agent : agents.values()) {
-            if (agent.getGoalLocation() != null) {
-                int mhtDis = Math.abs(agent.getCurrentLocation().getRow() - agent.getGoalLocation().getRow()) + Math.abs(agent.getCurrentLocation().getCol() - agent.getGoalLocation().getCol());
-                heuristicValue = Math.max(heuristicValue, mhtDis);
+        if (!reminderBox.isEmpty()) {
+            for (Agent agent : agents.values()) {
+                List<Box> boxCanBePushed = reminderBox.get(agent.getColor());
+                if (boxCanBePushed != null && !boxCanBePushed.isEmpty()) {
+                    int mhtDis = -1;
+                    for (Box box : boxCanBePushed) {
+                        int tmpMhtDis = Math.abs(agent.getCurrentLocation().getRow() - box.getCurrentLocation().getRow())
+                                + Math.abs(agent.getCurrentLocation().getCol() - box.getCurrentLocation().getCol());
+                        mhtDis = ((mhtDis == -1) ? tmpMhtDis : Math.min(mhtDis, tmpMhtDis));
+                    }
+                    heuristicValue += mhtDis;
+                }
+            }
+        }
+
+        if (reminderBox.isEmpty()) {
+            for (Agent agent : agents.values()) {
+                if (agent.getGoalLocation() != null) {
+//                int mhtDis = Math.abs(agent.getCurrentLocation().getRow() - agent.getGoalLocation().getRow()) + Math.abs(agent.getCurrentLocation().getCol() - agent.getGoalLocation().getCol());
+                    AStarReachabilityChecker.ReachableResult result = env.getCostMap().get(agent.getCurrentLocation()).get(agent.getGoalLocation());
+                    if (!result.isReachable()) {
+                        throw new IllegalStateException("Agent " + agent.getCurrentLocation() + " is not reachable to " + agent.getGoalLocation());
+                    }
+                    int mhtDis = result.getSteps();
+                    heuristicValue = Math.max(heuristicValue, mhtDis);
+                }
             }
         }
 
@@ -406,8 +449,9 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
     }
 
     // A* heuristic function
-    public long getAStar() {
-        return this.getHeuristic() + this.timeNow;
+    public double getAStar() {
+//        return this.getHeuristic();
+        return 2*this.getHeuristic() + this.timeNow;
     }
 
     @Override
@@ -428,13 +472,11 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
         }
         LowLevelState other = (LowLevelState) obj;
 
-        //        if (!this.allInOne) {
-        if (this.agents.size() == 1) {
+        if (!this.isAllInOne() && this.agents.size() == 1) {
             if (this.timeNow != other.timeNow) {
                 return false;
             }
         }
-
 
         boolean equals = Objects.deepEquals(agents, other.agents);
         if (!equals) {
@@ -449,7 +491,7 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
     }
 
     public int hashCode() {
-        if (this.agents.size() > 1) {
+        if (this.isAllInOne() || this.agents.size() > 1) {
             return Objects.hash(agents, boxes);
         } else {
             return Objects.hash(agents, boxes, timeNow);

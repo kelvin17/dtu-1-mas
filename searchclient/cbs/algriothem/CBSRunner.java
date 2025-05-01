@@ -30,12 +30,13 @@ public class CBSRunner {
     /**
      * High level of CBS
      *
-     * @param initEnv
      * @return
      */
-    public Action[][] findSolution(Environment initEnv, int superB) {
+    public Action[][] findSolution(int superB) {
+        Environment initEnv = AppContext.getEnv();
         Node rootNode = initRoot(initEnv);
         if (!rootNode.getSolution().isValid()) {
+            System.err.println("Root node is invalid");
             return null;
         }
 
@@ -50,7 +51,7 @@ public class CBSRunner {
             if (firstConflict == null) {
                 return convertPaths2Actions(node.getSolution());
             }
-//            System.err.println("Conflict detected result - " + firstConflict);
+            System.err.println("Conflict detected result - " + firstConflict);
             //update cmMatrix
             updateCMMatrix(cmMatrix, firstConflict);
 
@@ -72,7 +73,7 @@ public class CBSRunner {
                 }
             }
         }
-
+        System.err.println("CBS openlist empty with a solution");
         return null;
     }
 
@@ -178,7 +179,7 @@ public class CBSRunner {
                 Map<Character, Agent> agents = new HashMap<>();
                 Agent agent = colorGroup.getAgents().get(0);
                 agents.put(agent.getAgentId(), agent);
-                MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agents, environment);
+                MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agents);
                 for (Box box : colorGroup.getBoxes()) {
                     assignGoal2Box(box, environment, boxType2Index);
                     metaAgentPlan.addBox(box);
@@ -190,7 +191,7 @@ public class CBSRunner {
                     Agent agent = colorGroup.getAgents().get(i);
                     agents.put(agent.getAgentId(), agent);
 
-                    MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agents, environment);
+                    MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agents);
                     for (int j = i; j < boxCounts; j = j + agentCounts) {
                         Box box = colorGroup.getBoxes().get(j);
                         assignGoal2Box(box, environment, boxType2Index);
@@ -200,6 +201,10 @@ public class CBSRunner {
                 }
             }
         }
+
+//        for (MetaAgentPlan metaAgentPlan : metaAgentPlanList) {
+//            System.err.println(metaAgentPlan.toString());
+//        }
 
         Node rootNode = new Node(null);
 
@@ -228,12 +233,20 @@ public class CBSRunner {
      * @param type2CurrentIndex
      */
     private void assignGoal2Box(Box box, Environment environment, Map<Character, Integer> type2CurrentIndex) {
-        int index = type2CurrentIndex.get(box.getBoxTypeLetter());
         List<Location> goalsForBoxType = environment.getBoxType2GoalMap().get(box.getBoxTypeLetter());
-        if (goalsForBoxType != null && !goalsForBoxType.isEmpty()) {
-            box.setGoalLocation(goalsForBoxType.get(index));
-            type2CurrentIndex.put(box.getBoxTypeLetter(), (index + 1));
+        if (goalsForBoxType == null || goalsForBoxType.isEmpty()) {
+            System.err.printf("There is no goal for this type of box, [%s]\n", box.getBoxTypeLetter());
+            return;
         }
+        Integer index = type2CurrentIndex.get(box.getBoxTypeLetter());
+
+        if (index >= goalsForBoxType.size()) {
+            System.err.printf("There is no other goal for this box, [%s], which has been run out[%d]\n", box.getBoxTypeLetter(), goalsForBoxType.size());
+            return;
+        }
+
+        box.setGoalLocation(goalsForBoxType.get(index));
+        type2CurrentIndex.put(box.getBoxTypeLetter(), (index + 1));
     }
 
     public boolean isAbortedForTimeout() {

@@ -17,5 +17,5 @@
 | MAsimple1-Design-3 | MA-CBS(10)       | 7,130        | --        | 17       |
 | MAsimple1-Design-3 | MA-CBS(infinite) | 0,509        | --        | 17       |
 | planB              | A*               | 7,005        | 283.707   | 22       |
-| planB              | MA-CBS(5)        | 1,271        | --        | 15       |
+| planB              | MA-CBS(10)       | 0,799        | --        | 21       |
 

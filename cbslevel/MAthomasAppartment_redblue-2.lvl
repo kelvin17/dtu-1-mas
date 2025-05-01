@@ -1,7 +1,7 @@
 #domain
 hospital
 #levelname
-MAthomasAppartment_redblue
+MAthomasAppartment_redblue-2
 #colors
 red: 0, A, B, C
 blue: 1, D, E, F, G
@@ -19,9 +19,9 @@ blue: 1, D, E, F, G
 +         +             +  +
 +                   0   +  +
 +                       +  +
-+         +             +  +
-+         +             +  +
-+         +             +  +
++         +                +
++         +                +
++         +                +
 ++++++++++++++++++++++++++++
 #goal
                    +++++++++
@@ -37,8 +37,8 @@ blue: 1, D, E, F, G
 +         +             +  +
 +                       +  +
 +                       +  +
-+         +             +C +
-+         +             +B +
-+         +             +A +
++         +              C +
++         +              B +
++         +              A +
 ++++++++++++++++++++++++++++
 #end

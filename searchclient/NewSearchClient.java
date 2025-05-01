@@ -1,6 +1,7 @@
 package searchclient;
 
 import searchclient.cbs.algriothem.CBSRunner;
+import searchclient.cbs.model.AppContext;
 import searchclient.cbs.model.Environment;
 
 import java.io.BufferedReader;
@@ -21,10 +22,11 @@ public class NewSearchClient {
         // We can also print comments to stdout by prefixing with a #.
         System.out.println("#This is a comment.");
 
-        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/planB.lvl";
-        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
-//        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
+        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/complevels/StarGrid.lvl";
+//        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
+        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
         Environment environment = Environment.parseLevel(serverMessages);
+        AppContext.init(environment);
 
         int superB = -1;//watch dog for Max
         if (args.length > 0) {
@@ -39,7 +41,7 @@ public class NewSearchClient {
         CBSRunner cbsRunner = new CBSRunner();
         boolean timeout = false;
         try {
-            plan = cbsRunner.findSolution(environment, superB);
+            plan = cbsRunner.findSolution(superB);
         } catch (OutOfMemoryError ex) {
             System.err.println("Maximum memory usage exceeded.");
         } catch (TimeoutException e) {
