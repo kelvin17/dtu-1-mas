@@ -22,9 +22,9 @@ public class NewSearchClient {
         // We can also print comments to stdout by prefixing with a #.
         System.out.println("#This is a comment.");
 
-        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/complevels/StarGrid.lvl";
-//        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
-        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
+        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/complevels/sadbois.lvl";
+        BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
+//        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
         Environment environment = Environment.parseLevel(serverMessages);
         AppContext.init(environment);
 

@@ -4,10 +4,7 @@ import searchclient.Action;
 import searchclient.TimeoutException;
 import searchclient.cbs.model.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CBSRunner {
 
@@ -137,14 +134,16 @@ public class CBSRunner {
         //action 2-D array; 1st is the max steps of all agents; 2nd is the number of agents
         int rows = solution.getMaxMetaPath();
         int cols = 0;
-        List<List<Move>> agent2Moves = new ArrayList<>();
+        Map<Character, List<Move>> agent2MovesMap = new TreeMap<>();
         for (MetaAgentPlan agentPath : agentPathList) {
             cols += agentPath.getAgents().size();
             for (Map.Entry<Character, Agent> entry : agentPath.getAgents().entrySet()) {
                 List<Move> moves = new ArrayList<>(agentPath.getMoves(entry.getKey()).values());
-                agent2Moves.add(moves);
+                agent2MovesMap.put(entry.getKey(), moves);
             }
         }
+
+        List<List<Move>> agent2Moves = new ArrayList<>(agent2MovesMap.values());
 
         Action[][] actions = new Action[rows][cols];
         for (int i = 0; i < rows; i++) {
