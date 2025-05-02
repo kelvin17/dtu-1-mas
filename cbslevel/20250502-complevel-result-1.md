@@ -8,10 +8,8 @@ PIAF.lvl
 JarvisExe.lvl
 AIAgents.lvl
 
-待处理问题： 
-- [x] AIAgents.lvl - 没有agent的box成为了墙 done
-JAMP.lvl 有agent没有init位置 - 过滤一下
-YummAI.lvl - 有agent没有初始位置 - 需要过滤 ++ box 可达性问题
+待处理问题：
+YummAI.lvl -  ++ box 可达性问题
 EulerPpl.lvl - box 可达性问题
 SinbadAil.lvl - 有box 不可达 goal的问题
 Qbit.lvl - 有box 不可达 goal的问题
