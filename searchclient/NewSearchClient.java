@@ -44,6 +44,7 @@ public class NewSearchClient {
             plan = cbsRunner.findSolution(superB);
         } catch (OutOfMemoryError ex) {
             System.err.println("Maximum memory usage exceeded.");
+            ex.printStackTrace();
         } catch (TimeoutException e) {
             timeout = true;
         } catch (Exception e) {

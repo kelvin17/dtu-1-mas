@@ -449,8 +449,8 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
 
     // A* heuristic function
     public double getAStar() {
-        return this.getHeuristic();
-//        return 2*this.getHeuristic() + this.timeNow;
+//        return this.getHeuristic();
+        return 2 * this.getHeuristic() + this.timeNow;
     }
 
     @Override
