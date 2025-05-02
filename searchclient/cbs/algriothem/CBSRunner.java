@@ -234,13 +234,13 @@ public class CBSRunner {
     private void assignGoal2Box(Box box, Environment environment, Map<Character, Integer> type2CurrentIndex) {
         List<Location> goalsForBoxType = environment.getBoxType2GoalMap().get(box.getBoxTypeLetter());
         if (goalsForBoxType == null || goalsForBoxType.isEmpty()) {
-            System.err.printf("There is no goal for this type of box, [%s]\n", box.getBoxTypeLetter());
+//            System.err.printf("There is no goal for this type of box, [%s]\n", box.getBoxTypeLetter());
             return;
         }
         Integer index = type2CurrentIndex.get(box.getBoxTypeLetter());
 
         if (index >= goalsForBoxType.size()) {
-            System.err.printf("There is no other goal for this box, [%s], which has been run out[%d]\n", box.getBoxTypeLetter(), goalsForBoxType.size());
+//            System.err.printf("There is no other goal for this box, [%s], which has been run out[%d]\n", box.getBoxTypeLetter(), goalsForBoxType.size());
             return;
         }
 

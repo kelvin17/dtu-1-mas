@@ -5,10 +5,7 @@ import searchclient.cbs.utils.AStarReachabilityChecker;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Environment {
 
@@ -128,7 +125,25 @@ public class Environment {
             line = serverMessages.readLine();
         }
 
-        //todo delete agents or boxes which don't have init loc
+        //preprocess delete agents or boxes which don't have init loc
+        Iterator<Map.Entry<Color, LowLevelColorGroup>> colorGroupIterator = colorGroupMap.entrySet().iterator();
+        while (colorGroupIterator.hasNext()) {
+            Map.Entry<Color, LowLevelColorGroup> group = colorGroupIterator.next();
+            group.getValue().getAgents().removeIf(agent -> agent.getInitLocation() == null);
+            group.getValue().getBoxes().removeIf(box -> box.getInitLocation() == null);
+
+            if (group.getValue().getAgents().isEmpty() && group.getValue().getBoxes().isEmpty()) {
+                //1. remove the whole group if there isn't anything
+                colorGroupIterator.remove();
+            } else if (group.getValue().getAgents().isEmpty()) {
+                //2. set the box as the wall if there isn't any agent for them, then remove the group
+                for (Box box : group.getValue().getBoxes()) {
+                    walls[box.getInitLocation().getRow()][box.getInitLocation().getCol()] = true;
+                }
+                colorGroupIterator.remove();
+            }
+        }
+
         //make the location of boxes which haven't agent as a wall
 
         Environment env = new Environment(colorGroupMap, walls, numRows, numCols, boxType2GoalMap, agents.size());
@@ -151,9 +166,7 @@ public class Environment {
         return costMap;
     }
 
-    public Environment(Map<Color, LowLevelColorGroup> colorGroups, boolean[][] walls,
-                       int gridNumRows, int gridNumCol, Map<Character, List<Location>> boxType2GoalMap,
-                       int agentNums) {
+    public Environment(Map<Color, LowLevelColorGroup> colorGroups, boolean[][] walls, int gridNumRows, int gridNumCol, Map<Character, List<Location>> boxType2GoalMap, int agentNums) {
         WALLS = walls;
         this.colorGroups = colorGroups;
         this.gridNumRows = gridNumRows;
@@ -193,14 +206,7 @@ public class Environment {
 
     @Override
     public String toString() {
-        return "Environment{" +
-                "gridNumRows=" + gridNumRows +
-                ", gridNumCol=" + gridNumCol +
-                ", colorGroups=" + colorGroups +
-                ", boxType2GoalMap=" + boxType2GoalMap +
-                ", WALLS=" + (WALLS == null ? null : WALLS.length) +
-                ", agentNums=" + agentNums +
-                '}';
+        return "Environment{" + "gridNumRows=" + gridNumRows + ", gridNumCol=" + gridNumCol + ", colorGroups=" + colorGroups + ", boxType2GoalMap=" + boxType2GoalMap + ", WALLS=" + (WALLS == null ? null : WALLS.length) + ", agentNums=" + agentNums + '}';
     }
 
     public Map<Character, List<Location>> getBoxType2GoalMap() {

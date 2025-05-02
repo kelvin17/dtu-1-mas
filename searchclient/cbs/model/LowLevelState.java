@@ -434,7 +434,6 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
         if (reminderBox.isEmpty()) {
             for (Agent agent : agents.values()) {
                 if (agent.getGoalLocation() != null) {
-//                int mhtDis = Math.abs(agent.getCurrentLocation().getRow() - agent.getGoalLocation().getRow()) + Math.abs(agent.getCurrentLocation().getCol() - agent.getGoalLocation().getCol());
                     AStarReachabilityChecker.ReachableResult result = env.getCostMap().get(agent.getCurrentLocation()).get(agent.getGoalLocation());
                     if (!result.isReachable()) {
                         throw new IllegalStateException("Agent " + agent.getCurrentLocation() + " is not reachable to " + agent.getGoalLocation());
@@ -450,8 +449,8 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
 
     // A* heuristic function
     public double getAStar() {
-//        return this.getHeuristic();
-        return 2*this.getHeuristic() + this.timeNow;
+        return this.getHeuristic();
+//        return 2*this.getHeuristic() + this.timeNow;
     }
 
     @Override
