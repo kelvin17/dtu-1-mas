@@ -17,10 +17,15 @@ public class NewSearchClient {
         System.err.println("SearchClient initializing. I am sending this using the error output stream.");
 
         // Send client name to server.
-        System.out.println("SearchClient");
+        System.out.println("GHandDirt");
 
         // We can also print comments to stdout by prefixing with a #.
         System.out.println("#This is a comment.");
+
+        // Provide information about who we are when asked
+        System.out.println("#I am a Conflict-Based Search (CBS) client for solving multi-agent pathfinding problems.");
+        System.out.println("#I can run in two modes: Basic CBS or MA-CBS (Meta-Agent CBS) when a parameter is provided.");
+        System.out.println("#I find optimal collision-free paths for multiple agents in shared environments.");
 
         String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/AIAgents.lvl";
         BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
