@@ -457,6 +457,8 @@ public class CBSRunner {
                 Agent chosenAgent = leastLoadedAgents.get(random.nextInt(leastLoadedAgents.size()));
                 agentToBoxesMap.get(chosenAgent).add(box);
             }
+
+
             for (Map.Entry<Agent, List<Box>> entry : agentToBoxesMap.entrySet()) {
                 Agent agent = entry.getKey();
                 List<Box> assignedBoxes = entry.getValue();
@@ -465,9 +467,10 @@ public class CBSRunner {
                 agentMap.put(agent.getAgentId(), agent);
 
                 MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agentMap);
-
+                System.err.println("Agent ID: " + agent.getAgentId());
                 for (Box box : assignedBoxes) {
                     metaAgentPlan.addBox(box);
+                    System.err.println("  Box ID: " + box.getBoxTypeLetter() + " Box initLocation: " + box.getInitLocation());
                 }
                 metaAgentPlanList.add(metaAgentPlan);
             }
