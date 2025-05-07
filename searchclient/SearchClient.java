@@ -111,10 +111,15 @@ public class SearchClient {
         System.err.println("SearchClient initializing. I am sending this using the error output stream.");
 
         // Send client name to server.
-        System.out.println("SearchClient");
+        System.out.println("GHandDirt");
 
         // We can also print comments to stdout by prefixing with a #.
         System.out.println("#This is a comment.");
+
+        // Provide information about who we are when asked
+        System.out.println("#I am a traditional search client for solving multi-agent pathfinding problems.");
+        System.out.println("#I support multiple search strategies: BFS, DFS, A*, Weighted A*, and Greedy search.");
+        System.out.println("#I find paths for multiple agents in shared environments using graph search algorithms.");
 
         // Parse the level.
         BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
