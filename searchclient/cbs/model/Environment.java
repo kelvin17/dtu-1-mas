@@ -87,15 +87,18 @@ public class Environment {
                 if ('0' <= c && c <= '9') {
                     Agent agent = agents.get(c);
                     agent.setInitLocation(initLoc);
+                    agent.setCurrentLocation(initLoc);
                 } else if ('A' <= c && c <= 'Z') {
                     Color color = boxLetter2Color.get(c);
                     Box box = new Box(c, color, initLoc);
+                    box.setCurrentLocation(initLoc);
                     colorGroupMap.get(color).addBox(box);
                 } else if (c == '+') {
                     walls[row][col] = true;
                 }
             }
         }
+
 
         // Read goal state
         // line is currently "#goal"
@@ -144,6 +147,14 @@ public class Environment {
             }
         }
 
+        //add the agent and box initLocation. for agent -> box.
+        for (LowLevelColorGroup group : colorGroupMap.values()) {
+            for (Box box : group.getBoxes()) {
+                if (box.getInitLocation() != null) {
+                    goalCells.add(box.getInitLocation());
+                }
+            }
+        }
         //make the location of boxes which haven't agent as a wall
 
         Environment env = new Environment(colorGroupMap, walls, numRows, numCols, boxType2GoalMap, agents.size());
@@ -216,4 +227,9 @@ public class Environment {
     public int getAgentNums() {
         return agentNums;
     }
+
+    public void setWallAt(Location location) {
+        WALLS[location.getRow()][location.getCol()] = true;
+    }
+
 }
