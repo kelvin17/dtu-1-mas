@@ -201,10 +201,6 @@ public class CBSRunner {
             }
         }
 
-//        for (MetaAgentPlan metaAgentPlan : metaAgentPlanList) {
-//            System.err.println(metaAgentPlan.toString());
-//        }
-
         Node rootNode = new Node(null);
 
         Solution solution = new Solution();
