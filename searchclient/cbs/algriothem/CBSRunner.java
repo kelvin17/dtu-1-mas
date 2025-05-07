@@ -253,7 +253,9 @@ public class CBSRunner {
             for (Box box : colorGroup.getBoxes()) {
                 char type = box.getBoxTypeLetter();
                 List<Location> goalList = environment.getBoxType2GoalMap().get(type);
-
+                if(goalList == null){
+                    continue;
+                }
                 Location boxLoc = box.getInitLocation();
                 Map<Location, AStarReachabilityChecker.ReachableResult> reachMap = environment.getCostMap().get(boxLoc);
                 for (Location goalLoc : goalList) {
@@ -264,6 +266,12 @@ public class CBSRunner {
                                 .put(goalLoc, result.getSteps());
                     }
                 }
+            }
+
+            //如果所有box都没有可达goal证明这一组box都没有goal，直接下一个colorgroup
+            if(boxToReachableGoals.isEmpty()){
+                System.err.printf("Color group [%s] has no boxes with reachable goals — skipped.\n", colorGroup.getColor());
+                continue;
             }
 
 //              2.检查每个goal都有至少一个box可达
@@ -378,17 +386,17 @@ public class CBSRunner {
 
 //         处理无agent的box
             for (Box box : unreachableBoxes) {
-                List<Location> goalLocation = environment.getBoxType2GoalMap().get(box.getBoxTypeLetter());
+                List<Location> goalLocations = environment.getBoxType2GoalMap().get(box.getBoxTypeLetter());
                 Location boxLoc = box.getInitLocation();
-                if (boxLoc == null) {
-                    System.err.println("Unreachable box has null location: " + box.getBoxTypeLetter());
-                    continue;
-                }
-                if (goalLocation != null && goalLocation.contains(boxLoc)) {
+                if (goalLocations != null && goalLocations.contains(boxLoc)) {
                     Location loc = box.getInitLocation();
                     environment.setWallAt(loc);
                     System.err.printf("Box %s unreachable but already at goal — marked as wall.\n", box);
-                } else {
+                } else if(box.getGoalLocation() == null){
+                    Location loc = box.getInitLocation();
+                    environment.setWallAt(loc);
+                    System.err.printf("Box %s unreachable but no goal — marked as wall.\n", box);
+                }else {
                     throw new IllegalStateException("Unreachable box " + box + " is not on goal — UNSOLVABLE.");
                 }
             }
