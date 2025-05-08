@@ -253,7 +253,7 @@ public class CBSRunner {
             for (Box box : colorGroup.getBoxes()) {
                 char type = box.getBoxTypeLetter();
                 List<Location> goalList = environment.getBoxType2GoalMap().get(type);
-                if(goalList == null){
+                if (goalList == null) {
                     continue;
                 }
                 Location boxLoc = box.getInitLocation();
@@ -269,7 +269,7 @@ public class CBSRunner {
             }
 
             //如果所有box都没有可达goal证明这一组box都没有goal，直接下一个colorgroup
-            if(boxToReachableGoals.isEmpty()){
+            if (boxToReachableGoals.isEmpty()) {
                 System.err.printf("Color group [%s] has no boxes with reachable goals — skipped.\n", colorGroup.getColor());
                 continue;
             }
@@ -392,11 +392,11 @@ public class CBSRunner {
                     Location loc = box.getInitLocation();
                     environment.setWallAt(loc);
                     System.err.printf("Box %s unreachable but already at goal — marked as wall.\n", box);
-                } else if(box.getGoalLocation() == null){
+                } else if (box.getGoalLocation() == null) {
                     Location loc = box.getInitLocation();
                     environment.setWallAt(loc);
                     System.err.printf("Box %s unreachable but no goal — marked as wall.\n", box);
-                }else {
+                } else {
                     throw new IllegalStateException("Unreachable box " + box + " is not on goal — UNSOLVABLE.");
                 }
             }
@@ -475,13 +475,22 @@ public class CBSRunner {
                 agentMap.put(agent.getAgentId(), agent);
 
                 MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agentMap);
-                System.err.println("Agent ID: " + agent.getAgentId());
                 for (Box box : assignedBoxes) {
                     metaAgentPlan.addBox(box);
-                    System.err.println("  Box ID: " + box.getBoxTypeLetter() + " Box initLocation: " + box.getInitLocation());
                 }
                 metaAgentPlanList.add(metaAgentPlan);
             }
+        }
+
+        System.err.println("Group result");
+        for (MetaAgentPlan metaAgentPlan : metaAgentPlanList) {
+            for (Agent agent : metaAgentPlan.getAgents().values()) {
+                System.err.printf("Agent - %s, color: %s\n", agent.getAgentId(), agent.getColor());
+            }
+            for (Box box : metaAgentPlan.getBoxes().values()) {
+                System.err.printf("Box - %s, color: %s\n", box.getUniqueId(), box.getColor());
+            }
+            System.err.println("---------------------");
         }
     }
 
