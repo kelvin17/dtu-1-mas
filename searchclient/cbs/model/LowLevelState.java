@@ -422,6 +422,7 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
             }
         }
 
+        //去掉这行可以跑托马斯apartment
         if (!reminderBox.isEmpty()) {
             for (Agent agent : agents.values()) {
                 List<Box> boxCanBePushed = reminderBox.get(agent.getColor());
@@ -462,9 +463,7 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
 
     // A* heuristic function
     private double getWeightedAStar() {
-//        return 2 * this.getHeuristic() + 0.1 * this.timeNow;
         return 2 * this.getHeuristic() + 0.5 * this.timeNow;
-//        return this.getHeuristic();
     }
 
     private double getEPEAStar() {

@@ -2,14 +2,14 @@
 
 | NUM | level         | time   | cost |
 |-----|---------------|--------|------|
-| 1   | OnlyLast.lvl  | 1,049s | 17   |
-| 2   | sadbois.lvl   | 4s     | 31   |
-| 3   | Raffaello.lvl | 0,191  | 35   |
-| 4   | aMAzing.lvl   | 0,564  | 58   |
+| 1   | OnlyLast.lvl  | 0,510s | 15   |
+| 2   | sadbois.lvl   | 0,268s | 24   |
+| 3   | Raffaello.lvl | 0,282  | 20   |
+| 4   | aMAzing.lvl   | 0,564  | 72   |
 | 5   | planB.lvl     | 0,345  | 21   |
 | 6   | Spds.lvl      | 0,103  | 13   |
-| 7   | PIAF.lvl      | 0,160  | 37   |
-| 8   | JarvisExe.lvl | 26,693 | 76   |
+| 7   | PIAF.lvl      | 0,383  | 37   |
+| 8   | JarvisExe.lvl | 3,929  | 78   |
 | 9   | AIAgents.lvl  | 2,882  | 32   |
 
 
