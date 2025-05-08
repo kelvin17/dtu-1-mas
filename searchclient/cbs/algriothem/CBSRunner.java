@@ -492,6 +492,7 @@ public class CBSRunner {
             }
             System.err.println("---------------------");
         }
+        System.err.println("End group, begin to find path");
     }
 
     /**
