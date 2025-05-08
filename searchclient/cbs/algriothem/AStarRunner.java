@@ -1,11 +1,10 @@
 package searchclient.cbs.algriothem;
 
-import searchclient.Frontier;
-import searchclient.Memory;
-import searchclient.State;
 import searchclient.TimeoutException;
 import searchclient.cbs.model.*;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 public class AStarRunner {
@@ -62,13 +61,48 @@ public class AStarRunner {
 //                }
 //            }
 
-            for (LowLevelState child : currentState.expand(currentNode)) {
-                if (frontier.hasNotVisited(child)) {
-                    frontier.add(child);
+            Environment environment = AppContext.getEnv();
+            if (environment.isEPEA()) {
+                doEPEA(currentState, frontier, currentNode);
+            } else {
+                for (LowLevelState child : currentState.expand(currentNode)) {
+                    if (frontier.hasNotVisited(child)) {
+                        frontier.add(child);
+                    }
                 }
             }
         }
         return findPath;
+    }
+
+    private void doEPEA(LowLevelState currentState, AStarFrontier frontier, Node currentNode) {
+        List<LowLevelState> children = currentState.expand(currentNode);
+        if (!children.isEmpty()) {
+            //1. 子节点按照 getPrioirity 的返回值排序
+            children.sort(Comparator.comparingDouble(LowLevelState::getPriority));
+            //2. 只插入getPrioirity 最小的几个节点
+            double minPriority = children.get(0).getPriority();
+            if (!currentState.isDefaultFValue()) {
+                minPriority = currentState.getPriority();
+            }
+            for (LowLevelState child : children) {
+                double childPriority = child.getPriority();
+                if (childPriority < minPriority) {
+                    //已经入过队了
+                    continue;
+                } else if (childPriority == minPriority) {
+                    if (frontier.hasNotVisited(child)) {
+                        frontier.add(child);
+                    }
+                } else {
+                    currentState.setfValue(childPriority);
+                    if (frontier.hasNotVisited(currentState)) {
+                        frontier.add(currentState);
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     private boolean checkTimeout() {

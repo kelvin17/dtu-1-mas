@@ -9,6 +9,7 @@ import java.util.*;
 
 public class Environment {
 
+    private boolean isEPEA = false;
     private final int gridNumRows;
     private final int gridNumCol;
     private final Map<Color, LowLevelColorGroup> colorGroups;
@@ -215,5 +216,13 @@ public class Environment {
 
     public int getAgentNums() {
         return agentNums;
+    }
+
+    public boolean isEPEA() {
+        return isEPEA;
+    }
+
+    public void setEPEA(boolean EPEA) {
+        isEPEA = EPEA;
     }
 }

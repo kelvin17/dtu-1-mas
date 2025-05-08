@@ -41,6 +41,14 @@ public class NewSearchClient {
             System.err.println("No parameter of B provided. Defaulting to Basic CBS.");
         }
 
+        if (args.length > 1) {
+            boolean isEPEA = Boolean.parseBoolean(args[1]);
+            environment.setEPEA(isEPEA);
+            System.err.printf("Parameter of EPEA provided = %s.\n", isEPEA);
+        } else {
+            System.err.println("No parameter of EPEA provided. Defaulting to false as Weighted A*.");
+        }
+
         // Search for a plan.
         Action[][] plan = null;
         CBSRunner cbsRunner = new CBSRunner();
