@@ -252,7 +252,7 @@ public class CBSRunner {
             for (Box box : colorGroup.getBoxes()) {
                 char type = box.getBoxTypeLetter();
                 List<Location> goalList = environment.getBoxType2GoalMap().get(type);
-                if (goalList == null) {
+                if (goalList == null || goalList.isEmpty()) {
                     continue;
                 }
                 Location boxLoc = box.getInitLocation();
