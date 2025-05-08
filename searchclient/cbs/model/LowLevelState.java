@@ -12,7 +12,7 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
     private Map<Character, Move> agentMove = new HashMap<>();
     private Map<Character, Agent> agents = new HashMap<>();
     private Map<String, Box> boxes = new HashMap<>();
-    private final Box[][] loc2Box;
+    private Map<Integer, Box> loc2BoxMap = new HashMap<>();
     private LowLevelState parent;
     public int timeNow = 0;
     private final int gridNumRows;
@@ -22,8 +22,12 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
     private final static double F_VALUE = -1;
     private double fValue = F_VALUE;
 
-    public double getfValue(){
+    public double getfValue() {
         return fValue;
+    }
+
+    public int encode(Location loc) {
+        return loc.getRow() * this.gridNumCol + loc.getCol();
     }
 
     public LowLevelState getParent() {
@@ -69,7 +73,6 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
         this.agents = agents;
         this.gridNumRows = gridNumRows;
         this.gridNumCol = gridNumCol;
-        this.loc2Box = new Box[gridNumRows][gridNumCol];
         if (boxes != null) {
             this.boxes = boxes;
         }
@@ -90,10 +93,9 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
             this.boxes.put(entry.getKey(), entry.getValue().deepCopy());
         }
 
-        this.loc2Box = new Box[this.gridNumRows][this.gridNumCol];
         if (!this.boxes.isEmpty()) {
             for (Box box : this.boxes.values()) {
-                this.loc2Box[box.getCurrentLocation().getRow()][box.getCurrentLocation().getCol()] = box;
+                this.loc2BoxMap.put(this.encode(box.getCurrentLocation()), box);
             }
         }
     }
@@ -109,7 +111,7 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
         if (!rootState.boxes.isEmpty()) {
             for (Box box : rootState.boxes.values()) {
                 box.setCurrentLocation(box.getInitLocation());
-                rootState.loc2Box[box.getCurrentLocation().getRow()][box.getCurrentLocation().getCol()] = box;
+                rootState.loc2BoxMap.put(rootState.encode(box.getCurrentLocation()), box);
             }
         }
         return rootState;
@@ -118,7 +120,6 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
     public LowLevelState() {
         this.gridNumRows = 0;
         this.gridNumCol = 0;
-        this.loc2Box = new Box[0][0];
     }
 
     private List<Character> getAgentIds() {
@@ -239,7 +240,7 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
                     return null;
                 }
                 //2. check会不会有当前组内的box
-                if (this.loc2Box[newLocation.getRow()][newLocation.getCol()] != null) {
+                if (this.loc2BoxMap.get(this.encode(newLocation)) != null) {
                     return null;
                 }
                 //3. 不需要检查考虑一下这里要不要考虑其他的agent和box - 应该可以不考虑。等同于ignore处理 todo
@@ -271,7 +272,7 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
                     return null;
                 }
                 //2. check 会不会有当前组内的box
-                if (this.loc2Box[newOccupiedLocation.getRow()][newOccupiedLocation.getCol()] != null) {
+                if (this.loc2BoxMap.get(this.encode(newOccupiedLocation)) != null) {
                     return null;
                 }
                 //3. check 是否在约束中
@@ -302,7 +303,7 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
                     return null;
                 }
                 //2. check 会不会有当前组内的box
-                if (this.loc2Box[newOccupiedLocationForPull.getRow()][newOccupiedLocationForPull.getCol()] != null) {
+                if (this.loc2BoxMap.get(this.encode(newOccupiedLocationForPull)) != null) {
                     return null;
                 }
                 //3. check 是否在约束中
@@ -366,11 +367,11 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
      * @param newLocation
      */
     public void updateBoxLocation(Location origin, Location newLocation) {
-        Box box = this.loc2Box[origin.getRow()][origin.getCol()];
+        Box box = this.loc2BoxMap.get(this.encode(origin));
         if (box != null) {
             box.setCurrentLocation(newLocation);
-            this.loc2Box[newLocation.getRow()][newLocation.getCol()] = box;
-            this.loc2Box[origin.getRow()][origin.getCol()] = null;
+            this.loc2BoxMap.put(this.encode(newLocation), box);
+            this.loc2BoxMap.remove(this.encode(origin));
         } else {
             throw new IllegalArgumentException("No box found for location " + newLocation);
         }
@@ -436,16 +437,14 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
             }
         }
 
-        if (reminderBox.isEmpty()) {
-            for (Agent agent : agents.values()) {
-                if (agent.getGoalLocation() != null) {
-                    AStarReachabilityChecker.ReachableResult result = env.getCostMap().get(agent.getCurrentLocation()).get(agent.getGoalLocation());
-                    if (!result.isReachable()) {
-                        throw new IllegalStateException("Agent " + agent.getCurrentLocation() + " is not reachable to " + agent.getGoalLocation());
-                    }
-                    int mhtDis = result.getSteps();
-                    heuristicValue = Math.max(heuristicValue, mhtDis);
+        for (Agent agent : agents.values()) {
+            if (agent.getGoalLocation() != null) {
+                AStarReachabilityChecker.ReachableResult result = env.getCostMap().get(agent.getCurrentLocation()).get(agent.getGoalLocation());
+                if (!result.isReachable()) {
+                    throw new IllegalStateException("Agent " + agent.getCurrentLocation() + " is not reachable to " + agent.getGoalLocation());
                 }
+                int mhtDis = result.getSteps();
+                heuristicValue += mhtDis;
             }
         }
 
@@ -464,7 +463,7 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
     // A* heuristic function
     private double getWeightedAStar() {
 //        return 2 * this.getHeuristic() + 0.1 * this.timeNow;
-        return 2 * this.getHeuristic() + this.timeNow;
+        return 2 * this.getHeuristic() + 0.5 * this.timeNow;
 //        return this.getHeuristic();
     }
 
@@ -512,7 +511,7 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
     }
 
     private Box boxAt(Location location) {
-        return this.loc2Box[location.getRow()][location.getCol()];
+        return this.loc2BoxMap.get(this.encode(location));
     }
 
     public int hashCode() {
@@ -528,7 +527,6 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
         return "LowLevelState{"
                 + "agents=" + agents
                 + ", boxes=" + boxes
-                + ", loc2Box=" + Arrays.deepToString(loc2Box)
                 + ", gridNumRows=" + gridNumRows
                 + ", gridNumCol=" + gridNumCol
                 + ", parent=" + parent

@@ -33,6 +33,7 @@ public class AStarRunner {
         initState.setAllInOne(allInOne);
         AStarFrontier frontier = new AStarFrontier();
         frontier.add(initState);
+//        System.err.printf("#Start-Lower-level, MetaId=%s\n", metaAgentPlan.getMetaId());
 
         while (!frontier.isEmpty() && !checkTimeout()) {
             LowLevelState currentState = frontier.pop();
@@ -44,22 +45,7 @@ public class AStarRunner {
                 break;
             }
 
-//            if (frontier.getVisitedSize() % 10000 == 0) {
-//                double elapsedTime = (System.currentTimeMillis() - this.startTime) / 1_000d;
-//                System.err.printf("#Current-Lower-level, MetaId=%s , VisitedSize=%,4d, FrontierReminderSize=%,4d, time cost=%3.3f s, steps=%d\n",
-//                        metaAgentPlan.getMetaId(), frontier.getVisitedSize(), frontier.size(), elapsedTime, currentState.timeNow);
-
-//                if (currentState.timeNow > 58) {
-//                    LowLevelState current = currentState;
-//                    while (current != null) {
-//                        System.err.printf("Current State, timeNow=%d\n", current.timeNow);
-//                        for (Map.Entry<Character, Move> item : current.getAgentMove().entrySet()) {
-//                            System.err.printf("Agent:[%s],Action: [%s],Box:[%s]\n", item.getValue().getAgent().getAgentId(), item.getValue().getAction().name, item.getValue().getBox() == null ? "" : item.getValue().getBox().getUniqueId());
-//                        }
-//                        current = current.getParent();
-//                    }
-//                }
-//            }
+//            printDetail(frontier, metaAgentPlan, currentState);
 
             Environment environment = AppContext.getEnv();
             if (environment.isEPEA()) {
@@ -73,6 +59,25 @@ public class AStarRunner {
             }
         }
         return findPath;
+    }
+
+    private void printDetail(AStarFrontier frontier, MetaAgentPlan metaAgentPlan, LowLevelState currentState) {
+        if (frontier.getVisitedSize() % 10000 == 0) {
+            double elapsedTime = (System.currentTimeMillis() - this.startTime) / 1_000d;
+            System.err.printf("#Current-Lower-level, MetaId=%s , VisitedSize=%,4d, FrontierReminderSize=%,4d, time cost=%3.3f s, steps=%d\n",
+                    metaAgentPlan.getMetaId(), frontier.getVisitedSize(), frontier.size(), elapsedTime, currentState.timeNow);
+
+            if (currentState.timeNow > 100) {
+                LowLevelState current = currentState;
+                while (current != null) {
+                    System.err.printf("Current State, timeNow=%d\n", current.timeNow);
+                    for (Map.Entry<Character, Move> item : current.getAgentMove().entrySet()) {
+                        System.err.printf("Agent:[%s],Action: [%s],Box:[%s]\n", item.getValue().getAgent().getAgentId(), item.getValue().getAction().name, item.getValue().getBox() == null ? "" : item.getValue().getBox().getUniqueId());
+                    }
+                    current = current.getParent();
+                }
+            }
+        }
     }
 
     private void doEPEA(LowLevelState currentState, AStarFrontier frontier, Node currentNode) {
