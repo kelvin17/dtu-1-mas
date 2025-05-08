@@ -19,6 +19,13 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
     private final int gridNumCol;
     private boolean allInOne;
 
+    private final static double F_VALUE = -1;
+    private double fValue = F_VALUE;
+
+    public double getfValue(){
+        return fValue;
+    }
+
     public LowLevelState getParent() {
         return parent;
     }
@@ -400,8 +407,6 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
         Map<Color, List<Box>> reminderBox = new HashMap<>();
         for (Box box : this.boxes.values()) {
             if (box.getGoalLocation() != null) {
-//                int mhtDis = Math.abs(box.getCurrentLocation().getRow() - box.getGoalLocation().getRow()) + Math.abs(box.getCurrentLocation().getCol() - box.getGoalLocation().getCol());
-
                 AStarReachabilityChecker.ReachableResult result = env.getCostMap().get(box.getCurrentLocation()).get(box.getGoalLocation());
                 if (!result.isReachable()) {
                     throw new IllegalStateException("box " + box.getCurrentLocation() + " is not reachable to " + box.getGoalLocation());
@@ -447,15 +452,32 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
         return heuristicValue;
     }
 
+    public double getPriority() {
+        Environment environment = AppContext.getEnv();
+        if (environment.isEPEA()) {
+            return getEPEAStar();
+        } else {
+            return getWeightedAStar();
+        }
+    }
+
     // A* heuristic function
-    public double getAStar() {
-//        return this.getHeuristic();
+    private double getWeightedAStar() {
+//        return 2 * this.getHeuristic() + 0.1 * this.timeNow;
         return 2 * this.getHeuristic() + this.timeNow;
+//        return this.getHeuristic();
+    }
+
+    private double getEPEAStar() {
+        if (this.fValue != F_VALUE) {
+            return this.fValue;
+        }
+        return this.getWeightedAStar();
     }
 
     @Override
     public int compareTo(LowLevelState o) {
-        return Objects.compare(this, o, Comparator.comparing(LowLevelState::getAStar));
+        return Objects.compare(this, o, Comparator.comparing(LowLevelState::getPriority));
     }
 
     @Override
@@ -482,6 +504,10 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
             return false;
         }
 
+        if (this.fValue != other.fValue) {
+            return false;
+        }
+
         return Objects.deepEquals(this.boxes, other.boxes);
     }
 
@@ -491,15 +517,26 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
 
     public int hashCode() {
         if (this.isAllInOne() || this.agents.size() > 1) {
-            return Objects.hash(agents, boxes);
+            return Objects.hash(agents, boxes, fValue);
         } else {
-            return Objects.hash(agents, boxes, timeNow);
+            return Objects.hash(agents, boxes, timeNow, fValue);
         }
     }
 
     @Override
     public String toString() {
-        return "LowLevelState{" + "agents=" + agents + ", boxes=" + boxes + ", loc2Box=" + Arrays.deepToString(loc2Box) + ", gridNumRows=" + gridNumRows + ", gridNumCol=" + gridNumCol + ", parent=" + parent + ", timeNow=" + timeNow + ", agentMove=" + agentMove + '}';
+        return "LowLevelState{"
+                + "agents=" + agents
+                + ", boxes=" + boxes
+                + ", loc2Box=" + Arrays.deepToString(loc2Box)
+                + ", gridNumRows=" + gridNumRows
+                + ", gridNumCol=" + gridNumCol
+                + ", parent=" + parent
+                + ", timeNow=" + timeNow
+                + ", agentMove=" + agentMove
+                + ", allInOne=" + allInOne
+                + ", fValue=" + fValue
+                + '}';
     }
 
     public boolean isAllInOne() {
@@ -508,5 +545,13 @@ public class LowLevelState implements Comparable<LowLevelState>, Serializable {
 
     public void setAllInOne(boolean allInOne) {
         this.allInOne = allInOne;
+    }
+
+    public void setfValue(double fValue) {
+        this.fValue = fValue;
+    }
+
+    public boolean isDefaultFValue() {
+        return this.fValue == F_VALUE;
     }
 }
