@@ -281,8 +281,11 @@ public class CBSRunner {
 
             List<Location> allGoals = new ArrayList<>();
             for (Box box : colorGroup.getBoxes()) {
-                char boxType = box.getBoxTypeLetter();
-                allGoals.addAll(environment.getBoxType2GoalMap().get(boxType));
+                    char boxType = box.getBoxTypeLetter();
+                    List<Location> goalList = environment.getBoxType2GoalMap().get(boxType);
+                    if(goalList != null && !goalList.isEmpty()) {
+                        allGoals.addAll(goalList);
+                    }
             }
 
             List<Location> unreachableGoals = new ArrayList<>();
@@ -324,7 +327,7 @@ public class CBSRunner {
                     boxAssignment.put(box, bestGoal);
                     assignedGoals.add(bestGoal);
                 } else {
-                    System.err.println("Warning: No available goal found for box " + box);
+                    System.err.println("Warning: No available goal found for box: " + box.getBoxTypeLetter() + "--- Box initLocation: " + box.getInitLocation());
                 }
             }
 
@@ -393,8 +396,8 @@ public class CBSRunner {
                 } else if (box.getGoalLocation() == null) {
                     Location loc = box.getInitLocation();
                     environment.setWallAt(loc);
-                    System.err.printf("Box %s unreachable but no goal — marked as wall.\n", box);
-                } else {
+                    System.err.printf("Box %s unreachable but no goal — marked as wall.\n", box.getBoxTypeLetter() + "---Box InitLocation: " + box.getInitLocation());
+                }else {
                     throw new IllegalStateException("Unreachable box " + box + " is not on goal — UNSOLVABLE.");
                 }
             }
