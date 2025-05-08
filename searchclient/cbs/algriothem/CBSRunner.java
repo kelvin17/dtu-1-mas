@@ -232,17 +232,16 @@ public class CBSRunner {
         for (LowLevelColorGroup colorGroup : environment.getColorGroups().values()) {
 
             int agentCounts = colorGroup.getAgents().size();
-            int boxCounts = colorGroup.getBoxes().size();
 
             //If this group don't have box, only have agents.
             if (colorGroup.getBoxes().isEmpty()) {
-                Map<Character, Agent> agents = new HashMap<>();
                 for (int i = 0; i < agentCounts; i++) {
                     Agent agent = colorGroup.getAgents().get(i);
+                    Map<Character, Agent> agents = new HashMap<>();
                     agents.put(agent.getAgentId(), agent);
+                    MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agents);
+                    metaAgentPlanList.add(metaAgentPlan);
                 }
-                MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agents);
-                metaAgentPlanList.add(metaAgentPlan);
                 continue;
             }
 
@@ -298,8 +297,7 @@ public class CBSRunner {
                 for (Location goal : unreachableGoals) {
                     System.err.println("Unreachable goal at: " + goal);
                 }
-            } else {
-                System.err.println("All goals are reachable by at least one box.");
+                throw new RuntimeException("Some goals are unreachable by any box - level cannot be solved.");
             }
 
 //              3.为box分配最短路径的goal
@@ -485,10 +483,12 @@ public class CBSRunner {
         System.err.println("Group result");
         for (MetaAgentPlan metaAgentPlan : metaAgentPlanList) {
             for (Agent agent : metaAgentPlan.getAgents().values()) {
-                System.err.printf("Agent - %s, color: %s\n", agent.getAgentId(), agent.getColor());
+                System.err.printf("Agent - %s, color: %s, init:[%s], goal:[%s]\n", agent.getAgentId(), agent.getColor(),
+                        agent.getInitLocation(), agent.getGoalLocation() != null ? agent.getGoalLocation() : "null");
             }
             for (Box box : metaAgentPlan.getBoxes().values()) {
-                System.err.printf("Box - %s, color: %s\n", box.getUniqueId(), box.getColor());
+                System.err.printf("Box - %s, color: %s, init:[%s], goal:[%s]\n", box.getUniqueId(), box.getColor(),
+                        box.getInitLocation(), box.getGoalLocation() != null ? box.getGoalLocation() : "null");
             }
             System.err.println("---------------------");
         }
