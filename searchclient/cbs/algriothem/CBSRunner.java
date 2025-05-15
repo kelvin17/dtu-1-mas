@@ -229,19 +229,22 @@ public class CBSRunner {
     }
 
     private void doDevide(Environment environment, List<MetaAgentPlan> metaAgentPlanList) {
+        Map<Agent, MetaAgentPlan> agentToMetaPlanMap = new HashMap<>();
+
         for (LowLevelColorGroup colorGroup : environment.getColorGroups().values()) {
 
             int agentCounts = colorGroup.getAgents().size();
+            for (int i = 0; i < agentCounts; i++) {
+                Agent agent = colorGroup.getAgents().get(i);
+                Map<Character, Agent> agents = new HashMap<>();
+                agents.put(agent.getAgentId(), agent);
+                MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agents);
+                agentToMetaPlanMap.put(agent, metaAgentPlan);
+                metaAgentPlanList.add(metaAgentPlan);
+            }
 
             //If this group don't have box, only have agents.
             if (colorGroup.getBoxes().isEmpty()) {
-                for (int i = 0; i < agentCounts; i++) {
-                    Agent agent = colorGroup.getAgents().get(i);
-                    Map<Character, Agent> agents = new HashMap<>();
-                    agents.put(agent.getAgentId(), agent);
-                    MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agents);
-                    metaAgentPlanList.add(metaAgentPlan);
-                }
                 continue;
             }
 
@@ -270,46 +273,13 @@ public class CBSRunner {
             //如果所有box都没有可达goal证明这一组box都没有goal，则agent要放入单独的组。再进入下一个colorgroup
             if (boxToReachableGoals.isEmpty()) {
 //                System.err.printf("Color group [%s] has no boxes with reachable goals — skipped.\n", colorGroup.getColor());
-                for (int i = 0; i < agentCounts; i++) {
-                    Agent agent = colorGroup.getAgents().get(i);
-                    Map<Character, Agent> agents = new HashMap<>();
-                    agents.put(agent.getAgentId(), agent);
-                    MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agents);
-                    metaAgentPlanList.add(metaAgentPlan);
-                }
                 continue;
             }
-//              2.检查每个goal都有至少一个box可达
-            Set<Location> coveredGoals = new HashSet<>();
-            for (Map<Location, Integer> goalMap : boxToReachableGoals.values()) {
-                coveredGoals.addAll(goalMap.keySet());
-            }
 
-            List<Location> allGoals = new ArrayList<>();
-            for (Box box : colorGroup.getBoxes()) {
-                char boxType = box.getBoxTypeLetter();
-                List<Location> goalList = environment.getBoxType2GoalMap().get(boxType);
-                if (goalList != null && !goalList.isEmpty()) {
-                    allGoals.addAll(goalList);
-                }
-            }
+            //2.检查每个goal都有至少一个box可达.如果没有，则抛出异常
+            doCheckGoalReachability(environment, boxToReachableGoals, colorGroup);
 
-            List<Location> unreachableGoals = new ArrayList<>();
-            for (Location goal : allGoals) {
-                if (!coveredGoals.contains(goal)) {
-                    unreachableGoals.add(goal);
-                }
-            }
-
-            if (!unreachableGoals.isEmpty()) {
-//                System.err.println("Some goals are unreachable by any box:");
-//                for (Location goal : unreachableGoals) {
-//                    System.err.println("Unreachable goal at: " + goal);
-//                }
-                throw new RuntimeException("Some goals are unreachable by any box - level cannot be solved.");
-            }
-
-//              3.为box分配最短路径的goal
+            //3.为box分配最短路径的goal
             Map<Box, Location> boxAssignment = new HashMap<>();
             Set<Location> assignedGoals = new HashSet<>();
 
@@ -478,22 +448,13 @@ public class CBSRunner {
                 Agent agent = entry.getKey();
                 List<Box> assignedBoxes = entry.getValue();
 
-                Map<Character, Agent> agentMap = new HashMap<>();
-                agentMap.put(agent.getAgentId(), agent);
+//                Map<Character, Agent> agentMap = new HashMap<>();
+//                agentMap.put(agent.getAgentId(), agent);
 
-                MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agentMap);
+                MetaAgentPlan metaAgentPlan = agentToMetaPlanMap.get(agent);
                 for (Box box : assignedBoxes) {
                     metaAgentPlan.addBox(box);
                 }
-                metaAgentPlanList.add(metaAgentPlan);
-            }
-
-            agents.removeIf(agentToReachableBoxes.keySet()::contains);
-            for (Agent agent : agents) {
-                Map<Character, Agent> agentTemp = new HashMap<>();
-                agentTemp.put(agent.getAgentId(), agent);
-                MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agentTemp);
-                metaAgentPlanList.add(metaAgentPlan);
             }
         }
 
@@ -509,6 +470,33 @@ public class CBSRunner {
 //            System.err.println("---------------------");
 //        }
         System.err.printf("End group, begin to find path, size = %d\n", metaAgentPlanList.size());
+    }
+
+    private void doCheckGoalReachability(Environment environment, Map<Box, Map<Location, Integer>> boxToReachableGoals, LowLevelColorGroup colorGroup) {
+        Set<Location> coveredGoals = new HashSet<>();
+        for (Map<Location, Integer> goalMap : boxToReachableGoals.values()) {
+            coveredGoals.addAll(goalMap.keySet());
+        }
+
+        List<Location> allGoals = new ArrayList<>();
+        for (Box box : colorGroup.getBoxes()) {
+            char boxType = box.getBoxTypeLetter();
+            List<Location> goalList = environment.getBoxType2GoalMap().get(boxType);
+            if (goalList != null && !goalList.isEmpty()) {
+                allGoals.addAll(goalList);
+            }
+        }
+
+        List<Location> unreachableGoals = new ArrayList<>();
+        for (Location goal : allGoals) {
+            if (!coveredGoals.contains(goal)) {
+                unreachableGoals.add(goal);
+            }
+        }
+
+        if (!unreachableGoals.isEmpty()) {
+            throw new RuntimeException("Some goals are unreachable by any box - level cannot be solved.");
+        }
     }
 
     /**
