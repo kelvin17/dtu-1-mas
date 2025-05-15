@@ -267,12 +267,18 @@ public class CBSRunner {
                 }
             }
 
-            //如果所有box都没有可达goal证明这一组box都没有goal，直接下一个colorgroup
+            //如果所有box都没有可达goal证明这一组box都没有goal，则agent要放入单独的组。再进入下一个colorgroup
             if (boxToReachableGoals.isEmpty()) {
 //                System.err.printf("Color group [%s] has no boxes with reachable goals — skipped.\n", colorGroup.getColor());
+                for (int i = 0; i < agentCounts; i++) {
+                    Agent agent = colorGroup.getAgents().get(i);
+                    Map<Character, Agent> agents = new HashMap<>();
+                    agents.put(agent.getAgentId(), agent);
+                    MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agents);
+                    metaAgentPlanList.add(metaAgentPlan);
+                }
                 continue;
             }
-
 //              2.检查每个goal都有至少一个box可达
             Set<Location> coveredGoals = new HashSet<>();
             for (Map<Location, Integer> goalMap : boxToReachableGoals.values()) {
