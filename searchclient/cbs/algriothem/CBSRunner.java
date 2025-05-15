@@ -269,7 +269,7 @@ public class CBSRunner {
 
             //如果所有box都没有可达goal证明这一组box都没有goal，直接下一个colorgroup
             if (boxToReachableGoals.isEmpty()) {
-                System.err.printf("Color group [%s] has no boxes with reachable goals — skipped.\n", colorGroup.getColor());
+//                System.err.printf("Color group [%s] has no boxes with reachable goals — skipped.\n", colorGroup.getColor());
                 continue;
             }
 
@@ -281,11 +281,11 @@ public class CBSRunner {
 
             List<Location> allGoals = new ArrayList<>();
             for (Box box : colorGroup.getBoxes()) {
-                    char boxType = box.getBoxTypeLetter();
-                    List<Location> goalList = environment.getBoxType2GoalMap().get(boxType);
-                    if(goalList != null && !goalList.isEmpty()) {
-                        allGoals.addAll(goalList);
-                    }
+                char boxType = box.getBoxTypeLetter();
+                List<Location> goalList = environment.getBoxType2GoalMap().get(boxType);
+                if (goalList != null && !goalList.isEmpty()) {
+                    allGoals.addAll(goalList);
+                }
             }
 
             List<Location> unreachableGoals = new ArrayList<>();
@@ -296,10 +296,10 @@ public class CBSRunner {
             }
 
             if (!unreachableGoals.isEmpty()) {
-                System.err.println("Some goals are unreachable by any box:");
-                for (Location goal : unreachableGoals) {
-                    System.err.println("Unreachable goal at: " + goal);
-                }
+//                System.err.println("Some goals are unreachable by any box:");
+//                for (Location goal : unreachableGoals) {
+//                    System.err.println("Unreachable goal at: " + goal);
+//                }
                 throw new RuntimeException("Some goals are unreachable by any box - level cannot be solved.");
             }
 
@@ -327,7 +327,7 @@ public class CBSRunner {
                     boxAssignment.put(box, bestGoal);
                     assignedGoals.add(bestGoal);
                 } else {
-                    System.err.println("Warning: No available goal found for box: " + box.getBoxTypeLetter() + "--- Box initLocation: " + box.getInitLocation());
+//                    System.err.println("Warning: No available goal found for box: " + box.getBoxTypeLetter() + "--- Box initLocation: " + box.getInitLocation());
                 }
             }
 
@@ -392,12 +392,12 @@ public class CBSRunner {
                 if (goalLocations != null && goalLocations.contains(boxLoc)) {
                     Location loc = box.getInitLocation();
                     environment.setWallAt(loc);
-                    System.err.printf("Box %s unreachable but already at goal — marked as wall.\n", box);
+//                    System.err.printf("Box %s unreachable but already at goal — marked as wall.\n", box);
                 } else if (box.getGoalLocation() == null) {
                     Location loc = box.getInitLocation();
                     environment.setWallAt(loc);
-                    System.err.printf("Box %s unreachable but no goal — marked as wall.\n", box.getBoxTypeLetter() + "---Box InitLocation: " + box.getInitLocation());
-                }else {
+//                    System.err.printf("Box %s unreachable but no goal — marked as wall.\n", box.getBoxTypeLetter() + "---Box InitLocation: " + box.getInitLocation());
+                } else {
                     throw new IllegalStateException("Unreachable box " + box + " is not on goal — UNSOLVABLE.");
                 }
             }
@@ -481,21 +481,28 @@ public class CBSRunner {
                 }
                 metaAgentPlanList.add(metaAgentPlan);
             }
+
+            agents.removeIf(agentToReachableBoxes.keySet()::contains);
+            for (Agent agent : agents) {
+                Map<Character, Agent> agentTemp = new HashMap<>();
+                agentTemp.put(agent.getAgentId(), agent);
+                MetaAgentPlan metaAgentPlan = new MetaAgentPlan(agentTemp);
+                metaAgentPlanList.add(metaAgentPlan);
+            }
         }
 
-        System.err.println("Group result");
-        for (MetaAgentPlan metaAgentPlan : metaAgentPlanList) {
-            for (Agent agent : metaAgentPlan.getAgents().values()) {
-                System.err.printf("Agent - %s, color: %s, init:[%s], goal:[%s]\n", agent.getAgentId(), agent.getColor(),
-                        agent.getInitLocation(), agent.getGoalLocation() != null ? agent.getGoalLocation() : "null");
-            }
-            for (Box box : metaAgentPlan.getBoxes().values()) {
-                System.err.printf("Box - %s, color: %s, init:[%s], goal:[%s]\n", box.getUniqueId(), box.getColor(),
-                        box.getInitLocation(), box.getGoalLocation() != null ? box.getGoalLocation() : "null");
-            }
-            System.err.println("---------------------");
-        }
-        System.err.println("End group, begin to find path");
+//        for (MetaAgentPlan metaAgentPlan : metaAgentPlanList) {
+//            for (Agent agent : metaAgentPlan.getAgents().values()) {
+//                System.err.printf("Agent - %s, color: %s, init:[%s], goal:[%s]\n", agent.getAgentId(), agent.getColor(),
+//                        agent.getInitLocation(), agent.getGoalLocation() != null ? agent.getGoalLocation() : "null");
+//            }
+//            for (Box box : metaAgentPlan.getBoxes().values()) {
+//                System.err.printf("Box - %s, color: %s, init:[%s], goal:[%s]\n", box.getUniqueId(), box.getColor(),
+//                        box.getInitLocation(), box.getGoalLocation() != null ? box.getGoalLocation() : "null");
+//            }
+//            System.err.println("---------------------");
+//        }
+        System.err.printf("End group, begin to find path, size = %d\n", metaAgentPlanList.size());
     }
 
     /**

@@ -27,7 +27,7 @@ public class NewSearchClient {
         System.out.println("#I can run in two modes: Basic CBS or MA-CBS (Meta-Agent CBS) when a parameter is provided.");
         System.out.println("#I find optimal collision-free paths for multiple agents in shared environments.");
 
-        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/searchclient_java/cbslevel/AIAgents.lvl";
+        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/complevels/PFarthing.lvl";
         BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
 //        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
         Environment environment = Environment.parseLevel(serverMessages);
@@ -72,13 +72,13 @@ public class NewSearchClient {
             System.exit(0);
         } else {
             System.err.format("Found solution of length %,d.\n", plan.length);
-            for (int i = 0; i < plan.length; i++) {
-                System.err.format("Step Num %d: ", i);
-                for (int j = 0; j < plan[i].length; j++) {
-                    System.err.format("%s|", plan[i][j].name);
-                }
-                System.err.println();
-            }
+//            for (int i = 0; i < plan.length; i++) {
+//                System.err.format("Step Num %d: ", i);
+//                for (int j = 0; j < plan[i].length; j++) {
+//                    System.err.format("%s|", plan[i][j].name);
+//                }
+//                System.err.println();
+//            }
 
             for (Action[] jointAction : plan) {
                 System.out.print(jointAction[0].name + "@" + jointAction[0].name);
