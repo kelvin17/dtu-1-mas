@@ -162,7 +162,6 @@ public class Environment {
         }
 
         Environment env = new Environment(colorGroupMap, walls, numRows, numCols, boxType2GoalMap, agents.size(), goalCells, freeCells);
-        env.calculateCostMap();
         return env;
     }
 
