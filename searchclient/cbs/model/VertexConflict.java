@@ -37,14 +37,14 @@ public class VertexConflict extends AbstractConflict implements Serializable {
                     //Solution1 add a Constraint to Agent1
                     new Constraint(plan2.getMetaId(), agent1, plan1.getMetaId(), getTimeNow(), null, getTargetLocation())
             };
-        } else if(!this.needForStop){
-                return new Constraint[]{
+        } else if (!this.needForStop) {
+            return new Constraint[]{
                     //Solution1 add a Constraint to Agent1
                     new Constraint(plan2.getMetaId(), agent1, plan1.getMetaId(), getTimeNow(), null, getTargetLocation()),
                     //Solution2 add a Constraint to Agent2
                     new Constraint(plan1.getMetaId(), agent2, plan2.getMetaId(), getTimeNow(), null, getTargetLocation())
             };
-        }else {
+        } else {
             return new Constraint[]{
                     //Solution1 add a Constraint to Agent1
                     new Constraint(plan2.getMetaId(), agent1, plan1.getMetaId(), getTimeNow(), null, getTargetLocation()),

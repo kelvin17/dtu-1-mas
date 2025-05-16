@@ -170,10 +170,10 @@ public class DistributionProcessor {
                     environment.getBoxType2GoalMap().get(box.getBoxTypeLetter()).put(bestGoal, Boolean.TRUE);
 
                     assignedGoals.add(bestGoal);
-                } else {
-                    System.err.printf("There are unreachable goals[%s] for box: %s, or goal been assigned: %s\n", bestGoal != null ? "Y" : "N", box, assigned);
-//                    throw new RuntimeException("There are unreachable goals for box: " + box + " or goal been assigned: " + assigned);
                 }
+//                else {
+//                    System.err.printf("There are unreachable goals[%s] for box: %s, or goal been assigned: %s\n", bestGoal != null ? "Y" : "N", box, assigned);
+//                }
             }
         }
     }

@@ -195,7 +195,6 @@ public class MetaAgentPlan {
         if (plan1EndTime != plan2EndTime) {
             MetaAgentPlan earlyEndingPlan = (plan1EndTime > plan2EndTime ? otherPlan : this);
             MetaAgentPlan laterEndingPlan = (plan1EndTime > plan2EndTime ? this : otherPlan);
-            int earlyEndingPlanEndTime = Math.min(plan1EndTime, plan2EndTime);
 
             List<Location> stayLocations = new ArrayList<>();
             stayLocations.addAll(earlyEndingPlan.getAgentFinalLocation().values());
@@ -213,7 +212,7 @@ public class MetaAgentPlan {
                         int index = new Random().nextInt(agents.size());
                         Agent agentEarly = agents.get(index);
                         return new VertexConflict(laterEndingPlan, earlyEndingPlan, move2.getAgent(), agentEarly,
-                                time, move2.getCurrentLocation(), moveTo, moveTo, earlyEndingPlanEndTime);
+                                time, move2.getCurrentLocation(), moveTo, moveTo, minEndTime);
                     }
 
                 }
