@@ -171,7 +171,8 @@ public class DistributionProcessor {
 
                     assignedGoals.add(bestGoal);
                 } else {
-                    throw new RuntimeException("There are unreachable goals for box: " + box + " or goal been assigned: " + assigned);
+                    System.err.printf("There are unreachable goals[%s] for box: %s, or goal been assigned: %s\n", bestGoal != null ? "Y" : "N", box, assigned);
+//                    throw new RuntimeException("There are unreachable goals for box: " + box + " or goal been assigned: " + assigned);
                 }
             }
         }
