@@ -10,10 +10,19 @@ public class VertexConflict extends AbstractConflict implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private boolean isSingle;
+    private boolean needForStop = false;
+    private int timeForStop;
 
     public VertexConflict(MetaAgentPlan plan1, MetaAgentPlan plan2, Agent agent1, Agent agent2, int timeNow, Location locationOfAgent1, Location locationOfAgent2, Location targetLocation, boolean isSingle) {
         super(plan1, plan2, agent1, agent2, timeNow, locationOfAgent1, locationOfAgent2, targetLocation);
         this.isSingle = isSingle;
+    }
+
+    public VertexConflict(MetaAgentPlan plan1, MetaAgentPlan plan2, Agent agent1, Agent agent2, int timeNow, Location locationOfAgent1, Location locationOfAgent2, Location targetLocation, int timeForStop) {
+        super(plan1, plan2, agent1, agent2, timeNow, locationOfAgent1, locationOfAgent2, targetLocation);
+        this.isSingle = false;
+        this.needForStop = true;
+        this.timeForStop = timeForStop;
     }
 
     @Override
@@ -28,12 +37,19 @@ public class VertexConflict extends AbstractConflict implements Serializable {
                     //Solution1 add a Constraint to Agent1
                     new Constraint(plan2.getMetaId(), agent1, plan1.getMetaId(), getTimeNow(), null, getTargetLocation())
             };
-        } else {
-            return new Constraint[]{
+        } else if(!this.needForStop){
+                return new Constraint[]{
                     //Solution1 add a Constraint to Agent1
                     new Constraint(plan2.getMetaId(), agent1, plan1.getMetaId(), getTimeNow(), null, getTargetLocation()),
                     //Solution2 add a Constraint to Agent2
                     new Constraint(plan1.getMetaId(), agent2, plan2.getMetaId(), getTimeNow(), null, getTargetLocation())
+            };
+        }else {
+            return new Constraint[]{
+                    //Solution1 add a Constraint to Agent1
+                    new Constraint(plan2.getMetaId(), agent1, plan1.getMetaId(), getTimeNow(), null, getTargetLocation()),
+//                    //Solution2 add a Constraint to Agent2
+//                    new Constraint(plan1.getMetaId(), agent2, plan2.getMetaId(), this.timeForStop, null, getTargetLocation())
             };
         }
     }

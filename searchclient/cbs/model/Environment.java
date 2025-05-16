@@ -13,9 +13,11 @@ public class Environment {
     private final int gridNumRows;
     private final int gridNumCol;
     private final Map<Color, LowLevelColorGroup> colorGroups;
-    private final Map<Character, List<Location>> boxType2GoalMap;
+    private final Map<Character, Map<Location, Boolean>> boxType2GoalMap;
     private final boolean[][] WALLS;
     private int agentNums;
+    private List<Location> goalCells;
+    private List<Location> freeCells;
     private Map<Location, Map<Location, AStarReachabilityChecker.ReachableResult>> costMap;
 
     public Map<Location, Map<Location, AStarReachabilityChecker.ReachableResult>> getCostMap() {
@@ -42,7 +44,7 @@ public class Environment {
 
         Map<Character, Agent> agents = new HashMap<>();
         Map<Color, LowLevelColorGroup> colorGroupMap = new HashMap<>();
-        Map<Character, List<Location>> boxType2GoalMap = new HashMap<>();
+        Map<Character, Map<Location, Boolean>> boxType2GoalMap = new HashMap<>();
         Map<Character, Color> boxLetter2Color = new HashMap<>();
         List<Location> goalCells = new ArrayList<>();
         List<Location> freeCells = new ArrayList<>();
@@ -118,7 +120,7 @@ public class Environment {
                     agent.setGoalLocation(goalLoc);
                     goalCells.add(goalLoc);
                 } else if ('A' <= c && c <= 'Z') {
-                    boxType2GoalMap.computeIfAbsent(c, k -> new ArrayList<>()).add(goalLoc);
+                    boxType2GoalMap.computeIfAbsent(c, k -> new HashMap<>()).put(goalLoc, Boolean.FALSE);
                     goalCells.add(goalLoc);
                 }
 
@@ -141,49 +143,51 @@ public class Environment {
             } else if (group.getValue().getAgents().isEmpty()) {
                 //2. set the box as the wall if there isn't any agent for them, then remove the group
                 for (Box box : group.getValue().getBoxes()) {
+                    //make the location of boxes which haven't agent as a wall
                     walls[box.getInitLocation().getRow()][box.getInitLocation().getCol()] = true;
+
+                    Map<Location, Boolean> goalLocations = boxType2GoalMap.get(box.getBoxTypeLetter());
+                    if (goalLocations == null) {
+                        continue;
+                    }
+                    Boolean distributed = goalLocations.get(box.getInitLocation());
+                    if (distributed != null) {
+                        box.setGoalLocation(box.getInitLocation());
+                        goalLocations.put(box.getInitLocation(), Boolean.TRUE);
+                    }
+
                 }
                 colorGroupIterator.remove();
             }
         }
 
-        //add the agent and box initLocation. for agent -> box.
-        for (LowLevelColorGroup group : colorGroupMap.values()) {
-            for (Box box : group.getBoxes()) {
-                if (box.getInitLocation() != null) {
-                    goalCells.add(box.getInitLocation());
-                }
-            }
-        }
-        //make the location of boxes which haven't agent as a wall
-
-        Environment env = new Environment(colorGroupMap, walls, numRows, numCols, boxType2GoalMap, agents.size());
-        env.setCostMap(env.calculateCostMap(goalCells, freeCells));
+        Environment env = new Environment(colorGroupMap, walls, numRows, numCols, boxType2GoalMap, agents.size(), goalCells, freeCells);
+        env.calculateCostMap();
         return env;
     }
 
-    private Map<Location, Map<Location, AStarReachabilityChecker.ReachableResult>> calculateCostMap(List<Location> goalCells, List<Location> freeCells) {
+    public void calculateCostMap() {
         long start = System.currentTimeMillis();
-        Map<Location, Map<Location, AStarReachabilityChecker.ReachableResult>> costMap = new HashMap<>();
-        for (Location freeCell : freeCells) {
-            for (Location goalCell : goalCells) {
+        this.costMap = new HashMap<>();
+        for (Location freeCell : this.freeCells) {
+            for (Location goalCell : this.goalCells) {
                 AStarReachabilityChecker.ReachableResult result = AStarReachabilityChecker.reachable(freeCell, goalCell, this);
-                costMap.computeIfAbsent(freeCell, k -> new HashMap<>()).put(goalCell, result);
+                this.costMap.computeIfAbsent(freeCell, k -> new HashMap<>()).put(goalCell, result);
             }
         }
-
         System.err.println("Time to calculate cost map: " + (System.currentTimeMillis() - start) + "ms");
-
-        return costMap;
     }
 
-    public Environment(Map<Color, LowLevelColorGroup> colorGroups, boolean[][] walls, int gridNumRows, int gridNumCol, Map<Character, List<Location>> boxType2GoalMap, int agentNums) {
+    public Environment(Map<Color, LowLevelColorGroup> colorGroups, boolean[][] walls, int gridNumRows, int gridNumCol, Map<Character, Map<Location, Boolean>> boxType2GoalMap, int agentNums
+            , List<Location> goalCells, List<Location> freeCells) {
         WALLS = walls;
         this.colorGroups = colorGroups;
         this.gridNumRows = gridNumRows;
         this.gridNumCol = gridNumCol;
         this.boxType2GoalMap = boxType2GoalMap;
         this.agentNums = agentNums;
+        this.goalCells = goalCells;
+        this.freeCells = freeCells;
     }
 
     public Environment() {
@@ -220,7 +224,7 @@ public class Environment {
         return "Environment{" + "gridNumRows=" + gridNumRows + ", gridNumCol=" + gridNumCol + ", colorGroups=" + colorGroups + ", boxType2GoalMap=" + boxType2GoalMap + ", WALLS=" + (WALLS == null ? null : WALLS.length) + ", agentNums=" + agentNums + '}';
     }
 
-    public Map<Character, List<Location>> getBoxType2GoalMap() {
+    public Map<Character, Map<Location, Boolean>> getBoxType2GoalMap() {
         return boxType2GoalMap;
     }
 

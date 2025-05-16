@@ -27,7 +27,7 @@ public class NewSearchClient {
         System.out.println("#I can run in two modes: Basic CBS or MA-CBS (Meta-Agent CBS) when a parameter is provided.");
         System.out.println("#I find optimal collision-free paths for multiple agents in shared environments.");
 
-        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/complevels/DatzCrazy.lvl";
+        String levelFile = "/Users/blackbear/Desktop/dtu/semester1/course/Mas/searchclient/complevels/pooh.lvl";
         BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.US_ASCII));
 //        BufferedReader serverMessages = new BufferedReader(new FileReader(levelFile));
         Environment environment = Environment.parseLevel(serverMessages);
